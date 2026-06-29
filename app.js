@@ -1301,7 +1301,7 @@ let appState = {
   expenses: [], // Ver 2.18 Expenses Database
   expenseTypeFilter: 'all', // Ver 2.18 Filter by type ('all', 'fixed', 'variable')
   settings: { ...DEFAULT_SETTINGS },
-  theme: "dark",
+  theme: "light",
   currentDashboardPeriod: "week",
   currentTripsPeriod: "all",
   tripsSortOrder: "desc",

@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS public.trackers (
 CREATE TABLE IF NOT EXISTS public.settings (
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE PRIMARY KEY,
   owner_name TEXT,
-  theme TEXT NOT NULL DEFAULT 'dark',
+  theme TEXT NOT NULL DEFAULT 'light',
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -107,9 +107,9 @@ BEGIN
     'user'
   );
   
-  -- 2. Settings 생성 (기본 테마 'dark')
+  -- 2. Settings 생성 (기본 테마 'light')
   INSERT INTO public.settings (user_id, owner_name, theme)
-  VALUES (new.id, COALESCE(new.raw_user_meta_data->>'display_name', '사용자'), 'dark');
+  VALUES (new.id, COALESCE(new.raw_user_meta_data->>'display_name', '사용자'), 'light');
   
   -- 3. Trackers 생성 (기본 상태 '0'인 idle)
   INSERT INTO public.trackers (user_id)

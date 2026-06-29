@@ -2843,7 +2843,6 @@ function createTripElement(trip, disableHighlight = false) {
           <span class="db-trip-fee" style="margin-right: 0; line-height: 1.1;">${Number(trip.fee).toLocaleString()}원</span>
           <span class="db-trip-status-badge ${statusClass}">${statusText}</span>
         </div>
-        <i data-lucide="chevron-down" class="db-trip-chevron"></i>
       </div>
     </div>
     <div class="db-trip-detail-wrapper">
@@ -6493,7 +6492,6 @@ function createExpenseElement(exp) {
       <div class="db-trip-right">
         <span class="expense-type-badge ${typeBadgeClass}">${typeBadgeText}</span>
         <span class="expense-amount">${Number(exp.amount).toLocaleString()}원</span>
-        <i data-lucide="chevron-down" class="db-trip-chevron"></i>
       </div>
     </div>
     <div class="db-trip-detail-wrapper">

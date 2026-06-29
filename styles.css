@@ -2226,6 +2226,7 @@ body.light-theme .btn-tracker-secondary:hover {
   gap: 12px;
   justify-content: flex-end;
   text-align: right;
+  flex-shrink: 0;
 }
 
 .db-trip-fee {
@@ -2234,6 +2235,7 @@ body.light-theme .btn-tracker-secondary:hover {
   font-weight: 700;
   color: var(--text-main);
   text-align: center;
+  white-space: nowrap;
 }
 
 .db-trip-status-badge {
@@ -3420,6 +3422,7 @@ body.light-theme .auth-card {
   font-size: 0.95rem;
   font-weight: 800;
   color: var(--color-danger);
+  white-space: nowrap;
 }
 
 .expense-type-badge {

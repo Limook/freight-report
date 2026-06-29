@@ -2800,6 +2800,74 @@ body.light-theme .btn-tracker-secondary:hover {
   background-color: var(--color-warning-muted);
 }
 
+.calendar-day-cell.has-trips {
+  background-color: rgba(99, 102, 241, 0.03);
+  border-color: rgba(99, 102, 241, 0.15);
+}
+
+.calendar-day-cell.has-trips.has-unpaid {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(245, 158, 11, 0.03) 100%);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.day-dots-container {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .calendar-day-cell {
+    aspect-ratio: 1 / 1.1;
+    padding: 4px;
+    min-height: 48px;
+    justify-content: space-between;
+  }
+  
+  .day-number {
+    font-size: 0.72rem;
+    line-height: 1;
+  }
+
+  .desktop-badges {
+    display: none !important;
+  }
+
+  .day-dots-container {
+    display: flex !important;
+    gap: 3px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+    margin-bottom: 2px;
+  }
+
+  .day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .day-dot.trip-dot {
+    background-color: var(--color-primary);
+  }
+
+  .day-dot.unpaid-dot {
+    background-color: var(--color-warning);
+  }
+
+  .day-trip-fee {
+    font-size: 0.52rem;
+    font-weight: 800;
+    color: var(--text-main);
+    transform: scale(0.95);
+    margin-top: 1px;
+    line-height: 1;
+    text-align: center;
+    width: 100%;
+  }
+}
+
 /* ====================================================
    Clients Management Tab (Ver 2.16)
    ==================================================== */

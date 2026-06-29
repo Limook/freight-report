@@ -3287,9 +3287,13 @@ function renderCalendarView() {
       }
       
       badgeHtml = `
-        <div style="display: flex; flex-direction: column; gap: 2px; align-items: center; width: 100%;">
+        <div class="desktop-badges" style="display: flex; flex-direction: column; gap: 2px; align-items: center; width: 100%;">
           ${tripBadge}
           ${unpaidBadge}
+        </div>
+        <div class="day-dots-container">
+          ${hasTrips ? '<span class="day-dot trip-dot"></span>' : ''}
+          ${hasUnpaid ? '<span class="day-dot unpaid-dot"></span>' : ''}
         </div>
         ${feeFormatted ? `<span class="day-trip-fee">${feeFormatted}</span>` : ""}
       `;

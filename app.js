@@ -1854,7 +1854,7 @@ async function loadData() {
   }
 }
 
-function saveData() {
+async function saveData() {
   localStorage.setItem("logilog_users", JSON.stringify(appState.users)); // Ver 2.17
   localStorage.setItem("logilog_trips", JSON.stringify(appState.trips));
   localStorage.setItem("logilog_clients", JSON.stringify(appState.clients)); // Ver 2.16
@@ -1862,6 +1862,10 @@ function saveData() {
   localStorage.setItem("logilog_settings", JSON.stringify(appState.settings));
   localStorage.setItem("logilog_theme", appState.theme);
   localStorage.setItem("logilog_tracker", JSON.stringify(appState.tracker));
+  
+  if (supabaseClient && appState.currentUser && appState.currentUser.uid) {
+    await syncAllToSupabase();
+  }
 }
 
 // ----------------------------------------------------

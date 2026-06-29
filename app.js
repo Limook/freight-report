@@ -1378,7 +1378,15 @@ async function initSupabase() {
 
 async function syncAllToSupabase() {
   if (!supabaseClient || !appState.currentUser || !appState.currentUser.uid) return;
+  
+  // 0. Skip sync if offline to avoid useless error messages
+  if (navigator.onLine === false) {
+    console.log("Device is offline. Skipping data sync to Supabase.");
+    return;
+  }
+
   const uid = appState.currentUser.uid;
+  const syncErrors = [];
   
   // 1. Sync Trips
   try {
@@ -1411,7 +1419,7 @@ async function syncAllToSupabase() {
     }
   } catch (err) {
     console.error("Failed to sync trips to Supabase:", err);
-    showToast(`운행기록 동기화 실패: ${err.message || err}`);
+    syncErrors.push("운행기록");
   }
   
   // 2. Sync Clients
@@ -1430,7 +1438,7 @@ async function syncAllToSupabase() {
     }
   } catch (err) {
     console.error("Failed to sync clients to Supabase:", err);
-    showToast(`거래처 동기화 실패: ${err.message || err}`);
+    syncErrors.push("거래처");
   }
   
   // 3. Sync Expenses
@@ -1453,7 +1461,7 @@ async function syncAllToSupabase() {
     }
   } catch (err) {
     console.error("Failed to sync expenses to Supabase:", err);
-    showToast(`경비 동기화 실패: ${err.message || err}`);
+    syncErrors.push("경비");
   }
   
   // 4. Sync Settings
@@ -1466,7 +1474,7 @@ async function syncAllToSupabase() {
     if (error) throw error;
   } catch (err) {
     console.error("Failed to sync settings to Supabase:", err);
-    showToast(`개인설정 동기화 실패: ${err.message || err}`);
+    syncErrors.push("설정");
   }
   
   // 5. Sync Tracker
@@ -1487,10 +1495,14 @@ async function syncAllToSupabase() {
     if (error) throw error;
   } catch (err) {
     console.error("Failed to sync trackers to Supabase:", err);
-    showToast(`스마트기록기 동기화 실패: ${err.message || err}`);
+    syncErrors.push("기록기");
   }
   
-  console.log("Supabase data sync process completed.");
+  if (syncErrors.length > 0) {
+    showToast(`일부 데이터 동기화 실패 (${syncErrors.join(", ")})`);
+  } else {
+    console.log("Supabase data sync process completed successfully.");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

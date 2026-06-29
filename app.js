@@ -1,3 +1,22 @@
+// Global error catcher for debugging without devtools (Ver 2.20)
+window.onerror = function (message, source, lineno, colno, error) {
+  if (typeof showToast === 'function') {
+    showToast(`런타임 오류: ${message} (라인 ${lineno})`, 10000);
+  } else {
+    alert(`런타임 오류: ${message} (라인 ${lineno})`);
+  }
+  return false;
+};
+
+window.onunhandledrejection = function (event) {
+  const msg = event.reason ? (event.reason.message || event.reason) : 'Unknown promise rejection';
+  if (typeof showToast === 'function') {
+    showToast(`비동기 오류: ${msg}`, 10000);
+  } else {
+    alert(`비동기 오류: ${msg}`);
+  }
+};
+
 // LogiLog - Freight Driver Logbook App Logic (Ver 2.2)
 
 // Administrative region data

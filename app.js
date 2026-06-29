@@ -1641,23 +1641,7 @@ async function loadData() {
               };
             }
             
-            // Seed dummy data if trips is empty
-            if (appState.trips.length === 0) {
-              console.log("No trips in Supabase. Seeding initial dummy trips...");
-              appState.trips = [...DUMMY_TRIPS].map(t => {
-                t.userId = appState.currentUser.username;
-                return t;
-              });
-              appState.clients = [...DUMMY_CLIENTS].map(c => {
-                c.userId = appState.currentUser.username;
-                return c;
-              });
-              appState.expenses = [
-                { id: "expense-1", userId: appState.currentUser.username, date: "2026-05-05", type: "fixed", category: "차량할부", title: "화물차 할부금 (5월분)", amount: 1200000, notes: "매월 5일 자동이체" },
-                { id: "expense-2", userId: appState.currentUser.username, date: "2026-05-10", type: "fixed", category: "보험료", title: "적재물 배상책임보험", amount: 150000, notes: "분기 납부" }
-              ];
-              await syncAllToSupabase();
-            }
+
           }
           return;
         }

@@ -3647,7 +3647,11 @@ function openTripModal(tripId = null) {
   updateAddWaypointButtonState();
   checkTripDraft(tripId);
   
-  dialogTrip.showModal();
+  if (window.innerWidth <= 600) {
+    dialogTrip.show();
+  } else {
+    dialogTrip.showModal();
+  }
 }
 
 function closeTripModal() {
@@ -6101,6 +6105,8 @@ async function handleLogout() {
 
 function switchTab(tabName) {
   closeTrackerDialog();
+  closeTripModal();
+  closeExpenseModal();
   const navItems = document.querySelectorAll(".app-nav .nav-item");
   const panels = document.querySelectorAll(".app-panel");
   
@@ -6748,7 +6754,11 @@ function openExpenseModal(expenseId = null) {
   
   const dialogExpense = document.getElementById("dialog-expense");
   if (dialogExpense) {
-    dialogExpense.showModal();
+    if (window.innerWidth <= 600) {
+      dialogExpense.show();
+    } else {
+      dialogExpense.showModal();
+    }
     lucide.createIcons(); // To resolve the new segment control icons
   }
 }

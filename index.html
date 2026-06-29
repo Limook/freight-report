@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>로지로그 - 화물차 운행일지 & 관리</title>
+  <!-- PWA Settings -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="로지로그">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <!-- Google Fonts: Inter & Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dark-theme"> <!-- Default to dark theme as planned -->
+  
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <i data-lucide="truck" class="logo-icon"></i>
+        <h1>로지로그</h1>
+        <span class="logo-badge">Driver</span>
+      </div>
+      <div class="header-actions">
+        <div id="header-user-info" style="display: none; align-items: center; gap: 8px; margin-right: 8px;">
+          <span id="header-user-badge" class="logo-badge" style="background-color: var(--color-primary-muted); color: var(--color-primary); border: 1px solid var(--color-primary); font-size: 0.7rem; font-weight: 700; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">홍길동</span>
+          <button id="btn-logout" class="icon-btn" title="로그아웃" aria-label="로그아웃" onclick="handleLogout()" style="width: 32px; height: 32px;">
+            <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+        <button id="theme-toggle" class="icon-btn" title="화면 모드 변경" aria-label="테마 토글">
+          <i data-lucide="sun" class="sun-icon"></i>
+          <i data-lucide="moon" class="moon-icon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Panels (SPA) -->
+    <main class="app-main">
+      
+      <!-- 0. HOME PANEL (Ver 2.15) -->
+      <!-- 0. HOME PANEL (Ver 2.15 / 2.16 Layout) -->
+      <section id="panel-home" class="app-panel active">
+        <div class="panel-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
+          <h2>오늘의 운행</h2>
+          <div id="home-today-revenue-header" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success); letter-spacing: -0.5px;">오늘 매출 <span id="home-today-revenue-val" style="font-size: 1.4rem; font-weight: 900; margin-left: 4px;">0원</span></div>
+        </div>
+
+        <!-- Live Quick Tracker Widget (Ver 2.8 / 2.13 / 2.16 - Moved to top) -->
+        <!-- Live Quick Tracker Widget (Ver 2.25) -->
+        <div class="quick-tracker-card detail-card" id="quick-tracker-card">
+          <div class="tracker-hero-container">
+            <button class="btn-tracker-hero" onclick="openTrackerDialog()">
+              <div class="hero-icon-container">
+                <i data-lucide="navigation" class="hero-icon"></i>
+              </div>
+              <div class="hero-text-group">
+                <span class="hero-subtitle" id="tracker-hero-status-subtitle">실시간 기록 시작하기</span>
+                <h3 class="hero-title" id="tracker-hero-status-title">스마트 운행기록기</h3>
+              </div>
+            </button>
+          </div>
+        </div>
+        <div id="home-idle-management-view" class="home-desktop-grid">
+          <div class="home-left-col">
+            <!-- 등록 단축 버튼 그룹 (가로 배치 - 6:4 비율) -->
+            <div style="display: flex; gap: 12px; margin-bottom: 16px; width: 100%;">
+              <!-- 운행기록 등록 영웅 버튼 -->
+              <button class="btn-hero-register" onclick="openTripModal()" style="flex: 6; margin-bottom: 0;">
+                <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
+                <span>운행기록 등록하기</span>
+              </button>
+
+              <!-- 경비내역 등록 영웅 버튼 -->
+              <button class="btn-hero-register btn-hero-expense" onclick="openExpenseModal()" style="flex: 4; margin-bottom: 0;">
+                <i data-lucide="receipt" style="width: 18px; height: 18px;"></i>
+                <span>경비내역 등록하기</span>
+              </button>
+            </div>
+
+            <!-- Home Draft Indicator (Visible if draft exists) -->
+            <div id="home-draft-indicator" class="detail-card draft-home-card" style="margin-bottom: 16px; background-color: var(--color-warning-muted); border: 1px solid var(--color-warning); padding: 12px; border-radius: var(--radius-sm); align-items: center; justify-content: space-between; display: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="file-text" style="color: var(--color-warning); width: 20px; height: 20px;"></i>
+                <div>
+                  <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 2px;">임시저장된 운행기록이 있습니다</span>
+                  <strong id="home-draft-summary" style="font-size: 0.82rem; color: var(--text-main); font-weight: 700;">거래처 미지정 (상차지 ➔ 하차지)</strong>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-warning btn-sm" onclick="resumeTripDraft()" style="height: 28px; padding: 0 10px; font-size: 0.72rem; font-weight: 700; border-radius: 4px; border: none; background-color: var(--color-warning); color: #fff; cursor: pointer;">이어쓰기</button>
+                <button type="button" class="btn-icon" onclick="clearTripDraftHome()" title="임시저장 삭제" style="background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;">
+                  <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="home-right-col">
+            <!-- 오늘 확인해야 할 내용 -->
+            <div id="home-today-reminders" class="detail-card today-reminders-card">
+              <!-- JS로 동적 렌더링 -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. DASHBOARD PANEL -->
+      <section id="panel-dashboard" class="app-panel">
+        <div class="panel-header dashboard-header">
+          <h2>종합 대시보드</h2>
+          <div class="filter-group">
+            <button class="filter-btn" data-period="today">오늘</button>
+            <button class="filter-btn active" data-period="week">이번주</button>
+            <button class="filter-btn" data-period="month">이번달</button>
+            <button class="filter-btn" data-period="last-month">지난달</button>
+            <button class="filter-btn" data-period="custom" id="btn-dashboard-custom-period" onclick="openCustomPeriodDialog('dashboard')">직접선택</button>
+          </div>
+        </div>
+
+
+
+        <!-- Summary Cards Grid -->
+        <div class="stats-grid">
+          <div class="stat-card revenue" onclick="toggleDashboardCardDetail('revenue')" style="cursor: pointer;">
+            <div class="stat-icon-wrapper">
+              <i data-lucide="krw"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">총 운임 매출</span>
+              <h3 id="stat-total-fee" class="stat-value">0원</h3>
+            </div>
+            <div class="collapsible-wrapper" id="detail-revenue-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 8px; border-top: 1px dashed var(--bg-card-border); margin-top: 4px; font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;" id="detail-revenue-content">
+                  <!-- JS로 렌더링 -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card expense" onclick="toggleDashboardCardDetail('expense')" style="cursor: pointer;">
+            <div class="stat-icon-wrapper">
+              <i data-lucide="receipt"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">지출 경비</span>
+              <h3 id="stat-total-expense" class="stat-value">0원</h3>
+            </div>
+            <div class="collapsible-wrapper" id="detail-expense-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 8px; border-top: 1px dashed var(--bg-card-border); margin-top: 4px; font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;" id="detail-expense-content">
+                  <!-- JS로 렌더링 -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card net-income" onclick="toggleDashboardCardDetail('net-income')" style="cursor: pointer;">
+            <div class="stat-icon-wrapper">
+              <i data-lucide="trending-up"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">순수입 (매출-경비)</span>
+              <h3 id="stat-net-income" class="stat-value">0원</h3>
+            </div>
+            <div class="collapsible-wrapper" id="detail-net-income-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 8px; border-top: 1px dashed var(--bg-card-border); margin-top: 4px; font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;" id="detail-net-income-content">
+                  <!-- JS로 렌더링 -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card distance" onclick="toggleDashboardCardDetail('distance')" style="cursor: pointer;">
+            <div class="stat-icon-wrapper">
+              <i data-lucide="milestone"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">총 운행거리</span>
+              <h3 id="stat-total-distance" class="stat-value">0 km</h3>
+            </div>
+            <div class="collapsible-wrapper" id="detail-distance-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 8px; border-top: 1px dashed var(--bg-card-border); margin-top: 4px; font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;" id="detail-distance-content">
+                  <!-- JS로 렌더링 -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 화물차 맞춤 영업 효율 & 차량 관리 위젯 (Ver 2.13 추가) -->
+        <div class="dashboard-details-grid" id="dashboard-custom-insights" style="margin-top: 16px; margin-bottom: 16px;">
+          <!-- 1. 영업 효율성 분석 -->
+          <div class="detail-card insight-card" onclick="toggleDashboardCardDetail('efficiency')" style="cursor: pointer;">
+            <div class="card-header-flex">
+              <h4>운행 효율성 분석</h4>
+              <i data-lucide="trending-up" class="icon-sm" style="color: var(--color-primary);"></i>
+            </div>
+            <div class="insight-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+              <div class="insight-item" style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="insight-label" style="font-size: 0.8rem; color: var(--text-muted);">km당 매출 단가</span>
+                <div class="insight-value-row">
+                  <strong id="insight-km-rate" style="font-size: 0.95rem; color: var(--text-main); font-weight: 700;">0원</strong>
+                  <span class="insight-unit" style="font-size: 0.7rem; color: var(--text-muted);">/ km</span>
+                </div>
+              </div>
+              <div class="insight-item" style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="insight-label" style="font-size: 0.8rem; color: var(--text-muted);">매출 대비 경비 비율</span>
+                  <strong id="insight-expense-ratio" style="font-size: 0.95rem; color: var(--text-main); font-weight: 700;">0%</strong>
+                </div>
+                <div class="progress-bar-container" style="width: 100%; height: 8px; background-color: var(--bg-panel); border-radius: 4px; overflow: hidden; border: 1px solid var(--bg-card-border);">
+                  <div id="insight-expense-bar" class="progress-bar-fill" style="width: 0%; height: 100%; background-color: var(--color-warning); transition: width 0.4s ease;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="collapsible-wrapper" id="detail-efficiency-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 10px; border-top: 1px dashed var(--bg-card-border); margin-top: 10px; font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;" id="detail-efficiency-content">
+                  <!-- JS로 렌더링 -->
+                </div>
+              </div>
+            </div>
+          </div>
+          
+
+        </div>
+
+        <!-- Dashboard Charts -->
+        <div class="dashboard-details-grid">
+          <!-- Monthly/Weekly Earning bar chart (SVG dynamic) -->
+          <div class="detail-card chart-card">
+            <div class="card-header-flex">
+              <h4>최근 운행 통계</h4>
+              <span class="card-subtitle">일별 매출액 추이 (최근 7일)</span>
+            </div>
+            <div id="chart-container" class="svg-chart-container">
+              <!-- Render SVG charts programmatically in JS -->
+              <svg id="earnings-chart" width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="none">
+                <!-- Dynamically generated elements -->
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. TRIPS PANEL (Redesigned in Ver 2.15) -->
+      <section id="panel-trips" class="app-panel">
+        <div class="panel-header-sticky">
+          <div class="panel-title-row">
+            <h2>운행기록부</h2>
+            <button class="btn btn-primary btn-sm" onclick="openTripModal()">
+              <i data-lucide="plus" class="icon-sm"></i> 등록
+            </button>
+          </div>
+          
+          <!-- 3-Way Segmented Control -->
+          <div class="segmented-control trips-view-segment" id="trips-segment-control">
+            <button class="segment-item active" data-view="all" onclick="switchTripsView('all')">전체 운행 내역</button>
+            <button class="segment-item" data-view="unpaid" onclick="switchTripsView('unpaid')">미수금/대기 관리</button>
+            <button class="segment-item" data-view="calendar" onclick="switchTripsView('calendar')">달력으로 보기</button>
+          </div>
+        </div>
+
+        <!-- 2.1 All Trips List View Container -->
+        <div id="trips-list-view-container" class="trips-sub-panel">
+          <div class="search-filter-bar" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
+            <div class="search-box" style="flex: 1;">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="trip-search" placeholder="거래처 또는 경로 검색..." oninput="renderTripsList()">
+            </div>
+            <div class="filter-group" id="trips-sort-selector" style="display: flex; gap: 4px; flex-shrink: 0; margin: 0;">
+              <button class="filter-btn active" id="btn-trips-sort-desc" onclick="setTripsSortOrder('desc')">최신순</button>
+              <button class="filter-btn" id="btn-trips-sort-asc" onclick="setTripsSortOrder('asc')">과거순</button>
+            </div>
+          </div>
+          <div class="trips-filter-sort-row" style="display: flex; margin-bottom: 12px; width: 100%;">
+            <div class="filter-group" id="trips-period-filters" style="display: flex; gap: 3px; margin: 0; width: 100%; justify-content: space-between;">
+              <button class="filter-btn active" data-period="all" onclick="setTripsPeriod('all')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">전체</button>
+              <button class="filter-btn" data-period="today" onclick="setTripsPeriod('today')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">오늘</button>
+              <button class="filter-btn" data-period="week" onclick="setTripsPeriod('week')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">이번주</button>
+              <button class="filter-btn" data-period="month" onclick="setTripsPeriod('month')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">이번달</button>
+              <button class="filter-btn" data-period="last-month" onclick="setTripsPeriod('last-month')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">지난달</button>
+              <button class="filter-btn" data-period="custom" id="btn-trips-custom-period" onclick="openCustomPeriodDialog('trips')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0; overflow: hidden; text-overflow: ellipsis;">직접선택</button>
+            </div>
+          </div>
+          <div class="trips-summary-stats" id="trips-all-summary-stats" style="margin-bottom: 12px; display: flex; gap: 8px; width: 100%;">
+            <!-- Dynamically populated in JS -->
+          </div>
+
+          <div id="trips-list" class="items-list">
+            <!-- Dynamically populated -->
+            <div class="empty-state">
+              <i data-lucide="calendar-plus"></i>
+              <p>등록된 운행 내역이 없습니다.</p>
+              <button class="btn btn-outline" onclick="openTripModal()">첫 운행 입력하기</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2.2 Unpaid Dues Management View Container -->
+        <div id="trips-unpaid-view-container" class="trips-sub-panel" style="display: none;">
+          <div class="search-filter-bar" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
+            <div class="search-box" style="flex: 1;">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="unpaid-trip-search" placeholder="거래처 또는 경로 검색..." oninput="renderUnpaidTripsView()">
+            </div>
+            <div class="filter-group" id="unpaid-sort-selector" style="display: flex; gap: 4px; flex-shrink: 0; margin: 0;">
+              <button class="filter-btn active" id="btn-unpaid-sort-desc" onclick="setUnpaidSortOrder('desc')">최신순</button>
+              <button class="filter-btn" id="btn-unpaid-sort-asc" onclick="setUnpaidSortOrder('asc')">과거순</button>
+            </div>
+          </div>
+          <div class="trips-filter-sort-row" style="display: flex; margin-bottom: 12px; width: 100%;">
+            <div class="filter-group" id="unpaid-period-filters" style="display: flex; gap: 3px; margin: 0; width: 100%; justify-content: space-between;">
+              <button class="filter-btn active" data-period="all" onclick="setUnpaidPeriod('all')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">전체</button>
+              <button class="filter-btn" data-period="today" onclick="setUnpaidPeriod('today')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">오늘</button>
+              <button class="filter-btn" data-period="week" onclick="setUnpaidPeriod('week')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">이번주</button>
+              <button class="filter-btn" data-period="month" onclick="setUnpaidPeriod('month')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">이번달</button>
+              <button class="filter-btn" data-period="last-month" onclick="setUnpaidPeriod('last-month')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0;">지난달</button>
+              <button class="filter-btn" data-period="custom" id="btn-unpaid-custom-period" onclick="openCustomPeriodDialog('unpaid')" style="flex: 1; padding: 6px 2px; font-size: 0.72rem; text-align: center; min-width: 0; overflow: hidden; text-overflow: ellipsis;">직접선택</button>
+            </div>
+          </div>
+
+          <!-- Unpaid summary status card -->
+          <div class="detail-card unpaid-summary-card" id="trips-unpaid-summary-card" style="margin-bottom: 16px;">
+            <!-- Dynamically populated in JS -->
+          </div>
+
+          <!-- Grouped by client with total amount and collect all buttons -->
+          <div class="unpaid-client-group-section" style="margin-bottom: 20px;">
+            <div class="accordion-header" id="unpaid-client-header" onclick="toggleUnpaidClientList()" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 10px 12px; background-color: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); margin-bottom: 8px;">
+              <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="users" class="icon-sm" style="color: var(--color-warning); width: 14px; height: 14px;"></i>
+                거래처별 미수금 현황
+              </h4>
+              <i data-lucide="chevron-down" id="unpaid-client-chevron" style="width: 16px; height: 16px; transition: transform var(--transition-fast) ease; transform: rotate(0deg);"></i>
+            </div>
+            <div id="trips-unpaid-client-list-wrapper" class="collapsible-wrapper">
+              <div id="trips-unpaid-client-list" class="client-summary-list" style="min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 8px; padding: 4px 0;">
+                <!-- Grouped list -->
+              </div>
+            </div>
+          </div>
+
+          <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px;">미수금 상세 목록</h4>
+          <div id="trips-unpaid-list" class="items-list">
+            <!-- Unpaid trips will be dynamically populated -->
+          </div>
+        </div>
+
+        <!-- 2.3 Calendar View Container -->
+        <div id="trips-calendar-view-container" class="trips-sub-panel" style="display: none;">
+          <!-- Calendar Year/Month Header -->
+          <div class="calendar-nav-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background-color: var(--bg-card); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+            <button class="btn btn-outline btn-sm" onclick="navigateCalendarMonth(-1)" style="padding: 4px 8px; height: 30px;">
+              <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+            </button>
+            <strong id="calendar-current-month-label" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">2026년 6월</strong>
+            <button class="btn btn-outline btn-sm" onclick="navigateCalendarMonth(1)" style="padding: 4px 8px; height: 30px;">
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+            </button>
+          </div>
+
+          <!-- Calendar Month Stats Summary (Ver 2.16 - Patch 8) -->
+          <div class="calendar-month-summary-stats" id="calendar-month-summary-stats" style="margin-bottom: 12px; display: flex; gap: 8px; width: 100%;">
+            <!-- Dynamically populated in JS -->
+          </div>
+
+          <!-- Calendar Weekday grid -->
+          <div class="calendar-weekday-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed var(--bg-card-border);">
+            <div class="weekday sun" style="color: var(--color-danger);">일</div>
+            <div class="weekday">월</div>
+            <div class="weekday">화</div>
+            <div class="weekday">수</div>
+            <div class="weekday">목</div>
+            <div class="weekday">금</div>
+            <div class="weekday sat" style="color: var(--color-primary);">토</div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div id="calendar-days-grid" class="calendar-days-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px;">
+            <!-- Dynamically populated in JS -->
+          </div>
+
+          <!-- Trips on Selected Date List -->
+          <div class="calendar-selected-trips-section" style="border-top: 1px solid var(--bg-card-border); padding-top: 14px;">
+            <h4 id="calendar-selected-date-title" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px;">선택한 날짜의 운행 내역</h4>
+            <div id="calendar-selected-trips-list" class="items-list">
+              <!-- Dynamically populated in JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2.7 EXPENSES PANEL -->
+      <section id="panel-expenses" class="app-panel">
+        <div class="panel-header-sticky">
+          <div class="panel-title-row">
+            <h2>경비 관리</h2>
+            <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">
+              <i data-lucide="plus" class="icon-sm"></i> 등록
+            </button>
+          </div>
+        </div>
+
+        <!-- Monthly summaries stats (List style, 3 rows, expandable) -->
+        <div class="expenses-summary-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; width: 100%;">
+          
+          <!-- Card 1: 이달의 총 경비 -->
+          <div class="stat-card" onclick="toggleExpenseSummaryDetail('total')" style="cursor: pointer; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.04) 100%); padding: 14px 16px; width: 100%;">
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%;">
+              <div class="stat-icon-wrapper" style="background-color: var(--color-primary-muted); color: var(--color-primary); flex-shrink: 0; margin-bottom: 0;">
+                <i data-lucide="wallet"></i>
+              </div>
+              <div class="stat-info" style="flex: 1;">
+                <span class="stat-label" id="expense-stat-title-label">이달의 총 경비</span>
+                <h3 id="expense-stat-total" class="stat-value" style="margin-top: 2px;">0원</h3>
+              </div>
+              <i data-lucide="chevron-down" id="expense-chevron-total" style="width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
+            </div>
+            <!-- Collapsible details -->
+            <div class="collapsible-wrapper" id="detail-expense-total-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 10px; border-top: 1px dashed var(--bg-card-border); margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;" id="detail-expense-total-content">
+                  <!-- Dynamically populated detail list -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: 고정 경비 합계 -->
+          <div class="stat-card" onclick="toggleExpenseSummaryDetail('fixed')" style="cursor: pointer; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%); padding: 14px 16px; width: 100%;">
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%;">
+              <div class="stat-icon-wrapper" style="background-color: var(--color-success-muted); color: var(--color-success); flex-shrink: 0; margin-bottom: 0;">
+                <i data-lucide="lock"></i>
+              </div>
+              <div class="stat-info" style="flex: 1;">
+                <span class="stat-label">고정 경비 합계</span>
+                <h3 id="expense-stat-fixed" class="stat-value" style="margin-top: 2px;">0원</h3>
+              </div>
+              <i data-lucide="chevron-down" id="expense-chevron-fixed" style="width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
+            </div>
+            <!-- Collapsible details -->
+            <div class="collapsible-wrapper" id="detail-expense-fixed-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 10px; border-top: 1px dashed var(--bg-card-border); margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;" id="detail-expense-fixed-content">
+                  <!-- Dynamically populated detail list -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: 유동 경비 합계 -->
+          <div class="stat-card" onclick="toggleExpenseSummaryDetail('variable')" style="cursor: pointer; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%); padding: 14px 16px; width: 100%;">
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%;">
+              <div class="stat-icon-wrapper" style="background-color: var(--color-warning-muted); color: var(--color-warning); flex-shrink: 0; margin-bottom: 0;">
+                <i data-lucide="refresh-cw"></i>
+              </div>
+              <div class="stat-info" style="flex: 1;">
+                <span class="stat-label">유동 경비 합계</span>
+                <h3 id="expense-stat-variable" class="stat-value" style="margin-top: 2px;">0원</h3>
+              </div>
+              <i data-lucide="chevron-down" id="expense-chevron-variable" style="width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
+            </div>
+            <!-- Collapsible details -->
+            <div class="collapsible-wrapper" id="detail-expense-variable-wrapper">
+              <div style="overflow: hidden;">
+                <div style="padding-top: 10px; border-top: 1px dashed var(--bg-card-border); margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;" id="detail-expense-variable-content">
+                  <!-- Dynamically populated detail list -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Filter bar -->
+        <div class="search-filter-bar" style="display: flex; gap: 10px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;">
+          <div class="search-box" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="expense-search" placeholder="내용 또는 분류 검색..." oninput="renderExpensesList()">
+          </div>
+          <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+            <select id="expense-month-select" class="select-filter" onchange="renderExpensesList()" style="height: 38px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-panel); color: var(--text-main); font-weight: 500;">
+              <!-- Dynamically populated -->
+            </select>
+            <div class="filter-group" id="expense-type-filters" style="display: flex; gap: 4px; margin: 0;">
+              <button class="filter-btn active" data-type="all" onclick="setExpenseTypeFilter('all')" style="padding: 6px 10px; font-size: 0.75rem; height: 38px;">전체</button>
+              <button class="filter-btn" data-type="fixed" onclick="setExpenseTypeFilter('fixed')" style="padding: 6px 10px; font-size: 0.75rem; height: 38px;">고정</button>
+              <button class="filter-btn" data-type="variable" onclick="setExpenseTypeFilter('variable')" style="padding: 6px 10px; font-size: 0.75rem; height: 38px;">유동</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expenses List -->
+        <div id="expenses-list" class="items-list">
+          <div class="empty-state">
+            <i data-lucide="wallet"></i>
+            <p>등록된 경비 내역이 없습니다.</p>
+            <button class="btn btn-outline" onclick="openExpenseModal()">첫 경비 입력하기</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. SETTINGS PANEL -->
+      <section id="panel-settings" class="app-panel">
+        <h2>환경 설정</h2>
+        
+
+
+        <!-- Data Management -->
+        <div class="settings-card">
+          <h3><i data-lucide="database"></i> 데이터 백업 및 복원</h3>
+          <p class="settings-description">로컬에 저장된 모든 운행 일지 및 거래처 데이터를 파일로 안전하게 보관할 수 있습니다. 스마트폰 변경 시에 활용하세요.</p>
+          <div class="backup-actions">
+            <button id="btn-export" class="btn btn-outline">
+              <i data-lucide="download"></i>
+              데이터 백업 (JSON 내보내기)
+            </button>
+            <label for="import-file" class="btn btn-outline file-label">
+              <i data-lucide="upload"></i>
+              데이터 복원 (JSON 가져오기)
+              <input type="file" id="import-file" accept=".json" style="display:none;">
+            </label>
+          </div>
+        </div>
+
+        <!-- Reset / About -->
+        <div class="settings-card danger-zone">
+          <h3><i data-lucide="alert-triangle" class="text-danger"></i> 위험 지역</h3>
+          <p class="settings-description">앱의 모든 데이터(운행기록 및 설정)를 초기 상태로 리셋합니다. 삭제된 데이터는 복구할 수 없습니다.</p>
+          <button id="btn-reset" class="btn btn-danger">
+            <i data-lucide="trash-2"></i>
+            전체 데이터 공장 초기화
+          </button>
+        </div>
+
+        <div class="settings-info-text">
+          <p>로지로그(LogiLog) v1.0.0</p>
+          <p>Designed for Professional Freight Drivers</p>
+        </div>
+      </section>
+
+      <!-- 2.5 CLIENTS PANEL (Ver 2.16) -->
+      <section id="panel-clients" class="app-panel">
+        <div class="panel-header-sticky">
+          <div class="panel-title-row">
+            <h2>거래처 관리</h2>
+            <button class="btn btn-primary btn-sm" onclick="openClientModal()">
+              <i data-lucide="plus" class="icon-sm"></i> 등록
+            </button>
+          </div>
+          
+          <div class="search-filter-bar">
+            <div class="search-box">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="client-search" placeholder="거래처명 또는 전화번호 검색..." oninput="renderClientsPanel()">
+            </div>
+          </div>
+        </div>
+
+        <div id="clients-list" class="items-list" style="margin-top: 10px;">
+          <!-- Dynamically populated client cards -->
+        </div>
+      </section>
+
+      <!-- 6. ADMIN PANEL (Ver 2.17) -->
+      <section id="panel-admin" class="app-panel">
+        <div class="panel-header-sticky">
+          <div class="panel-title-row">
+            <h2>플랫폼 관리자 센터</h2>
+          </div>
+        </div>
+
+        <!-- Platform Overview Stat Cards -->
+        <div class="stats-grid" style="margin-bottom: 20px;">
+          <div class="stat-card revenue">
+            <div class="stat-icon-wrapper" style="background-color: var(--color-primary-muted); color: var(--color-primary);">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">가입 기사 수</span>
+              <h3 id="admin-stat-users" class="stat-value">0명</h3>
+            </div>
+          </div>
+          <div class="stat-card expense">
+            <div class="stat-icon-wrapper" style="background-color: var(--color-success-muted); color: var(--color-success);">
+              <i data-lucide="truck"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">총 운행기록 건수</span>
+              <h3 id="admin-stat-trips" class="stat-value">0건</h3>
+            </div>
+          </div>
+          <div class="stat-card net-income">
+            <div class="stat-icon-wrapper" style="background-color: var(--color-warning-muted); color: var(--color-warning);">
+              <i data-lucide="krw"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">플랫폼 누적 매출액</span>
+              <h3 id="admin-stat-revenue" class="stat-value">0원</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users Management Card -->
+        <div class="detail-card" style="margin-bottom: 20px;">
+          <div class="card-header-flex" style="border-bottom: 1px solid var(--bg-card-border); padding-bottom: 10px; margin-bottom: 12px;">
+            <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="users" class="icon-sm" style="color: var(--color-primary);"></i>
+              사용자 계정 관리
+            </h4>
+          </div>
+          <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--bg-card-border); color: var(--text-muted); font-weight: 600;">
+                  <th style="padding: 10px 8px;">ID / 기사명</th>
+                  <th style="padding: 10px 8px;">전화번호</th>
+                  <th style="padding: 10px 8px;">역할</th>
+                  <th style="padding: 10px 8px; text-align: center;">관리 액션</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-list">
+                <!-- Dynamically populated users -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- All Trips List across users -->
+        <div class="detail-card">
+          <div class="card-header-flex" style="border-bottom: 1px solid var(--bg-card-border); padding-bottom: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="calendar" class="icon-sm" style="color: var(--color-success);"></i>
+              플랫폼 전체 운행기록 실시간 스트림
+            </h4>
+            <div class="search-box" style="width: 180px; height: 28px; margin: 0;">
+              <i data-lucide="search" class="search-icon" style="top: 7px; left: 8px; width: 12px; height: 12px;"></i>
+              <input type="text" id="admin-trip-search" placeholder="기사명 또는 거래처 검색..." oninput="renderAdminPanel()" style="padding-left: 26px; font-size: 0.7rem; border-radius: 4px;">
+            </div>
+          </div>
+          <div id="admin-trips-list" class="items-list" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- All trips dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 0. FULLSCREEN REAL-TIME DRIVING DASHBOARD (Ver 2.28) -->
+    <div id="dialog-tracker" class="dialog-tracker-fullscreen">
+      <div class="tracker-dialog-header">
+        <h3><i data-lucide="navigation"></i> 실시간 운행 대시보드 <span class="tracker-header-live">LIVE</span></h3>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="demo-toggle-wrapper" style="margin: 0;">
+            <label for="tracker-demo-toggle" class="demo-toggle-label" style="font-size: 0.72rem;">
+              <span>시뮬레이터 (데모)</span>
+              <div class="demo-switch-container">
+                <input type="checkbox" id="tracker-demo-toggle" class="demo-checkbox" onchange="toggleTrackerDemoMode()">
+                <span class="demo-switch-slider"></span>
+              </div>
+            </label>
+          </div>
+          <button class="btn-close-tracker" onclick="closeTrackerDialog()" title="대시보드 닫기">&times;</button>
+        </div>
+      </div>
+      
+      <div class="tracker-dialog-content">
+        <!-- Top 30%: Road Guidance (VMS) -->
+        <div id="home-highway-vms" class="highway-vms-board">
+          <!-- Dynamically rendered in JS -->
+        </div>
+
+        <!-- Bottom 70%: Driving tracker body (horizontal split) -->
+        <div class="tracker-body">
+          <!-- Left: Stepper timeline (Full Height of tracker-body) -->
+          <div class="tracker-stepper">
+            <!-- Rendered dynamically by JS -->
+          </div>
+
+          <!-- Right: Control panel containing actions -->
+          <div class="tracker-content-side">
+            <!-- Live System Status Widget -->
+            <div class="tracker-status-widget">
+              <div class="gps-status-row">
+                <span class="gps-dot pulsing"></span>
+                <span>GPS 수신 정상</span>
+              </div>
+              <div class="device-status-row">
+                <i data-lucide="cpu" style="width: 12px; height: 12px;"></i>
+                <span>운행기록 실시간 기록 중</span>
+              </div>
+            </div>
+
+            <!-- Option buttons at top -->
+            <div class="tracker-option-actions" id="tracker-option-actions">
+              <!-- Dynamically populated in JS -->
+            </div>
+
+            <!-- Main button at bottom -->
+            <div class="tracker-main-actions" id="tracker-main-actions">
+              <!-- Dynamically populated in JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar (Tab trigger) -->
+    <nav class="app-nav">
+      <button class="nav-item active" data-target="home">
+        <i data-lucide="home"></i>
+        <span>홈</span>
+      </button>
+      <button class="nav-item" data-target="trips">
+        <i data-lucide="calendar"></i>
+        <span>운행기록</span>
+      </button>
+      <button class="nav-item" data-target="expenses">
+        <i data-lucide="wallet"></i>
+        <span>경비</span>
+      </button>
+      <button class="nav-item" data-target="dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>대시보드</span>
+      </button>
+      <button class="nav-item" data-target="clients">
+        <i data-lucide="users"></i>
+        <span>거래처</span>
+      </button>
+      <button class="nav-item" data-target="settings">
+        <i data-lucide="settings"></i>
+        <span>설정</span>
+      </button>
+      <button class="nav-item" data-target="admin" id="nav-item-admin" style="display: none;">
+        <i data-lucide="shield-check"></i>
+        <span>관리자</span>
+      </button>
+    </nav>
+
+  </div> <!-- /App Container -->
+
+  <!-- MODALS -->
+
+  <!-- 1. TRIP MODAL (ADD & EDIT) -->
+  <dialog id="dialog-trip" class="modal-dialog">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="trip-modal-title">운행기록 등록</h3>
+        <button class="close-btn" onclick="closeTripModal()">&times;</button>
+      </header>
+
+      <!-- Draft Alert Banner -->
+      <div id="trip-draft-banner" class="draft-banner" style="display: none;">
+        <div class="draft-banner-content">
+          <i data-lucide="file-text" class="icon-sm" style="color: var(--color-warning); width: 14px; height: 14px;"></i>
+          <span>작성 중이던 임시 저장본이 있습니다.</span>
+        </div>
+        <div class="draft-banner-actions">
+          <button type="button" class="btn btn-warning btn-sm" onclick="loadTripDraft()">불러오기</button>
+          <button type="button" class="btn-icon" onclick="clearTripDraft(true)" title="임시저장 삭제">
+            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <form id="form-trip" method="dialog">
+        <input type="hidden" id="trip-id">
+        
+        <!-- 1. 상하차지정보 Box -->
+        <div class="form-section-box">
+          <h4 class="form-section-title"><i data-lucide="map-pin"></i> 상·하차지 정보</h4>
+          <div class="timeline-journey-container">
+            
+            <!-- Section 1: 출발지 (Optional) -->
+            <div id="timeline-start-section" class="timeline-step start">
+              
+              <!-- Collapsed trigger button -->
+              <button type="button" id="link-add-start" class="btn-timeline-toggle" onclick="toggleLocationField('start', true)">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>출발지 추가 (선택)</span>
+              </button>
+              
+              <!-- Expanded card wrapper -->
+              <div id="start-location-wrapper" style="display: none;" class="journey-card">
+                <div class="card-header">
+                  <span>출발지 (선택)</span>
+                  <button type="button" class="btn-card-close" onclick="toggleLocationField('start', false)">
+                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                  </button>
+                </div>
+                <div class="input-icon-group">
+                  <i data-lucide="map-pin"></i>
+                  <input type="text" id="trip-start" placeholder="출발지 선택" readonly onclick="openLocationPicker('start')">
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: 상차지 (Required, Always Visible) -->
+            <div class="timeline-step load">
+              
+              <div class="journey-card">
+                <div class="card-header">
+                  <span class="step-title load-text">상차지 <span class="required">*</span></span>
+                </div>
+                <div class="input-icon-group" style="margin-bottom: 10px;">
+                  <i data-lucide="map-pin"></i>
+                  <input type="text" id="trip-load" placeholder="상차지 선택" readonly onclick="openLocationPicker('load')" required>
+                </div>
+                
+                <div class="datetime-input-group">
+                  <label for="trip-start-date" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px;">상차 일시</label>
+                  <div class="input-icon-group">
+                    <i data-lucide="calendar"></i>
+                    <input type="datetime-local" id="trip-start-date" required>
+                  </div>
+                  <div class="datetime-shortcuts">
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-1d')">-1일</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-1h')">-1시간</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-30m')">-30분</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'now')">지금</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-30m')">+30분</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-1h')">+1시간</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-1d')">+1일</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Waypoints Dynamic Container -->
+            <div id="waypoints-container" class="waypoints-dynamic-container" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Render waypoints dynamically -->
+            </div>
+
+            <!-- Section 3: 하차지 (Required, Always Visible) -->
+            <div class="timeline-step unload">
+              
+              <div class="journey-card">
+                <div class="card-header">
+                  <span class="step-title unload-text">하차지 <span class="required">*</span></span>
+                </div>
+                <div class="input-icon-group" style="margin-bottom: 10px;">
+                  <i data-lucide="map-pin"></i>
+                  <input type="text" id="trip-unload" placeholder="하차지 선택" readonly onclick="openLocationPicker('unload')" required>
+                </div>
+                
+                <div class="datetime-input-group">
+                  <label for="trip-end-date" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px;">하차 일시</label>
+                  <div class="input-icon-group">
+                    <i data-lucide="clock"></i>
+                    <input type="datetime-local" id="trip-end-date" required>
+                  </div>
+                  <div class="datetime-shortcuts">
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-1d')">-1일</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-1h')">-1시간</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-30m')">-30분</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'now')">지금</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-30m')">+30분</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-1h')">+1시간</button>
+                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-1d')">+1일</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 4: 도착지 (Optional) -->
+            <div id="timeline-arrival-section" class="timeline-step arrival">
+              
+              <!-- Collapsed trigger button -->
+              <button type="button" id="link-add-arrival" class="btn-timeline-toggle" onclick="toggleLocationField('arrival', true)">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>도착지 추가 (선택)</span>
+              </button>
+              
+              <!-- Expanded card wrapper -->
+              <div id="arrival-location-wrapper" style="display: none;" class="journey-card">
+                <div class="card-header">
+                  <span>도착지 (선택)</span>
+                  <button type="button" class="btn-card-close" onclick="toggleLocationField('arrival', false)">
+                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                  </button>
+                </div>
+                <div class="input-icon-group">
+                  <i data-lucide="map-pin"></i>
+                  <input type="text" id="trip-arrival" placeholder="도착지 선택" readonly onclick="openLocationPicker('arrival')">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Waypoint Button (Simple & Pretty timeline toggle style) -->
+          <div style="margin-top: 4px; width: 100%;">
+            <button type="button" id="btn-add-waypoint" class="btn-timeline-toggle" onclick="addWaypointField()">
+              <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+              <span>경유지 추가 (최대 3개)</span>
+            </button>
+            <input type="hidden" id="trip-distance" value="0">
+            <span id="distance-calc-indicator" style="display: none;"></span>
+          </div>
+        </div>
+
+        <!-- 2. 운송료 경비 Box -->
+        <div class="form-section-box">
+          <h4 class="form-section-title"><i data-lucide="krw"></i> 운송료 및 경비 정보</h4>
+          <!-- Freight Fee takes full width -->
+          <div class="form-group">
+            <label for="trip-fee">운송료 (운임, 원) <span class="required">*</span></label>
+            <input type="number" id="trip-fee" min="0" placeholder="예: 450000" required>
+          </div>
+
+          <!-- Separated Expenses Accordion (Now includes Commission) -->
+          <div class="expenses-accordion" style="border: 1px solid var(--bg-card-border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden;">
+            <div class="accordion-header" onclick="toggleExpensesAccordion()" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background-color: var(--bg-card); cursor: pointer; user-select: none;">
+              <span style="font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="receipt" style="width: 16px; height: 16px; color: var(--color-primary);"></i>
+                경비 상세 내역 입력 (주유, 수수료 등)
+              </span>
+              <i data-lucide="chevron-down" id="accordion-icon" style="width: 16px; height: 16px; transition: transform var(--transition-fast);"></i>
+            </div>
+            <div class="accordion-content" id="expenses-accordion-content" style="display: none; padding: 12px; background-color: var(--bg-panel); border-top: 1px solid var(--bg-card-border);">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="trip-expense-fuel">주유비 (원)</label>
+                  <input type="number" id="trip-expense-fuel" min="0" value="0" oninput="calculateTotalExpenses()">
+                </div>
+                <div class="form-group">
+                  <label for="trip-expense-toll">통행료 (원)</label>
+                  <input type="number" id="trip-expense-toll" min="0" value="0" oninput="calculateTotalExpenses()">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="trip-expense-meal">식대/숙박비 (원)</label>
+                  <input type="number" id="trip-expense-meal" min="0" value="0" oninput="calculateTotalExpenses()">
+                </div>
+                <div class="form-group">
+                  <label for="trip-expense-other">기타 경비 (원)</label>
+                  <input type="number" id="trip-expense-other" min="0" value="0" oninput="calculateTotalExpenses()">
+                </div>
+              </div>
+              <!-- Commission moved here inside accordion -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="trip-commission">수수료 (원)</label>
+                <input type="number" id="trip-commission" min="0" value="0" placeholder="예: 30000" oninput="calculateTotalExpenses()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary fields: Total Expenses (Always visible) -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>경비 합계 (자동 계산)</label>
+            <input type="text" id="trip-expense-total" readonly value="0원" style="background-color: var(--bg-app); opacity: 0.8; font-weight: 700;">
+          </div>
+        </div>
+
+        <!-- 3. 거래처명 수금예정 Box -->
+        <div class="form-section-box" style="margin-bottom: 0;">
+          <h4 class="form-section-title"><i data-lucide="briefcase"></i> 거래처 및 수금 정보</h4>
+          <!-- Client Name & Phone side-by-side -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="trip-client">거래처명</label>
+              <input type="text" id="trip-client" placeholder="예: (주)한라물류" list="trip-clients-suggestions" oninput="populateClientPhone()">
+              <datalist id="trip-clients-suggestions">
+                <!-- Dynamically populated from registered clients -->
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label for="trip-client-phone">거래처 전화번호</label>
+              <input type="text" id="trip-client-phone" placeholder="예: 010-1234-5678">
+            </div>
+          </div>
+
+          <!-- Realigned Payment Row: Left Expected Due Date, Right Status Switch -->
+          <div class="payment-status-row">
+            <!-- Left: Expected Payment Date -->
+            <div class="form-group" id="group-payment-due">
+              <label for="trip-payment-due">수금 예정일 <span class="required">*</span></label>
+              <input type="date" id="trip-payment-due">
+            </div>
+
+            <!-- Left: Actual Collection Date/Time -->
+            <div class="form-group" id="group-payment-date" style="display: none;">
+              <label for="trip-payment-date">수금 완료일시 <span class="required">*</span></label>
+              <input type="datetime-local" id="trip-payment-date">
+            </div>
+            
+            <!-- Right: Payment Status Toggle -->
+            <div class="payment-toggle-group">
+              <span class="toggle-label">수금 상태</span>
+              <div class="toggle-switch-container">
+                <input type="checkbox" id="trip-is-paid" class="toggle-checkbox" onchange="togglePaymentDueDate()">
+                <label for="trip-is-paid" class="toggle-switch-label">
+                  <span class="toggle-switch-button"></span>
+                  <span class="toggle-text-paid">수금완료</span>
+                  <span class="toggle-text-unpaid">미수금</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes (Moved to bottom of registration window) -->
+          <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
+            <label for="trip-notes">비고 (특이사항)</label>
+            <textarea id="trip-notes" rows="2" placeholder="주차비 별도 청구 등"></textarea>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeTripModal()">취소</button>
+          <button type="button" class="btn btn-outline text-warning" id="btn-draft-save" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
+          <button type="submit" class="btn btn-primary">저장하기</button>
+        </footer>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 3. LOCATION PICKER DIALOG -->
+  <dialog id="dialog-location-picker" class="modal-dialog">
+    <div class="modal-content location-picker-content">
+      <header class="modal-header">
+        <h3>행정구역 선택</h3>
+        <button class="close-btn" onclick="closeLocationPicker()">&times;</button>
+      </header>
+      <div class="location-search-row" style="margin-bottom: 10px;">
+        <div class="search-box">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="location-search-input" placeholder="동 이름 검색 (예: 역삼, 우면, 대연)..." oninput="handleLocationSearch(this.value)">
+        </div>
+      </div>
+      <!-- Search Results Autocomplete -->
+      <div id="location-search-results" class="search-results-list" style="display: none;"></div>
+      
+      <!-- Tab Selection -->
+      <div class="picker-tabs">
+        <button id="tab-btn-sido" class="picker-tab-btn active" onclick="switchPickerTab('sido')">시/도</button>
+        <button id="tab-btn-sigungu" class="picker-tab-btn" onclick="switchPickerTab('sigungu')" disabled>시/군/구</button>
+        <button id="tab-btn-dong" class="picker-tab-btn" onclick="switchPickerTab('dong')" disabled>읍/면/동</button>
+      </div>
+      
+      <!-- Buttons Grid -->
+      <div id="picker-buttons-grid" class="picker-buttons-grid">
+        <!-- Dynamically generated buttons -->
+      </div>
+      
+      <div class="picker-current-selection">
+        <span>선택 결과: </span>
+        <strong id="picker-selection-text">없음</strong>
+      </div>
+      
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeLocationPicker()">취소</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-location" disabled onclick="confirmLocationSelection()">선택 완료</button>
+      </footer>
+    </div>
+  </dialog>
+
+
+
+  <!-- 3. CUSTOM PERIOD SELECTOR MODAL -->
+  <dialog id="dialog-custom-period" class="modal-dialog">
+    <div class="modal-content" style="max-width: 420px;">
+      <header class="modal-header">
+        <h3>조회 기간 직접 선택</h3>
+        <button class="close-btn" onclick="closeCustomPeriodDialog()">&times;</button>
+      </header>
+      <div class="modal-body" style="padding: 16px 0 0 0; display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- Tab 1: Monthly select -->
+        <div class="custom-period-section">
+          <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">월별 선택</h4>
+          <div class="custom-period-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 1)">1월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 2)">2월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 3)">3월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 4)">4월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 5)">5월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 6)">6월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 7)">7월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 8)">8월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 9)">9월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 10)">10월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 11)">11월</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('month', 12)">12월</button>
+          </div>
+        </div>
+
+        <!-- Tab 2: Quarter select -->
+        <div class="custom-period-section">
+          <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">분기별 선택</h4>
+          <div class="custom-period-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('quarter', 1)">1분기</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('quarter', 2)">2분기</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('quarter', 3)">3분기</button>
+            <button class="btn btn-outline btn-sm custom-period-btn" onclick="selectCustomPeriodOption('quarter', 4)">4분기</button>
+          </div>
+        </div>
+
+        <!-- Tab 3: Year select -->
+        <div class="custom-period-section">
+          <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">연간 선택</h4>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline btn-sm custom-period-btn" style="flex: 1;" onclick="selectCustomPeriodOption('year', 'this')">올해 전체</button>
+          </div>
+        </div>
+
+        <!-- Tab 4: Custom Range Calendar -->
+        <div class="custom-period-section" style="border-top: 1px solid var(--bg-card-border); padding-top: 14px;">
+          <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">특정 기간 직접 입력</h4>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="date" id="custom-period-start" class="select-filter" style="flex: 1; height: 36px; padding: 0 8px;">
+            <span style="color: var(--text-muted);">~</span>
+            <input type="date" id="custom-period-end" class="select-filter" style="flex: 1; height: 36px; padding: 0 8px;">
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer" style="margin-top: 20px;">
+        <button type="button" class="btn btn-outline" onclick="closeCustomPeriodDialog()">취소</button>
+        <button type="button" class="btn btn-primary" onclick="applyCustomDateRange()">적용하기</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- 4. CLIENT MODAL (ADD & EDIT) -->
+  <dialog id="dialog-client" class="modal-dialog">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="client-modal-title">거래처 등록</h3>
+        <button class="close-btn" onclick="closeClientModal()">&times;</button>
+      </header>
+      <form id="form-client" method="dialog">
+        <input type="hidden" id="client-id">
+        
+        <div class="form-group">
+          <label for="client-modal-name">거래처명 <span class="required">*</span></label>
+          <input type="text" id="client-modal-name" placeholder="예: (주)한라물류" required>
+        </div>
+
+        <div class="form-group">
+          <label for="client-modal-phone">전화번호 <span class="required">*</span></label>
+          <input type="text" id="client-modal-phone" placeholder="예: 010-1234-5678" required>
+        </div>
+
+        <div class="form-group">
+          <label for="client-modal-manager">담당자명</label>
+          <input type="text" id="client-modal-manager" placeholder="예: 홍길동 과장 (선택사항)">
+        </div>
+
+        <div class="form-group">
+          <label for="client-modal-notes">메모/비고</label>
+          <textarea id="client-modal-notes" rows="2" placeholder="단가 조건 등 특이사항 기재 (선택사항)"></textarea>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeClientModal()">취소</button>
+          <button type="submit" class="btn btn-primary">저장하기</button>
+        </footer>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 7. EXPENSE MODAL (ADD & EDIT) -->
+  <dialog id="dialog-expense" class="modal-dialog">
+    <div class="modal-content modal-content-expense">
+      <header class="modal-header">
+        <h3 id="expense-modal-title">경비 기록 등록</h3>
+        <button class="close-btn" onclick="closeExpenseModal()">&times;</button>
+      </header>
+      <form id="form-expense" method="dialog">
+        <input type="hidden" id="expense-id">
+        <input type="hidden" id="expense-modal-type" value="fixed">
+        
+        <div class="expense-form-card">
+          <!-- Segmented Toggle Control for Expense Type -->
+          <div class="expense-type-segmented" style="margin-bottom: 12px;">
+            <input type="radio" id="expense-type-fixed" name="expense-modal-type-radio" value="fixed" checked onchange="handleExpenseTypeChange()">
+            <label for="expense-type-fixed">
+              <i data-lucide="lock"></i> 고정 경비
+            </label>
+            <input type="radio" id="expense-type-variable" name="expense-modal-type-radio" value="variable" onchange="handleExpenseTypeChange()">
+            <label for="expense-type-variable">
+              <i data-lucide="refresh-cw"></i> 유동 경비
+            </label>
+          </div>
+          
+          <!-- Row 1: Date, Repeat Type & Repeat Count on a single line -->
+          <div style="display: flex; gap: 12px; align-items: flex-end; width: 100%;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label for="expense-modal-date">날짜 <span class="required">*</span></label>
+              <div class="form-input-icon-group">
+                <i data-lucide="calendar"></i>
+                <input type="date" id="expense-modal-date" required>
+              </div>
+            </div>
+            <div class="form-group" id="group-expense-repeat-type" style="width: 80px; flex: 0 0 80px; margin-bottom: 0;">
+              <label for="expense-modal-repeat-type">반복 주기</label>
+              <select id="expense-modal-repeat-type" onchange="handleExpenseRepeatChange()">
+                <option value="none">없음</option>
+                <option value="weekly">매주</option>
+                <option value="monthly">매월</option>
+              </select>
+            </div>
+            <div class="form-group" id="group-expense-repeat-count" style="width: 65px; flex: 0 0 65px; margin-bottom: 0;">
+              <label for="expense-modal-repeat-count" id="label-expense-repeat-count" style="opacity: 0.5;">횟수</label>
+              <input type="number" id="expense-modal-repeat-count" min="1" max="100" value="1" disabled style="opacity: 0.5; padding-left: 6px !important; padding-right: 6px !important; text-align: center;">
+            </div>
+          </div>
+          
+          <!-- Row 2: Amount (Full Width) -->
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="expense-modal-amount">금액 (원) <span class="required">*</span></label>
+            <div class="form-input-icon-group">
+              <i data-lucide="credit-card"></i>
+              <input type="number" id="expense-modal-amount" min="0" placeholder="예: 1200000" required>
+            </div>
+          </div>
+
+          <!-- Row 3: Category Swap Container (Zero Layout Shift) -->
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="expense-modal-category">분류 <span class="required">*</span></label>
+            
+            <div id="wrapper-category-select">
+              <div class="form-input-icon-group">
+                <i data-lucide="tag"></i>
+                <select id="expense-modal-category" onchange="handleExpenseCategoryChange()" required>
+                  <!-- Dynamically populated via Javascript -->
+                </select>
+              </div>
+            </div>
+            
+            <div id="wrapper-category-custom" style="display: none;">
+              <div class="form-input-icon-group">
+                <i data-lucide="tag"></i>
+                <input type="text" id="expense-modal-custom-category" placeholder="분류 직접 입력">
+                <button type="button" class="btn-clear-custom" onclick="resetExpenseCategoryDropdown()" title="선택목록으로 돌아가기">&times;</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Row 4: Title -->
+          <div class="form-group">
+            <label for="expense-modal-title-input">지출 내용 / 항목명</label>
+            <div class="form-input-icon-group">
+              <i data-lucide="edit-3"></i>
+              <input type="text" id="expense-modal-title-input" placeholder="공란 시 분류명 입력">
+            </div>
+          </div>
+
+          <!-- Row 5: Notes -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="expense-modal-notes">메모 / 특이사항</label>
+            <div class="form-input-icon-group" style="align-items: flex-start;">
+              <i data-lucide="file-text" style="top: 12px;"></i>
+              <textarea id="expense-modal-notes" rows="2" placeholder="할부 회차 또는 상세 정보 기재 (선택사항)" style="padding-left: 34px !important;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer" style="margin-top: 20px;">
+          <button type="button" class="btn btn-outline" onclick="closeExpenseModal()">취소</button>
+          <button type="submit" class="btn btn-primary">저장하기</button>
+        </footer>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">알림 메시지</div>
+
+  <!-- 5. AUTHENTICATION OVERLAY (Login/Signup - Ver 2.17) -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-card" id="auth-card">
+      <div class="auth-header">
+        <i data-lucide="truck" class="auth-logo-icon" style="width: 48px; height: 48px; color: var(--color-primary); margin-bottom: 8px;"></i>
+        <h2>로지로그</h2>
+        <p>화물차 운행일지 & 관리 서비스</p>
+      </div>
+
+      <!-- Login View -->
+      <div id="auth-view-login" class="auth-view active">
+        <form id="form-login" onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-group" style="text-align: left;">
+            <label for="login-username" style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-muted);">사용자 아이디</label>
+            <input type="text" id="login-username" placeholder="아이디를 입력하세요" required style="width: 100%; height: 38px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-panel); color: var(--text-main);">
+          </div>
+          <div class="form-group" style="text-align: left;">
+            <label for="login-password" style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-muted);">비밀번호</label>
+            <input type="password" id="login-password" placeholder="비밀번호를 입력하세요" required style="width: 100%; height: 38px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-panel); color: var(--text-main);">
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 10px; height: 40px; font-weight: 700; width: 100%;">로그인</button>
+        </form>
+        <div class="auth-toggle-link" style="margin-top: 16px; font-size: 0.75rem; text-align: center; color: var(--text-muted);">
+          <span>처음이신가요?</span>
+          <button type="button" onclick="switchAuthView('signup')" style="background: none; border: none; color: var(--color-primary); font-weight: 700; cursor: pointer; padding: 0 4px;">회원가입</button>
+        </div>
+      </div>
+
+      <!-- Signup View -->
+      <div id="auth-view-signup" class="auth-view" style="display: none;">
+        <form id="form-signup" onsubmit="handleSignup(event)" style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-group" style="text-align: left;">
+            <label for="signup-username" style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-muted);">아이디 (영문/숫자)</label>
+            <input type="text" id="signup-username" placeholder="사용할 아이디" required style="width: 100%; height: 38px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-panel); color: var(--text-main);">
+          </div>
+          <div class="form-group" style="text-align: left;">
+            <label for="signup-password" style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-muted);">비밀번호</label>
+            <input type="password" id="signup-password" placeholder="비밀번호 설정" required style="width: 100%; height: 38px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-panel); color: var(--text-main);">
+          </div>
+          <div class="form-group" style="text-align: left;">
+            <label for="signup-name" style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-muted);">성명 / 기사명</label>
+            <input type="text" id="signup-name" placeholder="예: 홍길동" required style="width: 100%; height: 38px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-panel); color: var(--text-main);">
+          </div>
+          <div class="form-group" style="text-align: left;">
+            <label for="signup-phone" style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-muted);">전화번호</label>
+            <input type="text" id="signup-phone" placeholder="예: 010-1234-5678" required style="width: 100%; height: 38px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-panel); color: var(--text-main);">
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 10px; height: 40px; font-weight: 700; width: 100%;">회원가입 완료</button>
+        </form>
+        <div class="auth-toggle-link" style="margin-top: 16px; font-size: 0.75rem; text-align: center; color: var(--text-muted);">
+          <span>이미 계정이 있으신가요?</span>
+          <button type="button" onclick="switchAuthView('login')" style="background: none; border: none; color: var(--color-primary); font-weight: 700; cursor: pointer; padding: 0 4px;">로그인 화면으로</button>
+        </div>
+      </div>
+
+      <div class="auth-demo-hint" style="margin-top: 20px; padding: 12px; background-color: var(--bg-panel); border: 1px dashed var(--bg-card-border); border-radius: var(--radius-sm); font-size: 0.72rem; text-align: left; color: var(--text-muted);">
+        <div class="hint-title" style="font-weight: 700; color: var(--text-main); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;"><i data-lucide="info" style="width: 12px; height: 12px;"></i> 데모 계정 안내</div>
+        <div class="hint-item" style="margin-bottom: 2px;">일반 기사 계정: <strong style="color: var(--color-primary);">user</strong> / <strong style="color: var(--text-main);">1234</strong></div>
+        <div class="hint-item">플랫폼 관리자: <strong style="color: var(--color-warning);">admin</strong> / <strong style="color: var(--text-main);">1234</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>

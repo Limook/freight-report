@@ -3560,39 +3560,6 @@ const dialogTrip = document.getElementById("dialog-trip");
 let currentTripWizardStep = 1;
 
 function goToWizardStep(stepNum) {
-  // Validate required fields when moving forward
-  if (stepNum > currentTripWizardStep) {
-    if (currentTripWizardStep === 1) {
-      const loadInput = document.getElementById("trip-load");
-      const unloadInput = document.getElementById("trip-unload");
-      const startDateInput = document.getElementById("trip-start-date");
-      const endDateInput = document.getElementById("trip-end-date");
-      
-      if (!loadInput.value) {
-        showToast("상차지를 입력해주세요.");
-        return;
-      }
-      if (!startDateInput.value) {
-        showToast("상차 일시를 입력해주세요.");
-        return;
-      }
-      if (!unloadInput.value) {
-        showToast("하차지를 입력해주세요.");
-        return;
-      }
-      if (!endDateInput.value) {
-        showToast("하차 일시를 입력해주세요.");
-        return;
-      }
-    } else if (currentTripWizardStep === 2) {
-      const feeInput = document.getElementById("trip-fee");
-      if (!feeInput.value || Number(feeInput.value) <= 0) {
-        showToast("운송료를 입력해주세요.");
-        return;
-      }
-    }
-  }
-
   currentTripWizardStep = stepNum;
   
   // Hide/Show step panes
@@ -4868,6 +4835,8 @@ function getFormattedTime() {
   return `${hrs}:${mins}`;
 }
 
+
+
 function getTrackerProgressPercent(step) {
   switch(step) {
     case 0: return "0%";
@@ -4968,33 +4937,44 @@ function captureCurrentLocation(target, callback) {
 
 function startTrackerWithDeparture(withDeparture) {
   const target = withDeparture ? 'departure' : 'load';
+  
+  saveTrackerStateForUndo();
+  const clickTime = getFormattedTime();
+  const clickTimestamp = Date.now();
+  appState.tracker.startTime = clickTimestamp;
+  appState.tracker.routeVias = [];
+  appState.tracker.viaTimes = [];
+  appState.tracker.viaCompleteTimes = [];
+  appState.tracker.viaTimestamps = [];
+  appState.tracker.viaCompleteTimestamps = [];
+  appState.tracker.arrivalLocation = "";
+  appState.tracker.endLocation = "";
+  appState.tracker.startLocation = "";
+  
+  if (withDeparture) {
+    appState.tracker.step = 1;
+    appState.tracker.departureLocation = "위치 확인 중...";
+    appState.tracker.stepTimes = [clickTime, null, null, null, null, null, null];
+    appState.tracker.stepTimestamps = [clickTimestamp, null, null, null, null, null, null];
+    showToast(`운행 기록을 시작합니다 (위치 확인 중)`);
+  } else {
+    appState.tracker.step = 2;
+    appState.tracker.departureLocation = "";
+    appState.tracker.startLocation = "위치 확인 중...";
+    appState.tracker.stepTimes = [null, clickTime, null, null, null, null, null];
+    appState.tracker.stepTimestamps = [null, clickTimestamp, null, null, null, null, null];
+    showToast(`상차지 도착 상태로 기록을 시작합니다 (위치 확인 중)`);
+  }
+  saveTrackerData();
+  updateTrackerUI();
+
   captureCurrentLocation(target, (resolvedAddress) => {
-    saveTrackerStateForUndo();
-    const clickTime = getFormattedTime();
-    const clickTimestamp = Date.now();
-    appState.tracker.startTime = clickTimestamp;
-    appState.tracker.routeVias = [];
-    appState.tracker.viaTimes = [];
-    appState.tracker.viaCompleteTimes = [];
-    appState.tracker.viaTimestamps = [];
-    appState.tracker.viaCompleteTimestamps = [];
-    appState.tracker.arrivalLocation = "";
-    appState.tracker.endLocation = "";
-    appState.tracker.startLocation = "";
-    
     if (withDeparture) {
-      appState.tracker.step = 1;
       appState.tracker.departureLocation = resolvedAddress;
-      appState.tracker.stepTimes = [clickTime, null, null, null, null, null, null];
-      appState.tracker.stepTimestamps = [clickTimestamp, null, null, null, null, null, null];
-      showToast(`운행 기록을 시작합니다: 출발지 기록됨 (${resolvedAddress})`);
+      showToast(`출발지 기록됨: ${resolvedAddress}`);
     } else {
-      appState.tracker.step = 2;
-      appState.tracker.departureLocation = "";
       appState.tracker.startLocation = resolvedAddress;
-      appState.tracker.stepTimes = [null, clickTime, null, null, null, null, null];
-      appState.tracker.stepTimestamps = [null, clickTimestamp, null, null, null, null, null];
-      showToast(`상차지 도착 상태로 기록을 시작합니다: 상차지 기록됨 (${resolvedAddress})`);
+      showToast(`상차지 기록됨: ${resolvedAddress}`);
     }
     saveTrackerData();
     updateTrackerUI();
@@ -5002,16 +4982,20 @@ function startTrackerWithDeparture(withDeparture) {
 }
 
 function progressTrackerToStep2() {
+  saveTrackerStateForUndo();
+  const clickTime = getFormattedTime();
+  const clickTimestamp = Date.now();
+  appState.tracker.step = 2;
+  appState.tracker.startLocation = "위치 확인 중...";
+  appState.tracker.stepTimes[1] = clickTime;
+  if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
+  appState.tracker.stepTimestamps[1] = clickTimestamp;
+  showToast("상차지에 도착했습니다. (위치 확인 중)");
+  saveTrackerData();
+  updateTrackerUI();
+
   captureCurrentLocation('load', (resolvedAddress) => {
-    saveTrackerStateForUndo();
-    const clickTime = getFormattedTime();
-    const clickTimestamp = Date.now();
-    appState.tracker.step = 2;
     appState.tracker.startLocation = resolvedAddress;
-    appState.tracker.stepTimes[1] = clickTime;
-    if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
-    appState.tracker.stepTimestamps[1] = clickTimestamp;
-    showToast("상차지에 도착했습니다.");
     saveTrackerData();
     updateTrackerUI();
   });
@@ -5019,16 +5003,21 @@ function progressTrackerToStep2() {
 
 // Keep stubs to prevent backward crashes
 function progressTrackerToStep3() {
+  saveTrackerStateForUndo();
+  const clickTime = getFormattedTime();
+  const clickTimestamp = Date.now();
+  appState.tracker.step = 3;
+  appState.tracker.startLocation = "위치 확인 중...";
+  appState.tracker.stepTimes[2] = clickTime;
+  if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
+  appState.tracker.stepTimestamps[2] = clickTimestamp;
+  showToast(`상차 완료! 출발합니다. (위치 확인 중)`);
+  saveTrackerData();
+  updateTrackerUI();
+
   captureCurrentLocation('load', (resolvedAddress) => {
-    saveTrackerStateForUndo();
-    const clickTime = getFormattedTime();
-    const clickTimestamp = Date.now();
-    appState.tracker.step = 3;
     appState.tracker.startLocation = resolvedAddress;
-    appState.tracker.stepTimes[2] = clickTime;
-    if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
-    appState.tracker.stepTimestamps[2] = clickTimestamp;
-    showToast(`상차 완료! 상차지로 기록됨: ${resolvedAddress}`);
+    showToast(`상차지로 기록됨: ${resolvedAddress}`);
     saveTrackerData();
     updateTrackerUI();
   });
@@ -5042,15 +5031,22 @@ function addTrackerWaypoint() {
     showToast("경유지는 최대 3개까지만 추가할 수 있습니다.");
     return;
   }
+  
+  saveTrackerStateForUndo();
+  const clickTime = getFormattedTime();
+  const clickTimestamp = Date.now();
+  const index = appState.tracker.routeVias.length;
+  appState.tracker.routeVias.push("위치 확인 중...");
+  appState.tracker.viaTimes.push(clickTime);
+  appState.tracker.viaTimestamps.push(clickTimestamp);
+  appState.tracker.step = 9; // Move to Waypoint Waiting state
+  showToast(`경유지에 도착했습니다. (위치 확인 중)`);
+  saveTrackerData();
+  updateTrackerUI();
+
   captureCurrentLocation('waypoint', (resolvedAddress) => {
-    saveTrackerStateForUndo();
-    const clickTime = getFormattedTime();
-    const clickTimestamp = Date.now();
-    appState.tracker.routeVias.push(resolvedAddress);
-    appState.tracker.viaTimes.push(clickTime);
-    appState.tracker.viaTimestamps.push(clickTimestamp);
-    appState.tracker.step = 9; // Move to Waypoint Waiting state
-    showToast(`경유지 ${appState.tracker.routeVias.length} 도착 기록됨: ${resolvedAddress}`);
+    appState.tracker.routeVias[index] = resolvedAddress;
+    showToast(`경유지 ${index + 1} 도착 기록됨: ${resolvedAddress}`);
     saveTrackerData();
     updateTrackerUI();
   });
@@ -5071,32 +5067,41 @@ function completeTrackerWaypoint() {
 }
 
 function progressTrackerToStep5() {
+  saveTrackerStateForUndo();
+  const clickTime = getFormattedTime();
+  const clickTimestamp = Date.now();
+  appState.tracker.step = 5;
+  appState.tracker.endLocation = "위치 확인 중...";
+  appState.tracker.stepTimes[4] = clickTime;
+  if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
+  appState.tracker.stepTimestamps[4] = clickTimestamp;
+  showToast("하차지에 도착했습니다. (위치 확인 중)");
+  saveTrackerData();
+  updateTrackerUI();
+
   captureCurrentLocation('unload', (resolvedAddress) => {
-    saveTrackerStateForUndo();
-    const clickTime = getFormattedTime();
-    const clickTimestamp = Date.now();
-    appState.tracker.step = 5;
     appState.tracker.endLocation = resolvedAddress;
-    appState.tracker.stepTimes[4] = clickTime;
-    if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
-    appState.tracker.stepTimestamps[4] = clickTimestamp;
-    showToast("하차지에 도착했습니다.");
     saveTrackerData();
     updateTrackerUI();
   });
 }
 
 function progressTrackerToStep7() {
+  saveTrackerStateForUndo();
+  const clickTime = getFormattedTime();
+  const clickTimestamp = Date.now();
+  appState.tracker.step = 7;
+  appState.tracker.endLocation = "위치 확인 중...";
+  appState.tracker.stepTimes[5] = clickTime;
+  if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
+  appState.tracker.stepTimestamps[5] = clickTimestamp;
+  showToast(`하차 완료! (위치 확인 중)`);
+  saveTrackerData();
+  updateTrackerUI();
+
   captureCurrentLocation('unload', (resolvedAddress) => {
-    saveTrackerStateForUndo();
-    const clickTime = getFormattedTime();
-    const clickTimestamp = Date.now();
-    appState.tracker.step = 7;
     appState.tracker.endLocation = resolvedAddress;
-    appState.tracker.stepTimes[5] = clickTime;
-    if (!appState.tracker.stepTimestamps) appState.tracker.stepTimestamps = [null, null, null, null, null, null, null];
-    appState.tracker.stepTimestamps[5] = clickTimestamp;
-    showToast(`하차 완료! 하차지로 기록됨: ${resolvedAddress}`);
+    showToast(`하차지로 기록됨: ${resolvedAddress}`);
     saveTrackerData();
     updateTrackerUI();
   });
@@ -5133,6 +5138,7 @@ function closeTrackerDialog() {
 function completeTrackerAndRegister(withArrival) {
   closeTrackerDialog();
   if (withArrival) {
+    showToast("차고지 위치 확인 중...");
     captureCurrentLocation('arrival', (resolvedAddress) => {
       const clickTime = getFormattedTime();
       const clickTimestamp = Date.now();

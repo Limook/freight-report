@@ -1495,7 +1495,10 @@ async function syncAllToSupabase() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await initSupabase();
-  await loadData();
+  
+  // 1. Optimistic UI: Load local data instantly
+  loadLocalData();
+  
   initTheme();
   initNavigation();
   initDashboardFilters();
@@ -1516,11 +1519,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
   
+  // Initial UI Render (Instant)
   updateUI();
   lucide.createIcons();
+  
+  // 2. Background Sync: Fetch fresh data from Supabase in parallel
+  loadSupabaseData();
 });
 
-async function loadData() {
+async function loadSupabaseData() {
   if (supabaseClient) {
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -1542,8 +1549,14 @@ async function loadData() {
           };
           
           if (profile.role === 'admin') {
-            // Admin mode: load all profiles and all trips
-            const { data: allProfiles } = await supabaseClient.from('profiles').select('*');
+            const [
+              { data: allProfiles },
+              { data: allTrips }
+            ] = await Promise.all([
+              supabaseClient.from('profiles').select('*'),
+              supabaseClient.from('trips').select('*')
+            ]);
+            
             if (allProfiles) {
               appState.users = allProfiles.map(p => ({
                 username: p.email.split('@')[0],
@@ -1552,7 +1565,6 @@ async function loadData() {
                 phone: ''
               }));
             }
-            const { data: allTrips } = await supabaseClient.from('trips').select('*');
             if (allTrips) {
               appState.trips = allTrips.map(row => {
                 const owner = allProfiles ? allProfiles.find(p => p.id === row.user_id) : null;
@@ -1581,11 +1593,20 @@ async function loadData() {
               });
             }
           } else {
-            // Regular user mode: load user's own data
-            const { data: dbTrips, error: tripsErr } = await supabaseClient
-              .from('trips')
-              .select('*')
-              .eq('user_id', profile.id);
+            // Parallelize Supabase requests
+            const [
+              { data: dbTrips, error: tripsErr },
+              { data: dbClients },
+              { data: dbExpenses },
+              { data: dbSettings },
+              { data: dbTracker }
+            ] = await Promise.all([
+              supabaseClient.from('trips').select('*').eq('user_id', profile.id),
+              supabaseClient.from('clients').select('*').eq('user_id', profile.id),
+              supabaseClient.from('expenses').select('*').eq('user_id', profile.id),
+              supabaseClient.from('settings').select('*').eq('user_id', profile.id).maybeSingle(),
+              supabaseClient.from('trackers').select('*').eq('user_id', profile.id).maybeSingle()
+            ]);
               
             if (!tripsErr && dbTrips) {
               appState.trips = dbTrips.map(row => ({
@@ -1611,10 +1632,6 @@ async function loadData() {
               }));
             }
             
-            const { data: dbClients } = await supabaseClient
-              .from('clients')
-              .select('*')
-              .eq('user_id', profile.id);
             if (dbClients) {
               appState.clients = dbClients.map(row => ({
                 id: row.id,
@@ -1624,10 +1641,6 @@ async function loadData() {
               }));
             }
             
-            const { data: dbExpenses } = await supabaseClient
-              .from('expenses')
-              .select('*')
-              .eq('user_id', profile.id);
             if (dbExpenses) {
               appState.expenses = dbExpenses.map(row => ({
                 id: row.id,
@@ -1641,11 +1654,6 @@ async function loadData() {
               }));
             }
             
-            const { data: dbSettings } = await supabaseClient
-              .from('settings')
-              .select('*')
-              .eq('user_id', profile.id)
-              .single();
             if (dbSettings) {
               appState.settings = {
                 ...DEFAULT_SETTINGS,
@@ -1654,13 +1662,9 @@ async function loadData() {
                 theme: dbSettings.theme
               };
               appState.theme = dbSettings.theme;
+              initTheme(); // Re-apply theme if updated from server
             }
             
-            const { data: dbTracker } = await supabaseClient
-              .from('trackers')
-              .select('*')
-              .eq('user_id', profile.id)
-              .single();
             if (dbTracker) {
               let stepVal = isNaN(dbTracker.step) ? dbTracker.step : Number(dbTracker.step);
               appState.tracker = {
@@ -1682,7 +1686,6 @@ async function loadData() {
               };
             }
             
-
             // Update LocalStorage to keep offline cache and theme inline script in sync
             localStorage.setItem("logilog_trips", JSON.stringify(appState.trips));
             localStorage.setItem("logilog_clients", JSON.stringify(appState.clients));
@@ -1691,15 +1694,21 @@ async function loadData() {
             localStorage.setItem("logilog_theme", appState.theme);
             localStorage.setItem("logilog_tracker", JSON.stringify(appState.tracker));
             localStorage.setItem("logilog_current_user", appState.currentUser.username);
-            
           }
+          
+          // Re-render UI now that Supabase data is loaded (for both user and admin)
+          updateUI();
+          lucide.createIcons();
           return;
         }
       }
     } catch (err) {
-      console.error("Failed to load data from Supabase, falling back to LocalStorage:", err);
+      console.error("Failed to load data from Supabase:", err);
     }
   }
+}
+
+function loadLocalData() {
 
   // Load users database (Ver 2.17)
   const savedUsers = localStorage.getItem("logilog_users");

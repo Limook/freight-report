@@ -5811,6 +5811,26 @@ function switchAuthView(view) {
   }
 }
 
+async function handleGoogleLogin() {
+  if (!supabaseClient) {
+    showToast("온라인 모드에서만 구글 로그인을 지원합니다.");
+    return;
+  }
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) {
+      showToast(`구글 로그인 실패: ${error.message}`);
+    }
+  } catch (err) {
+    showToast(`구글 로그인 시도 중 에러가 발생했습니다: ${err.message}`);
+  }
+}
+
 async function handleLogin(event) {
   if (event) event.preventDefault();
   

@@ -1367,8 +1367,8 @@ async function syncAllToSupabase() {
   if (!supabaseClient || !appState.currentUser || !appState.currentUser.uid) return;
   const uid = appState.currentUser.uid;
   
+  // 1. Sync Trips
   try {
-    // 1. Sync Trips
     const tripsToSync = appState.trips
       .filter(t => t.userId === appState.currentUser.username)
       .map(t => ({
@@ -1395,8 +1395,12 @@ async function syncAllToSupabase() {
     if (tripsToSync.length > 0) {
       await supabaseClient.from('trips').upsert(tripsToSync);
     }
-    
-    // 2. Sync Clients
+  } catch (err) {
+    console.error("Failed to sync trips to Supabase:", err);
+  }
+  
+  // 2. Sync Clients
+  try {
     const clientsToSync = appState.clients
       .filter(c => c.userId === appState.currentUser.username)
       .map(c => ({
@@ -1408,8 +1412,12 @@ async function syncAllToSupabase() {
     if (clientsToSync.length > 0) {
       await supabaseClient.from('clients').upsert(clientsToSync);
     }
-    
-    // 3. Sync Expenses
+  } catch (err) {
+    console.error("Failed to sync clients to Supabase:", err);
+  }
+  
+  // 3. Sync Expenses
+  try {
     const expensesToSync = appState.expenses
       .filter(e => e.userId === appState.currentUser.username)
       .map(e => ({
@@ -1425,15 +1433,23 @@ async function syncAllToSupabase() {
     if (expensesToSync.length > 0) {
       await supabaseClient.from('expenses').upsert(expensesToSync);
     }
-    
-    // 4. Sync Settings
+  } catch (err) {
+    console.error("Failed to sync expenses to Supabase:", err);
+  }
+  
+  // 4. Sync Settings
+  try {
     await supabaseClient.from('settings').upsert({
       user_id: uid,
-      owner_name: appState.settings.ownerName,
+      owner_name: appState.settings.ownerName || appState.currentUser.name || "사용자",
       theme: appState.theme
     });
-    
-    // 5. Sync Tracker
+  } catch (err) {
+    console.error("Failed to sync settings to Supabase:", err);
+  }
+  
+  // 5. Sync Tracker
+  try {
     await supabaseClient.from('trackers').upsert({
       user_id: uid,
       step: String(appState.tracker.step),
@@ -1447,11 +1463,11 @@ async function syncAllToSupabase() {
       route_arrival: appState.tracker.arrivalLocation,
       distance: appState.tracker.distance || 0
     });
-    
-    console.log("Supabase data sync completed successfully.");
   } catch (err) {
-    console.error("Failed to sync data to Supabase:", err);
+    console.error("Failed to sync trackers to Supabase:", err);
   }
+  
+  console.log("Supabase data sync process completed.");
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -1609,6 +1625,8 @@ async function loadData() {
               .single();
             if (dbSettings) {
               appState.settings = {
+                ...DEFAULT_SETTINGS,
+                ...appState.settings,
                 ownerName: dbSettings.owner_name,
                 theme: dbSettings.theme
               };

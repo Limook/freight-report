@@ -5930,8 +5930,8 @@ async function handleSignup(event) {
     return;
   }
   
-  if (password.length < 4) {
-    showToast("비밀번호는 최소 4자 이상이어야 합니다.");
+  if (password.length < 6) {
+    showToast("비밀번호는 최소 6자 이상이어야 합니다.");
     return;
   }
   

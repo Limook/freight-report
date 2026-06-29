@@ -4849,6 +4849,57 @@ body.light-theme .btn-tracker-hero::before {
   color: var(--text-main); 
 }
 
+/* ====================================================
+   Minimize Spacing in Trip Modal Step 1 (Ver 2.3.1)
+   ==================================================== */
+#dialog-trip .timeline-journey-container {
+  gap: 8px !important;
+  margin-top: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+#dialog-trip .journey-card {
+  padding: 8px 12px !important;
+  gap: 4px !important;
+}
+
+#dialog-trip .journey-card .input-icon-group {
+  margin-bottom: 4px !important;
+}
+
+#dialog-trip .btn-timeline-toggle {
+  padding: 6px 12px !important;
+  font-size: 0.75rem !important;
+}
+
+#dialog-trip .datetime-shortcuts {
+  margin-top: 4px !important;
+}
+
+#dialog-trip .shortcut-badge {
+  padding: 3px 8px !important;
+  font-size: 0.62rem !important;
+  border-radius: 12px !important;
+}
+
+#dialog-trip .form-section-box {
+  padding: 10px !important;
+  margin-bottom: 8px !important;
+}
+
+#dialog-trip .wizard-tabs {
+  margin-bottom: 10px !important;
+}
+
+#dialog-trip .wizard-tab {
+  padding: 8px 0 !important;
+}
+
+#dialog-trip .timeline-step .datetime-input-group label {
+  margin-bottom: 2px !important;
+}
+
+
 
 
 

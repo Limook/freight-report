@@ -6812,6 +6812,7 @@ function handleExpenseRepeatChange() {
 }
 
 function openExpenseModal(expenseId = null) {
+  const dialogExpense = document.getElementById("dialog-expense");
   const modalTitle = document.getElementById("expense-modal-title");
   const form = document.getElementById("form-expense");
   

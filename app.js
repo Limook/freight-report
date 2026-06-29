@@ -2443,6 +2443,7 @@ function updateDashboardStats() {
 }
 
 function renderHomePanel() {
+  if (!appState.currentUser) return;
   const idleMgmtView = document.getElementById("home-idle-management-view");
   if (!idleMgmtView) return;
   

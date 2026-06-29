@@ -1393,10 +1393,12 @@ async function syncAllToSupabase() {
         expenses: t.expenses || {}
       }));
     if (tripsToSync.length > 0) {
-      await supabaseClient.from('trips').upsert(tripsToSync);
+      const { error } = await supabaseClient.from('trips').upsert(tripsToSync);
+      if (error) throw error;
     }
   } catch (err) {
     console.error("Failed to sync trips to Supabase:", err);
+    showToast(`운행기록 동기화 실패: ${err.message || err}`);
   }
   
   // 2. Sync Clients
@@ -1410,10 +1412,12 @@ async function syncAllToSupabase() {
         phone: c.phone
       }));
     if (clientsToSync.length > 0) {
-      await supabaseClient.from('clients').upsert(clientsToSync);
+      const { error } = await supabaseClient.from('clients').upsert(clientsToSync);
+      if (error) throw error;
     }
   } catch (err) {
     console.error("Failed to sync clients to Supabase:", err);
+    showToast(`거래처 동기화 실패: ${err.message || err}`);
   }
   
   // 3. Sync Expenses
@@ -1431,26 +1435,30 @@ async function syncAllToSupabase() {
         notes: e.notes
       }));
     if (expensesToSync.length > 0) {
-      await supabaseClient.from('expenses').upsert(expensesToSync);
+      const { error } = await supabaseClient.from('expenses').upsert(expensesToSync);
+      if (error) throw error;
     }
   } catch (err) {
     console.error("Failed to sync expenses to Supabase:", err);
+    showToast(`경비 동기화 실패: ${err.message || err}`);
   }
   
   // 4. Sync Settings
   try {
-    await supabaseClient.from('settings').upsert({
+    const { error } = await supabaseClient.from('settings').upsert({
       user_id: uid,
       owner_name: appState.settings.ownerName || appState.currentUser.name || "사용자",
       theme: appState.theme
     });
+    if (error) throw error;
   } catch (err) {
     console.error("Failed to sync settings to Supabase:", err);
+    showToast(`개인설정 동기화 실패: ${err.message || err}`);
   }
   
   // 5. Sync Tracker
   try {
-    await supabaseClient.from('trackers').upsert({
+    const { error } = await supabaseClient.from('trackers').upsert({
       user_id: uid,
       step: String(appState.tracker.step),
       start_time: appState.tracker.startTime,
@@ -1463,8 +1471,10 @@ async function syncAllToSupabase() {
       route_arrival: appState.tracker.arrivalLocation,
       distance: appState.tracker.distance || 0
     });
+    if (error) throw error;
   } catch (err) {
     console.error("Failed to sync trackers to Supabase:", err);
+    showToast(`스마트기록기 동기화 실패: ${err.message || err}`);
   }
   
   console.log("Supabase data sync process completed.");

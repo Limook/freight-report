@@ -4777,5 +4777,78 @@ body.light-theme .btn-tracker-hero::before {
   display: none !important;
 }
 
+/* ====================================================
+   Trip Registration Wizard (Ver 2.3)
+   ==================================================== */
+.wizard-tabs {
+  display: flex;
+  width: 100%;
+  border-bottom: 2px solid var(--bg-card-border);
+  margin-bottom: 16px;
+  background-color: var(--bg-panel);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.wizard-tab {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px; /* overlap container border-bottom */
+}
+
+.wizard-tab:hover {
+  color: var(--color-primary);
+  opacity: 0.85;
+}
+
+.wizard-tab.active {
+  color: var(--color-primary) !important;
+  font-weight: 800;
+  border-bottom-color: var(--color-primary) !important;
+}
+
+/* Summary Badge Layout styles for Wizard Confirm */
+.sum-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.sum-badge.start-badge { 
+  background-color: var(--bg-card-border); 
+  color: var(--text-muted); 
+}
+.sum-badge.load-badge { 
+  background-color: rgba(99, 102, 241, 0.15); 
+  color: var(--color-primary); 
+}
+.sum-badge.via-badge { 
+  background-color: rgba(139, 92, 246, 0.15); 
+  color: #8b5cf6; 
+}
+.sum-badge.unload-badge { 
+  background-color: rgba(245, 158, 11, 0.15); 
+  color: var(--color-warning); 
+}
+.sum-badge.arrival-badge { 
+  background-color: var(--bg-card-border); 
+  color: var(--text-main); 
+}
+
+
 
 

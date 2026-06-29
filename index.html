@@ -802,251 +802,289 @@
 
       <form id="form-trip" method="dialog">
         <input type="hidden" id="trip-id">
+
+        <!-- Wizard Navigation Tabs (Ver 2.3) -->
+        <div class="wizard-tabs">
+          <button type="button" class="wizard-tab active" data-step="1" onclick="goToWizardStep(1)">
+            1. 상·하차지
+          </button>
+          <button type="button" class="wizard-tab" data-step="2" onclick="goToWizardStep(2)">
+            2. 운송료·경비
+          </button>
+          <button type="button" class="wizard-tab" data-step="3" onclick="goToWizardStep(3)">
+            3. 거래처·확인
+          </button>
+        </div>
         
-        <!-- 1. 상하차지정보 Box -->
-        <div class="form-section-box">
-          <h4 class="form-section-title"><i data-lucide="map-pin"></i> 상·하차지 정보</h4>
-          <div class="timeline-journey-container">
-            
-            <!-- Section 1: 출발지 (Optional) -->
-            <div id="timeline-start-section" class="timeline-step start">
+        <!-- STEP 1 PANE: Route & Stops -->
+        <div class="wizard-step-pane" id="wizard-step-1-pane">
+          <!-- 1. 상하차지정보 Box -->
+          <div class="form-section-box">
+            <h4 class="form-section-title"><i data-lucide="map-pin"></i> 상·하차지 정보</h4>
+            <div class="timeline-journey-container">
               
-              <!-- Collapsed trigger button -->
-              <button type="button" id="link-add-start" class="btn-timeline-toggle" onclick="toggleLocationField('start', true)">
-                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
-                <span>출발지 추가 (선택)</span>
-              </button>
-              
-              <!-- Expanded card wrapper -->
-              <div id="start-location-wrapper" style="display: none;" class="journey-card">
-                <div class="card-header">
-                  <span>출발지 (선택)</span>
-                  <button type="button" class="btn-card-close" onclick="toggleLocationField('start', false)">
-                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
-                  </button>
-                </div>
-                <div class="input-icon-group">
-                  <i data-lucide="map-pin"></i>
-                  <input type="text" id="trip-start" placeholder="출발지 선택" readonly onclick="openLocationPicker('start')">
-                </div>
-              </div>
-            </div>
-
-            <!-- Section 2: 상차지 (Required, Always Visible) -->
-            <div class="timeline-step load">
-              
-              <div class="journey-card">
-                <div class="card-header">
-                  <span class="step-title load-text">상차지 <span class="required">*</span></span>
-                </div>
-                <div class="input-icon-group" style="margin-bottom: 10px;">
-                  <i data-lucide="map-pin"></i>
-                  <input type="text" id="trip-load" placeholder="상차지 선택" readonly onclick="openLocationPicker('load')" required>
-                </div>
+              <!-- Section 1: 출발지 (Optional) -->
+              <div id="timeline-start-section" class="timeline-step start">
+                <!-- Collapsed trigger button -->
+                <button type="button" id="link-add-start" class="btn-timeline-toggle" onclick="toggleLocationField('start', true)">
+                  <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                  <span>출발지 추가 (선택)</span>
+                </button>
                 
-                <div class="datetime-input-group">
-                  <label for="trip-start-date" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px;">상차 일시</label>
-                  <div class="input-icon-group">
-                    <i data-lucide="calendar"></i>
-                    <input type="datetime-local" id="trip-start-date" required>
+                <!-- Expanded card wrapper -->
+                <div id="start-location-wrapper" style="display: none;" class="journey-card">
+                  <div class="card-header">
+                    <span>출발지 (선택)</span>
+                    <button type="button" class="btn-card-close" onclick="toggleLocationField('start', false)">
+                      <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                    </button>
                   </div>
-                  <div class="datetime-shortcuts">
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-1d')">-1일</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-1h')">-1시간</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-30m')">-30분</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'now')">지금</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-30m')">+30분</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-1h')">+1시간</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-1d')">+1일</button>
+                  <div class="input-icon-group">
+                    <i data-lucide="map-pin"></i>
+                    <input type="text" id="trip-start" placeholder="출발지 선택" readonly onclick="openLocationPicker('start')">
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Waypoints Dynamic Container -->
-            <div id="waypoints-container" class="waypoints-dynamic-container" style="display: flex; flex-direction: column; gap: 8px;">
-              <!-- Render waypoints dynamically -->
-            </div>
-
-            <!-- Section 3: 하차지 (Required, Always Visible) -->
-            <div class="timeline-step unload">
-              
-              <div class="journey-card">
-                <div class="card-header">
-                  <span class="step-title unload-text">하차지 <span class="required">*</span></span>
+  
+              <!-- Section 2: 상차지 (Required, Always Visible) -->
+              <div class="timeline-step load">
+                <div class="journey-card">
+                  <div class="card-header">
+                    <span class="step-title load-text">상차지 <span class="required">*</span></span>
+                  </div>
+                  <div class="input-icon-group" style="margin-bottom: 10px;">
+                    <i data-lucide="map-pin"></i>
+                    <input type="text" id="trip-load" placeholder="상차지 선택" readonly onclick="openLocationPicker('load')" required>
+                  </div>
+                  
+                  <div class="datetime-input-group">
+                    <label for="trip-start-date" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px;">상차 일시</label>
+                    <div class="input-icon-group">
+                      <i data-lucide="calendar"></i>
+                      <input type="datetime-local" id="trip-start-date" required>
+                    </div>
+                    <div class="datetime-shortcuts">
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-1d')">-1일</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-1h')">-1시간</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'minus-30m')">-30분</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'now')">지금</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-30m')">+30분</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-1h')">+1시간</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('start', 'plus-1d')">+1일</button>
+                    </div>
+                  </div>
                 </div>
-                <div class="input-icon-group" style="margin-bottom: 10px;">
-                  <i data-lucide="map-pin"></i>
-                  <input type="text" id="trip-unload" placeholder="하차지 선택" readonly onclick="openLocationPicker('unload')" required>
+              </div>
+  
+              <!-- Waypoints Dynamic Container -->
+              <div id="waypoints-container" class="waypoints-dynamic-container" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Render waypoints dynamically -->
+              </div>
+  
+              <!-- Section 3: 하차지 (Required, Always Visible) -->
+              <div class="timeline-step unload">
+                <div class="journey-card">
+                  <div class="card-header">
+                    <span class="step-title unload-text">하차지 <span class="required">*</span></span>
+                  </div>
+                  <div class="input-icon-group" style="margin-bottom: 10px;">
+                    <i data-lucide="map-pin"></i>
+                    <input type="text" id="trip-unload" placeholder="하차지 선택" readonly onclick="openLocationPicker('unload')" required>
+                  </div>
+                  
+                  <div class="datetime-input-group">
+                    <label for="trip-end-date" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px;">하차 일시</label>
+                    <div class="input-icon-group">
+                      <i data-lucide="clock"></i>
+                      <input type="datetime-local" id="trip-end-date" required>
+                    </div>
+                    <div class="datetime-shortcuts">
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-1d')">-1일</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-1h')">-1시간</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-30m')">-30분</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'now')">지금</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-30m')">+30분</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-1h')">+1시간</button>
+                      <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-1d')">+1일</button>
+                    </div>
+                  </div>
                 </div>
+              </div>
+  
+              <!-- Section 4: 도착지 (Optional) -->
+              <div id="timeline-arrival-section" class="timeline-step arrival">
+                <!-- Collapsed trigger button -->
+                <button type="button" id="link-add-arrival" class="btn-timeline-toggle" onclick="toggleLocationField('arrival', true)">
+                  <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                  <span>도착지 추가 (선택)</span>
+                </button>
                 
-                <div class="datetime-input-group">
-                  <label for="trip-end-date" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px;">하차 일시</label>
+                <!-- Expanded card wrapper -->
+                <div id="arrival-location-wrapper" style="display: none;" class="journey-card">
+                  <div class="card-header">
+                    <span>도착지 (선택)</span>
+                    <button type="button" class="btn-card-close" onclick="toggleLocationField('arrival', false)">
+                      <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                    </button>
+                  </div>
                   <div class="input-icon-group">
-                    <i data-lucide="clock"></i>
-                    <input type="datetime-local" id="trip-end-date" required>
-                  </div>
-                  <div class="datetime-shortcuts">
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-1d')">-1일</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-1h')">-1시간</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'minus-30m')">-30분</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'now')">지금</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-30m')">+30분</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-1h')">+1시간</button>
-                    <button type="button" class="shortcut-badge" onclick="setDatetimeShortcut('end', 'plus-1d')">+1일</button>
+                    <i data-lucide="map-pin"></i>
+                    <input type="text" id="trip-arrival" placeholder="도착지 선택" readonly onclick="openLocationPicker('arrival')">
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Section 4: 도착지 (Optional) -->
-            <div id="timeline-arrival-section" class="timeline-step arrival">
-              
-              <!-- Collapsed trigger button -->
-              <button type="button" id="link-add-arrival" class="btn-timeline-toggle" onclick="toggleLocationField('arrival', true)">
+  
+            <!-- Add Waypoint Button -->
+            <div style="margin-top: 4px; width: 100%;">
+              <button type="button" id="btn-add-waypoint" class="btn-timeline-toggle" onclick="addWaypointField()">
                 <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
-                <span>도착지 추가 (선택)</span>
+                <span>경유지 추가 (최대 3개)</span>
               </button>
+              <input type="hidden" id="trip-distance" value="0">
+              <span id="distance-calc-indicator" style="display: none;"></span>
+            </div>
+          </div>
+
+          <footer class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTripModal()">취소</button>
+            <button type="button" class="btn btn-outline text-warning" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
+            <button type="button" class="btn btn-primary" onclick="goToWizardStep(2)">다음 단계 (운송료·경비)</button>
+          </footer>
+        </div>
+
+        <!-- STEP 2 PANE: Fees & Expenses -->
+        <div class="wizard-step-pane" id="wizard-step-2-pane" style="display: none;">
+          <!-- 2. 운송료 경비 Box -->
+          <div class="form-section-box">
+            <h4 class="form-section-title"><i data-lucide="banknote"></i> 운송료 및 경비 정보</h4>
+            <!-- Freight Fee takes full width -->
+            <div class="form-group">
+              <label for="trip-fee">운송료 (운임, 원) <span class="required">*</span></label>
+              <input type="number" id="trip-fee" min="0" placeholder="예: 450000" required>
+            </div>
+  
+            <!-- Separated Expenses Accordion (Now includes Commission) -->
+            <div class="expenses-accordion" style="border: 1px solid var(--bg-card-border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden;">
+              <div class="accordion-header" onclick="toggleExpensesAccordion()" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background-color: var(--bg-card); cursor: pointer; user-select: none;">
+                <span style="font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="receipt" style="width: 16px; height: 16px; color: var(--color-primary);"></i>
+                  경비 상세 내역 입력 (주유, 수수료 등)
+                </span>
+                <i data-lucide="chevron-down" id="accordion-icon" style="width: 16px; height: 16px; transition: transform var(--transition-fast);"></i>
+              </div>
+              <div class="accordion-content" id="expenses-accordion-content" style="display: none; padding: 12px; background-color: var(--bg-panel); border-top: 1px solid var(--bg-card-border);">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="trip-expense-fuel">주유비 (원)</label>
+                    <input type="number" id="trip-expense-fuel" min="0" value="0" oninput="calculateTotalExpenses()">
+                  </div>
+                  <div class="form-group">
+                    <label for="trip-expense-toll">통행료 (원)</label>
+                    <input type="number" id="trip-expense-toll" min="0" value="0" oninput="calculateTotalExpenses()">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="trip-expense-meal">식대/숙박비 (원)</label>
+                    <input type="number" id="trip-expense-meal" min="0" value="0" oninput="calculateTotalExpenses()">
+                  </div>
+                  <div class="form-group">
+                    <label for="trip-expense-other">기타 경비 (원)</label>
+                    <input type="number" id="trip-expense-other" min="0" value="0" oninput="calculateTotalExpenses()">
+                  </div>
+                </div>
+                <!-- Commission moved here inside accordion -->
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="trip-commission">수수료 (원)</label>
+                  <input type="number" id="trip-commission" min="0" value="0" placeholder="예: 30000" oninput="calculateTotalExpenses()">
+                </div>
+              </div>
+            </div>
+  
+            <!-- Summary fields: Total Expenses (Always visible) -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>경비 합계 (자동 계산)</label>
+              <input type="text" id="trip-expense-total" readonly value="0원" style="background-color: var(--bg-app); opacity: 0.8; font-weight: 700;">
+            </div>
+          </div>
+
+          <footer class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="goToWizardStep(1)">이전 단계</button>
+            <button type="button" class="btn btn-outline text-warning" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
+            <button type="button" class="btn btn-primary" onclick="goToWizardStep(3)">다음 단계 (거래처·확인)</button>
+          </footer>
+        </div>
+
+        <!-- STEP 3 PANE: Client Info & Summary Validation -->
+        <div class="wizard-step-pane" id="wizard-step-3-pane" style="display: none;">
+          <!-- 3. 거래처명 수금예정 Box -->
+          <div class="form-section-box" style="margin-bottom: 16px;">
+            <h4 class="form-section-title"><i data-lucide="briefcase"></i> 거래처 및 수금 정보</h4>
+            <!-- Client Name & Phone side-by-side -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="trip-client">거래처명</label>
+                <input type="text" id="trip-client" placeholder="예: (주)한라물류" list="trip-clients-suggestions" oninput="populateClientPhone()">
+                <datalist id="trip-clients-suggestions">
+                  <!-- Dynamically populated from registered clients -->
+                </datalist>
+              </div>
+              <div class="form-group">
+                <label for="trip-client-phone">거래처 전화번호</label>
+                <input type="text" id="trip-client-phone" placeholder="예: 010-1234-5678">
+              </div>
+            </div>
+  
+            <!-- Realigned Payment Row: Left Expected Due Date, Right Status Switch -->
+            <div class="payment-status-row">
+              <!-- Left: Expected Payment Date -->
+              <div class="form-group" id="group-payment-due">
+                <label for="trip-payment-due">수금 예정일 <span class="required">*</span></label>
+                <input type="date" id="trip-payment-due">
+              </div>
+  
+              <!-- Left: Actual Collection Date/Time -->
+              <div class="form-group" id="group-payment-date" style="display: none;">
+                <label for="trip-payment-date">수금 완료일시 <span class="required">*</span></label>
+                <input type="datetime-local" id="trip-payment-date">
+              </div>
               
-              <!-- Expanded card wrapper -->
-              <div id="arrival-location-wrapper" style="display: none;" class="journey-card">
-                <div class="card-header">
-                  <span>도착지 (선택)</span>
-                  <button type="button" class="btn-card-close" onclick="toggleLocationField('arrival', false)">
-                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
-                  </button>
-                </div>
-                <div class="input-icon-group">
-                  <i data-lucide="map-pin"></i>
-                  <input type="text" id="trip-arrival" placeholder="도착지 선택" readonly onclick="openLocationPicker('arrival')">
+              <!-- Right: Payment Status Toggle -->
+              <div class="payment-toggle-group">
+                <span class="toggle-label">수금 상태</span>
+                <div class="toggle-switch-container">
+                  <input type="checkbox" id="trip-is-paid" class="toggle-checkbox" onchange="togglePaymentDueDate()">
+                  <label for="trip-is-paid" class="toggle-switch-label">
+                    <span class="toggle-switch-button"></span>
+                    <span class="toggle-text-paid">수금완료</span>
+                    <span class="toggle-text-unpaid">미수금</span>
+                  </label>
                 </div>
               </div>
             </div>
+  
+            <!-- Notes -->
+            <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
+              <label for="trip-notes">비고 (특이사항)</label>
+              <textarea id="trip-notes" rows="2" placeholder="주차비 별도 청구 등"></textarea>
+            </div>
           </div>
 
-          <!-- Add Waypoint Button (Simple & Pretty timeline toggle style) -->
-          <div style="margin-top: 4px; width: 100%;">
-            <button type="button" id="btn-add-waypoint" class="btn-timeline-toggle" onclick="addWaypointField()">
-              <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
-              <span>경유지 추가 (최대 3개)</span>
-            </button>
-            <input type="hidden" id="trip-distance" value="0">
-            <span id="distance-calc-indicator" style="display: none;"></span>
+          <!-- Final Input Verification Box -->
+          <div class="form-section-box" style="margin-bottom: 0; background-color: var(--bg-card); border: 1px dashed var(--bg-card-border);">
+            <h4 class="form-section-title" style="color: var(--color-primary);"><i data-lucide="check-square"></i> 입력 내역 최종 확인</h4>
+            <div id="trip-wizard-summary-box" style="margin-top: 8px;">
+              <!-- Dynamically populated summary of all inputs -->
+            </div>
           </div>
+
+          <footer class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="goToWizardStep(2)">이전 단계</button>
+            <button type="button" class="btn btn-outline text-warning" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
+            <button type="submit" class="btn btn-success" style="font-weight: 800; background-color: var(--color-success); border-color: var(--color-success);">최종 등록하기</button>
+          </footer>
         </div>
-
-        <!-- 2. 운송료 경비 Box -->
-        <div class="form-section-box">
-          <h4 class="form-section-title"><i data-lucide="banknote"></i> 운송료 및 경비 정보</h4>
-          <!-- Freight Fee takes full width -->
-          <div class="form-group">
-            <label for="trip-fee">운송료 (운임, 원) <span class="required">*</span></label>
-            <input type="number" id="trip-fee" min="0" placeholder="예: 450000" required>
-          </div>
-
-          <!-- Separated Expenses Accordion (Now includes Commission) -->
-          <div class="expenses-accordion" style="border: 1px solid var(--bg-card-border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden;">
-            <div class="accordion-header" onclick="toggleExpensesAccordion()" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background-color: var(--bg-card); cursor: pointer; user-select: none;">
-              <span style="font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-                <i data-lucide="receipt" style="width: 16px; height: 16px; color: var(--color-primary);"></i>
-                경비 상세 내역 입력 (주유, 수수료 등)
-              </span>
-              <i data-lucide="chevron-down" id="accordion-icon" style="width: 16px; height: 16px; transition: transform var(--transition-fast);"></i>
-            </div>
-            <div class="accordion-content" id="expenses-accordion-content" style="display: none; padding: 12px; background-color: var(--bg-panel); border-top: 1px solid var(--bg-card-border);">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="trip-expense-fuel">주유비 (원)</label>
-                  <input type="number" id="trip-expense-fuel" min="0" value="0" oninput="calculateTotalExpenses()">
-                </div>
-                <div class="form-group">
-                  <label for="trip-expense-toll">통행료 (원)</label>
-                  <input type="number" id="trip-expense-toll" min="0" value="0" oninput="calculateTotalExpenses()">
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="trip-expense-meal">식대/숙박비 (원)</label>
-                  <input type="number" id="trip-expense-meal" min="0" value="0" oninput="calculateTotalExpenses()">
-                </div>
-                <div class="form-group">
-                  <label for="trip-expense-other">기타 경비 (원)</label>
-                  <input type="number" id="trip-expense-other" min="0" value="0" oninput="calculateTotalExpenses()">
-                </div>
-              </div>
-              <!-- Commission moved here inside accordion -->
-              <div class="form-group" style="margin-bottom: 0;">
-                <label for="trip-commission">수수료 (원)</label>
-                <input type="number" id="trip-commission" min="0" value="0" placeholder="예: 30000" oninput="calculateTotalExpenses()">
-              </div>
-            </div>
-          </div>
-
-          <!-- Summary fields: Total Expenses (Always visible) -->
-          <div class="form-group" style="margin-bottom: 0;">
-            <label>경비 합계 (자동 계산)</label>
-            <input type="text" id="trip-expense-total" readonly value="0원" style="background-color: var(--bg-app); opacity: 0.8; font-weight: 700;">
-          </div>
-        </div>
-
-        <!-- 3. 거래처명 수금예정 Box -->
-        <div class="form-section-box" style="margin-bottom: 0;">
-          <h4 class="form-section-title"><i data-lucide="briefcase"></i> 거래처 및 수금 정보</h4>
-          <!-- Client Name & Phone side-by-side -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="trip-client">거래처명</label>
-              <input type="text" id="trip-client" placeholder="예: (주)한라물류" list="trip-clients-suggestions" oninput="populateClientPhone()">
-              <datalist id="trip-clients-suggestions">
-                <!-- Dynamically populated from registered clients -->
-              </datalist>
-            </div>
-            <div class="form-group">
-              <label for="trip-client-phone">거래처 전화번호</label>
-              <input type="text" id="trip-client-phone" placeholder="예: 010-1234-5678">
-            </div>
-          </div>
-
-          <!-- Realigned Payment Row: Left Expected Due Date, Right Status Switch -->
-          <div class="payment-status-row">
-            <!-- Left: Expected Payment Date -->
-            <div class="form-group" id="group-payment-due">
-              <label for="trip-payment-due">수금 예정일 <span class="required">*</span></label>
-              <input type="date" id="trip-payment-due">
-            </div>
-
-            <!-- Left: Actual Collection Date/Time -->
-            <div class="form-group" id="group-payment-date" style="display: none;">
-              <label for="trip-payment-date">수금 완료일시 <span class="required">*</span></label>
-              <input type="datetime-local" id="trip-payment-date">
-            </div>
-            
-            <!-- Right: Payment Status Toggle -->
-            <div class="payment-toggle-group">
-              <span class="toggle-label">수금 상태</span>
-              <div class="toggle-switch-container">
-                <input type="checkbox" id="trip-is-paid" class="toggle-checkbox" onchange="togglePaymentDueDate()">
-                <label for="trip-is-paid" class="toggle-switch-label">
-                  <span class="toggle-switch-button"></span>
-                  <span class="toggle-text-paid">수금완료</span>
-                  <span class="toggle-text-unpaid">미수금</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Notes (Moved to bottom of registration window) -->
-          <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
-            <label for="trip-notes">비고 (특이사항)</label>
-            <textarea id="trip-notes" rows="2" placeholder="주차비 별도 청구 등"></textarea>
-          </div>
-        </div>
-
-        <footer class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="closeTripModal()">취소</button>
-          <button type="button" class="btn btn-outline text-warning" id="btn-draft-save" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
-          <button type="submit" class="btn btn-primary">저장하기</button>
-        </footer>
       </form>
     </div>
   </dialog>

@@ -3556,6 +3556,160 @@ function initForms() {
 // ----------------------------------------------------
 const dialogTrip = document.getElementById("dialog-trip");
 
+// Wizard State & Functions (Ver 2.3)
+let currentTripWizardStep = 1;
+
+function goToWizardStep(stepNum) {
+  // Validate required fields when moving forward
+  if (stepNum > currentTripWizardStep) {
+    if (currentTripWizardStep === 1) {
+      const loadInput = document.getElementById("trip-load");
+      const unloadInput = document.getElementById("trip-unload");
+      const startDateInput = document.getElementById("trip-start-date");
+      const endDateInput = document.getElementById("trip-end-date");
+      
+      if (!loadInput.value) {
+        showToast("상차지를 입력해주세요.");
+        return;
+      }
+      if (!startDateInput.value) {
+        showToast("상차 일시를 입력해주세요.");
+        return;
+      }
+      if (!unloadInput.value) {
+        showToast("하차지를 입력해주세요.");
+        return;
+      }
+      if (!endDateInput.value) {
+        showToast("하차 일시를 입력해주세요.");
+        return;
+      }
+    } else if (currentTripWizardStep === 2) {
+      const feeInput = document.getElementById("trip-fee");
+      if (!feeInput.value || Number(feeInput.value) <= 0) {
+        showToast("운송료를 입력해주세요.");
+        return;
+      }
+    }
+  }
+
+  currentTripWizardStep = stepNum;
+  
+  // Hide/Show step panes
+  const pane1 = document.getElementById("wizard-step-1-pane");
+  const pane2 = document.getElementById("wizard-step-2-pane");
+  const pane3 = document.getElementById("wizard-step-3-pane");
+  
+  if (pane1) pane1.style.display = stepNum === 1 ? "block" : "none";
+  if (pane2) pane2.style.display = stepNum === 2 ? "block" : "none";
+  if (pane3) pane3.style.display = stepNum === 3 ? "block" : "none";
+  
+  // Update Wizard tabs active styles
+  const tabs = document.querySelectorAll(".wizard-tab");
+  tabs.forEach(tab => {
+    const tabStep = Number(tab.getAttribute("data-step"));
+    if (tabStep === stepNum) {
+      tab.classList.add("active");
+    } else {
+      tab.classList.remove("active");
+    }
+  });
+  
+  // Update summary if in step 3
+  if (stepNum === 3) {
+    updateTripWizardSummary();
+  }
+}
+
+function updateTripWizardSummary() {
+  const summaryBox = document.getElementById("trip-wizard-summary-box");
+  if (!summaryBox) return;
+  
+  const startLoc = document.getElementById("trip-start").value || "";
+  const loadLoc = document.getElementById("trip-load").value || "";
+  const unloadLoc = document.getElementById("trip-unload").value || "";
+  const arrivalLoc = document.getElementById("trip-arrival").value || "";
+  
+  const waypoints = [];
+  const wpInputs = document.querySelectorAll(".waypoint-input");
+  wpInputs.forEach(input => {
+    if (input.value) waypoints.push(input.value);
+  });
+  
+  const startDate = document.getElementById("trip-start-date").value;
+  const endDate = document.getElementById("trip-end-date").value;
+  
+  const fee = Number(document.getElementById("trip-fee").value || 0);
+  const fuel = Number(document.getElementById("trip-expense-fuel").value || 0);
+  const toll = Number(document.getElementById("trip-expense-toll").value || 0);
+  const meal = Number(document.getElementById("trip-expense-meal").value || 0);
+  const other = Number(document.getElementById("trip-expense-other").value || 0);
+  const commission = Number(document.getElementById("trip-commission").value || 0);
+  const expSum = fuel + toll + meal + other + commission;
+  const netIncome = fee - expSum;
+  
+  const clientName = document.getElementById("trip-client").value || "미지정";
+  const clientPhone = document.getElementById("trip-client-phone").value || "";
+  const isPaid = document.getElementById("trip-is-paid").checked;
+  const dueDate = document.getElementById("trip-payment-due").value;
+  const paymentDate = document.getElementById("trip-payment-date").value;
+  
+  const formatDt = (dtStr) => {
+    if (!dtStr) return "-";
+    const d = new Date(dtStr);
+    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+  
+  let routeHtml = "";
+  if (startLoc) routeHtml += `<span class="sum-badge start-badge">출발</span> <strong>${startLoc}</strong> ➔ `;
+  routeHtml += `<span class="sum-badge load-badge">상차</span> <strong>${loadLoc}</strong>`;
+  
+  waypoints.forEach(wp => {
+    routeHtml += ` ➔ <span class="sum-badge via-badge">경유</span> <strong>${wp}</strong>`;
+  });
+  
+  routeHtml += ` ➔ <span class="sum-badge unload-badge">하차</span> <strong>${unloadLoc}</strong>`;
+  if (arrivalLoc) routeHtml += ` ➔ <span class="sum-badge arrival-badge">도착</span> <strong>${arrivalLoc}</strong>`;
+  
+  summaryBox.innerHTML = `
+    <div class="summary-section" style="margin-bottom: 10px; font-size: 0.8rem; line-height: 1.4;">
+      <h5 style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px; font-size: 0.82rem;">📍 운송 경로 및 일정</h5>
+      <div style="line-height: 1.5; margin-bottom: 4px;">${routeHtml}</div>
+      <div style="color: var(--text-muted); font-size: 0.72rem;">
+        상차: ${formatDt(startDate)} | 하차: ${formatDt(endDate)}
+      </div>
+    </div>
+    
+    <div class="summary-section" style="margin-bottom: 10px; font-size: 0.8rem; border-top: 1px dashed var(--bg-card-border); padding-top: 8px;">
+      <h5 style="font-weight: 700; color: var(--color-success); margin-bottom: 4px; font-size: 0.82rem;">💵 운송료 및 경비 정산</h5>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 12px; line-height: 1.4;">
+        <div>운송료: <strong style="color: var(--text-main);">${fee.toLocaleString()}원</strong></div>
+        <div>경비합계: <strong style="color: var(--color-danger);">${expSum.toLocaleString()}원</strong></div>
+        <div style="grid-column: span 2; font-size: 0.82rem; padding: 4px 8px; background-color: var(--color-success-muted); border-radius: 4px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--color-success); font-weight: 700;">순수입 (매출-경비):</span>
+          <strong style="color: var(--color-success); font-weight: 800;">${netIncome.toLocaleString()}원</strong>
+        </div>
+      </div>
+    </div>
+    
+    <div class="summary-section" style="font-size: 0.8rem; border-top: 1px dashed var(--bg-card-border); padding-top: 8px; line-height: 1.4;">
+      <h5 style="font-weight: 700; color: var(--color-warning); margin-bottom: 4px; font-size: 0.82rem;">🏢 거래처 및 수금</h5>
+      <div>거래처: <strong>${clientName}</strong> ${clientPhone ? `(${clientPhone})` : ""}</div>
+      <div style="margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+        <span>수금 상태:</span>
+        <span class="logo-badge" style="background-color: ${isPaid ? 'var(--color-success-muted)' : 'var(--color-warning-muted)'}; color: ${isPaid ? 'var(--color-success)' : 'var(--color-warning)'}; border: 1px solid ${isPaid ? 'var(--color-success)' : 'var(--color-warning)'}; font-size: 0.7rem; font-weight: 700; padding: 1px 5px; border-radius: 4px;">
+          ${isPaid ? '수금완료' : '미수금'}
+        </span>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">
+          ${isPaid ? `수금일: ${formatDt(paymentDate)}` : `예정일: ${dueDate || "-"}`}
+        </span>
+      </div>
+    </div>
+  `;
+  
+  lucide.createIcons();
+}
+
 function openTripModal(tripId = null) {
   const modalTitle = document.getElementById("trip-modal-title");
   const form = document.getElementById("form-trip");
@@ -3658,6 +3812,8 @@ function openTripModal(tripId = null) {
   togglePaymentDueDate();
   updateAddWaypointButtonState();
   checkTripDraft(tripId);
+  currentTripWizardStep = 1;
+  goToWizardStep(1);
   dialogTrip.show();
 }
 

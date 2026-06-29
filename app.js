@@ -3646,12 +3646,7 @@ function openTripModal(tripId = null) {
   togglePaymentDueDate();
   updateAddWaypointButtonState();
   checkTripDraft(tripId);
-  
-  if (window.innerWidth <= 600) {
-    dialogTrip.show();
-  } else {
-    dialogTrip.showModal();
-  }
+  dialogTrip.show();
 }
 
 function closeTripModal() {
@@ -6750,13 +6745,8 @@ function openExpenseModal(expenseId = null) {
     }
   }
   
-  const dialogExpense = document.getElementById("dialog-expense");
   if (dialogExpense) {
-    if (window.innerWidth <= 600) {
-      dialogExpense.show();
-    } else {
-      dialogExpense.showModal();
-    }
+    dialogExpense.show();
     lucide.createIcons(); // To resolve the new segment control icons
   }
 }

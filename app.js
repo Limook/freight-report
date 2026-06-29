@@ -1349,17 +1349,30 @@ let pickerState = {
 let supabaseClient = null;
 
 async function initSupabase() {
+  const statusEl = document.getElementById("db-connection-status");
   try {
     const res = await fetch('/api/config');
     const config = await res.json();
     if (config.supabaseUrl && config.supabaseKey && window.supabase) {
       supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
       console.log("Supabase client initialized successfully!");
+      if (statusEl) {
+        statusEl.style.color = "var(--color-success)";
+        statusEl.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-success); display: inline-block; box-shadow: 0 0 8px var(--color-success);"></span> 데이터베이스 온라인 연동 완료';
+      }
     } else {
       console.log("Supabase keys not found in config or SDK missing. Running in LocalStorage-only fallback mode.");
+      if (statusEl) {
+        statusEl.style.color = "var(--color-warning)";
+        statusEl.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-warning); display: inline-block;"></span> 로컬 저장소 모드 (Vercel 환경 변수 미등록)';
+      }
     }
   } catch (error) {
     console.error("Failed to load Supabase config. Running in LocalStorage-only fallback mode:", error);
+    if (statusEl) {
+      statusEl.style.color = "var(--color-danger)";
+      statusEl.innerHTML = `<span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-danger); display: inline-block;"></span> 연동 실패: ${error.message || error}`;
+    }
   }
 }
 

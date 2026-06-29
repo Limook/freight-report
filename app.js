@@ -1694,6 +1694,7 @@ async function loadSupabaseData() {
             localStorage.setItem("logilog_theme", appState.theme);
             localStorage.setItem("logilog_tracker", JSON.stringify(appState.tracker));
             localStorage.setItem("logilog_current_user", appState.currentUser.username);
+            localStorage.setItem("logilog_current_user_obj", JSON.stringify(appState.currentUser));
           }
           
           // Re-render UI now that Supabase data is loaded (for both user and admin)
@@ -1723,11 +1724,16 @@ function loadLocalData() {
   }
 
   // Load current session
-  const currentUsername = localStorage.getItem("logilog_current_user");
-  if (currentUsername) {
-    const user = appState.users.find(u => u.username === currentUsername);
-    if (user) {
-      appState.currentUser = user;
+  const currentUserObj = localStorage.getItem("logilog_current_user_obj");
+  if (currentUserObj) {
+    appState.currentUser = JSON.parse(currentUserObj);
+  } else {
+    const currentUsername = localStorage.getItem("logilog_current_user");
+    if (currentUsername) {
+      const user = appState.users.find(u => u.username === currentUsername);
+      if (user) {
+        appState.currentUser = user;
+      }
     }
   }
 
@@ -5974,6 +5980,7 @@ async function handleLogin(event) {
   
   appState.currentUser = user;
   localStorage.setItem("logilog_current_user", user.username);
+  localStorage.setItem("logilog_current_user_obj", JSON.stringify(user));
   
   usernameInput.value = "";
   passwordInput.value = "";
@@ -6091,6 +6098,7 @@ async function handleSignup(event) {
   
   appState.currentUser = newUser;
   localStorage.setItem("logilog_current_user", newUser.username);
+  localStorage.setItem("logilog_current_user_obj", JSON.stringify(newUser));
   
   usernameInput.value = "";
   passwordInput.value = "";
@@ -6113,6 +6121,7 @@ async function handleLogout() {
     }
     appState.currentUser = null;
     localStorage.removeItem("logilog_current_user");
+    localStorage.removeItem("logilog_current_user_obj");
     localStorage.removeItem("logilog_has_session");
     window.location.reload();
   }

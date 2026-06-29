@@ -24,21 +24,7 @@ const server = http.createServer((req, res) => {
       // Clear cache to allow local development edits
       delete require.cache[require.resolve('./api/config.js')];
       const configHandler = require('./api/config.js');
-      const mockRes = {
-        status: (statusCode) => {
-          res.statusCode = statusCode;
-          return mockRes;
-        },
-        setHeader: (name, value) => {
-          res.setHeader(name, value);
-          return mockRes;
-        },
-        json: (data) => {
-          res.setHeader('Content-Type', 'application/json; charset=utf-8');
-          res.end(JSON.stringify(data));
-        }
-      };
-      configHandler(req, mockRes);
+      configHandler(req, res);
     } catch (err) {
       console.error("Local server /api/config execution error:", err);
       res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });

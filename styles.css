@@ -2854,6 +2854,15 @@ body.light-theme .btn-tracker-secondary:hover {
 }
 
 @media (max-width: 600px) {
+  .app-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background-color: var(--bg-nav) !important;
+  }
+
   .calendar-day-cell {
     aspect-ratio: 1 / 1.1;
     padding: 4px;
@@ -3956,8 +3965,7 @@ body.light-theme .auth-card {
   justify-content: center;
   gap: 6px;
   width: 100%;
-  height: auto; /* Height controlled by aspect-ratio */
-  aspect-ratio: 8 / 3; /* Exactly 50% height of the basic button (which is 4/3) */
+  height: 40px;
   padding: 0 12px;
   background: linear-gradient(to bottom, #475569, #334155); /* Slate Metallic 3D */
   border-top: 1.5px solid rgba(255, 255, 255, 0.12);

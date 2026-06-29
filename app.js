@@ -3326,28 +3326,28 @@ function renderCalendarView() {
       </div>
     `;
   } else {
-    // 3.1 Render Driving list (운송 내역)
-    if (selectedTrips.length > 0) {
-      const header = document.createElement("h5");
-      header.style = "font-size: 0.8rem; font-weight: 700; color: var(--color-primary); margin: 10px 0 6px 0; display: flex; align-items: center; gap: 6px;";
-      header.innerHTML = `<i data-lucide="truck" style="width: 14px; height: 14px;"></i> 당일 운송 내역 (${selectedTrips.length}건)`;
-      listContainer.appendChild(header);
-      
-      selectedTrips.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-      selectedTrips.forEach(trip => {
-        listContainer.appendChild(createTripElement(trip));
-      });
-    }
-    
-    // 3.2 Render Collection list (수금 내역)
+    // 3.1 Render Collection list (수금 내역)
     if (selectedUnpaids.length > 0) {
       const header = document.createElement("h5");
-      header.style = "font-size: 0.8rem; font-weight: 700; color: var(--color-warning); margin: 18px 0 6px 0; display: flex; align-items: center; gap: 6px;";
+      header.style = "font-size: 0.8rem; font-weight: 700; color: var(--color-warning); margin: 10px 0 6px 0; display: flex; align-items: center; gap: 6px;";
       header.innerHTML = `<i data-lucide="wallet" style="width: 14px; height: 14px;"></i> 당일 수금(입금) 예정 내역 (${selectedUnpaids.length}건)`;
       listContainer.appendChild(header);
       
       selectedUnpaids.sort((a, b) => new Date(a.paymentDueDate) - new Date(b.paymentDueDate));
       selectedUnpaids.forEach(trip => {
+        listContainer.appendChild(createTripElement(trip));
+      });
+    }
+
+    // 3.2 Render Driving list (운송 내역)
+    if (selectedTrips.length > 0) {
+      const header = document.createElement("h5");
+      header.style = `font-size: 0.8rem; font-weight: 700; color: var(--color-primary); margin: ${selectedUnpaids.length > 0 ? '18px' : '10px'} 0 6px 0; display: flex; align-items: center; gap: 6px;`;
+      header.innerHTML = `<i data-lucide="truck" style="width: 14px; height: 14px;"></i> 당일 운송 내역 (${selectedTrips.length}건)`;
+      listContainer.appendChild(header);
+      
+      selectedTrips.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+      selectedTrips.forEach(trip => {
         listContainer.appendChild(createTripElement(trip));
       });
     }
@@ -4565,16 +4565,14 @@ function updateTrackerUI() {
     let resetBtnHtml = "";
     if (step > 0) {
       resetBtnHtml = `
-        <div class="tracker-option-row" style="display: flex; gap: 8px; width: 100%;">
-          <button class="btn-tracker-option btn-danger" style="flex: 1;" onclick="cancelTracker()">
-            <i data-lucide="trash-2" class="icon-sm"></i>
-            <span>초기화</span>
-          </button>
-          <button class="btn-tracker-option btn-warning" style="flex: 1;" onclick="undoTrackerStep()" ${hasHistory ? '' : 'disabled'}>
-            <i data-lucide="undo-2" class="icon-sm"></i>
-            <span>되돌리기</span>
-          </button>
-        </div>
+        <button class="btn-tracker-option btn-danger" onclick="cancelTracker()">
+          <i data-lucide="trash-2" class="icon-sm"></i>
+          <span>초기화</span>
+        </button>
+        <button class="btn-tracker-option btn-warning" onclick="undoTrackerStep()" ${hasHistory ? '' : 'disabled'}>
+          <i data-lucide="undo-2" class="icon-sm"></i>
+          <span>되돌리기</span>
+        </button>
       `;
     }
 
@@ -6916,6 +6914,102 @@ function setExpenseTypeFilter(type) {
   });
   
   renderExpensesList();
+}
+
+// ----------------------------------------------------
+// MOBILE SWIPE GESTURE TO SWITCH TABS
+// ----------------------------------------------------
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', e => {
+  const dialogTrip = document.getElementById("dialog-trip");
+  const dialogExpense = document.getElementById("dialog-expense");
+  const dialogTracker = document.getElementById("dialog-tracker");
+  const dialogLocation = document.getElementById("dialog-location-picker");
+  const dialogClient = document.getElementById("dialog-client");
+  
+  if (
+    (dialogTrip && dialogTrip.hasAttribute('open')) ||
+    (dialogExpense && dialogExpense.hasAttribute('open')) ||
+    (dialogTracker && dialogTracker.hasAttribute('open')) ||
+    (dialogLocation && dialogLocation.hasAttribute('open')) ||
+    (dialogClient && dialogClient.hasAttribute('open'))
+  ) {
+    return; // Don't swipe tabs if any modal/tracker is open
+  }
+  
+  // Ignore gestures starting on map, inputs, sliders, or other interactive components
+  const target = e.target;
+  if (target.closest('input') || target.closest('textarea') || target.closest('select') || target.closest('.no-swipe') || target.closest('#tracker-demo-toggle') || target.closest('.demo-switch-container')) {
+    return;
+  }
+
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  const dialogTrip = document.getElementById("dialog-trip");
+  const dialogExpense = document.getElementById("dialog-expense");
+  const dialogTracker = document.getElementById("dialog-tracker");
+  const dialogLocation = document.getElementById("dialog-location-picker");
+  const dialogClient = document.getElementById("dialog-client");
+  
+  if (
+    (dialogTrip && dialogTrip.hasAttribute('open')) ||
+    (dialogExpense && dialogExpense.hasAttribute('open')) ||
+    (dialogTracker && dialogTracker.hasAttribute('open')) ||
+    (dialogLocation && dialogLocation.hasAttribute('open')) ||
+    (dialogClient && dialogClient.hasAttribute('open'))
+  ) {
+    return;
+  }
+
+  const target = e.target;
+  if (target.closest('input') || target.closest('textarea') || target.closest('select') || target.closest('.no-swipe') || target.closest('#tracker-demo-toggle') || target.closest('.demo-switch-container')) {
+    return;
+  }
+
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  
+  handleSwipeGesture();
+}, { passive: true });
+
+function handleSwipeGesture() {
+  const diffX = touchEndX - touchStartX;
+  const diffY = touchEndY - touchStartY;
+  
+  // Swipe must be horizontal (X distance > Y distance) and exceed threshold (80px)
+  if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
+    const activeNavItem = document.querySelector(".app-nav .nav-item.active");
+    if (!activeNavItem) return;
+    const currentTab = activeNavItem.getAttribute("data-target");
+    
+    // Build array of currently visible navigation tabs
+    const visibleTabs = ["home", "trips", "expenses", "dashboard", "clients", "settings"];
+    if (appState.currentUser && appState.currentUser.role === "admin") {
+      visibleTabs.push("admin");
+    }
+    
+    const currentIndex = visibleTabs.indexOf(currentTab);
+    if (currentIndex === -1) return;
+    
+    if (diffX < 0) {
+      // Swipe Left -> Next Tab
+      if (currentIndex < visibleTabs.length - 1) {
+        switchTab(visibleTabs[currentIndex + 1]);
+      }
+    } else {
+      // Swipe Right -> Previous Tab
+      if (currentIndex > 0) {
+        switchTab(visibleTabs[currentIndex - 1]);
+      }
+    }
+  }
 }
 
 

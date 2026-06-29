@@ -4,6 +4,8 @@
   --bg-panel: #1e293b;
   --bg-card: #334155;
   --bg-card-border: rgba(255, 255, 255, 0.08);
+  --bg-input: #0f172a;
+  --border-input: rgba(255, 255, 255, 0.16);
   --bg-nav: #1e293b;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
@@ -42,6 +44,8 @@ body.light-theme {
   --bg-panel: #ffffff;
   --bg-card: #f8fafc;
   --bg-card-border: rgba(0, 0, 0, 0.08);
+  --bg-input: #ffffff;
+  --border-input: rgba(0, 0, 0, 0.15);
   --bg-nav: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
@@ -1213,15 +1217,15 @@ body.light-theme .sun-icon {
 .form-group textarea,
 .form-group select {
   width: 100%;
-  background-color: var(--bg-card);
-  border: 1px solid var(--bg-card-border);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-input);
   color: var(--text-main);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   font-size: 0.85rem;
   outline: none;
   font-family: inherit;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .form-group input:focus,

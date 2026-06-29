@@ -5810,7 +5810,10 @@ function checkAuthAndSetUI() {
 
   if (appState.currentUser) {
     localStorage.setItem("logilog_has_session", "true");
-    if (overlay) overlay.style.display = "none";
+    if (overlay) {
+      overlay.style.display = "none";
+      overlay.remove(); // 보안 프로그램 감지 회피를 위해 비밀번호 박스가 있는 로그인 폼을 DOM에서 제거
+    }
     if (userInfo) userInfo.style.display = "flex";
     if (userBadge) userBadge.textContent = appState.currentUser.name;
     if (navAdmin) {
@@ -6075,9 +6078,8 @@ async function handleLogout() {
     }
     appState.currentUser = null;
     localStorage.removeItem("logilog_current_user");
-    
-    checkAuthAndSetUI();
-    showToast("로그아웃 되었습니다.");
+    localStorage.removeItem("logilog_has_session");
+    window.location.reload();
   }
 }
 

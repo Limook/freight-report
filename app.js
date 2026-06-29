@@ -5809,6 +5809,7 @@ function checkAuthAndSetUI() {
   const navAdmin = document.getElementById("nav-item-admin");
 
   if (appState.currentUser) {
+    localStorage.setItem("logilog_has_session", "true");
     if (overlay) overlay.style.display = "none";
     if (userInfo) userInfo.style.display = "flex";
     if (userBadge) userBadge.textContent = appState.currentUser.name;
@@ -5820,6 +5821,9 @@ function checkAuthAndSetUI() {
       }
     }
   } else {
+    localStorage.removeItem("logilog_has_session");
+    const tempStyle = document.getElementById("temp-auth-hide");
+    if (tempStyle) tempStyle.remove();
     if (overlay) overlay.style.display = "flex";
     if (userInfo) userInfo.style.display = "none";
     if (navAdmin) navAdmin.style.display = "none";

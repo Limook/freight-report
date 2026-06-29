@@ -33,6 +33,14 @@
         document.body.classList.add("dark-theme");
         document.body.classList.remove("light-theme");
       }
+      
+      // Session pre-check to prevent login overlay flash
+      if (localStorage.getItem("logilog_has_session") === "true") {
+        const style = document.createElement('style');
+        style.id = 'temp-auth-hide';
+        style.innerHTML = '#auth-overlay { display: none !important; }';
+        document.head.appendChild(style);
+      }
     })();
   </script>
   <!-- App Container -->

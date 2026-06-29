@@ -1683,6 +1683,15 @@ async function loadData() {
             }
             
 
+            // Update LocalStorage to keep offline cache and theme inline script in sync
+            localStorage.setItem("logilog_trips", JSON.stringify(appState.trips));
+            localStorage.setItem("logilog_clients", JSON.stringify(appState.clients));
+            localStorage.setItem("logilog_expenses", JSON.stringify(appState.expenses));
+            localStorage.setItem("logilog_settings", JSON.stringify(appState.settings));
+            localStorage.setItem("logilog_theme", appState.theme);
+            localStorage.setItem("logilog_tracker", JSON.stringify(appState.tracker));
+            localStorage.setItem("logilog_current_user", appState.currentUser.username);
+            
           }
           return;
         }

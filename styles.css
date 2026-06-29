@@ -3656,7 +3656,7 @@ body.light-theme .auth-card {
 }
 
 .tracker-dialog-content .tracker-body {
-  height: 70%;
+  height: 100%;
   flex: 1;
   display: flex;
   flex-direction: row; /* Horizontal split: stepper left, buttons right */
@@ -4227,8 +4227,8 @@ body.light-theme .auth-card {
 .btn-tracker-hero {
   width: 100%;
   padding: 20px;
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(99, 102, 241, 0.07) 50%, rgba(139, 92, 246, 0.09) 100%);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(239, 68, 68, 0.08) 50%, rgba(239, 68, 68, 0.12) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.45);
   border-radius: var(--radius-md);
   color: var(--text-main);
   display: flex;
@@ -4244,8 +4244,8 @@ body.light-theme .auth-card {
 
 /* Light theme overrides for tracker hero */
 body.light-theme .btn-tracker-hero {
-  background: linear-gradient(135deg, #ffffff 0%, rgba(79, 70, 229, 0.05) 50%, rgba(139, 92, 246, 0.05) 100%);
-  border: 1px solid rgba(79, 70, 229, 0.2);
+  background: linear-gradient(135deg, #ffffff 0%, rgba(239, 68, 68, 0.04) 50%, rgba(239, 68, 68, 0.08) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.35);
 }
 
 /* Animated metallic light sweep reflection */
@@ -4269,7 +4269,7 @@ body.light-theme .btn-tracker-hero::before {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(79, 70, 229, 0.08),
+    rgba(239, 68, 68, 0.08),
     transparent
   );
 }
@@ -4279,8 +4279,8 @@ body.light-theme .btn-tracker-hero::before {
 }
 
 .btn-tracker-hero:hover {
-  border-color: rgba(99, 102, 241, 0.6);
-  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.25);
+  border-color: rgba(239, 68, 68, 0.8);
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.3);
   transform: translateY(-3px);
 }
 
@@ -4289,8 +4289,8 @@ body.light-theme .btn-tracker-hero::before {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4301,14 +4301,14 @@ body.light-theme .btn-tracker-hero::before {
 .btn-tracker-hero .hero-icon {
   width: 20px;
   height: 20px;
-  color: var(--color-primary);
+  color: #ef4444;
   transition: all var(--transition-normal);
 }
 
 .btn-tracker-hero:hover .hero-icon-container {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
 }
 
 .btn-tracker-hero:hover .hero-icon {
@@ -4358,31 +4358,31 @@ body.light-theme .btn-tracker-hero::before {
 }
 
 .tracker-hero-container.driving-active .btn-tracker-hero {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 25px rgba(99, 102, 241, 0.35);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
+  border-color: #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
   animation: borderGlowPulse 2s infinite alternate;
 }
 
 .tracker-hero-container.driving-active .btn-tracker-hero .hero-icon-container {
-  background: rgba(139, 92, 246, 0.2);
-  border-color: var(--color-accent-violet);
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
 }
 
 .tracker-hero-container.driving-active .btn-tracker-hero .hero-icon {
-  color: var(--color-accent-violet);
+  color: #ef4444;
   animation: pulseRotate 3s infinite ease-in-out;
 }
 
 @keyframes borderGlowPulse {
   0% {
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
-    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
   }
   100% {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.55);
-    border-color: var(--color-primary);
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.55);
+    border-color: #ef4444;
   }
 }
 

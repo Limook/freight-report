@@ -2516,38 +2516,7 @@ function renderHomePanel() {
   // Force idleMgmtView block since VMS is now modal-only (Ver 2.25)
   idleMgmtView.style.display = "block";
 
-  // Render Highway VMS Widget inside fullscreen dashboard (Ver 2.25)
-  const activeLocation = appState.tracker.startLocation || appState.tracker.departureLocation || "서울특별시 강남구 역삼동";
-  const roads = getNearbyRoadsList(activeLocation);
-  const vmsContainer = document.getElementById("home-highway-vms");
-  
-  if (vmsContainer) {
-    let html = `
-      <div class="road-guide-header">
-        <h4 class="road-guide-title">
-          <i data-lucide="info" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> 근처 주요 도로 실시간 상황
-        </h4>
-      </div>
-      <div class="road-guide-list">
-    `;
-    roads.forEach(r => {
-      html += `
-        <div class="road-guide-item ${r.statusClass}">
-          <div class="road-item-meta">
-            <span class="road-badge">${r.roadName}</span>
-            <span class="road-status-badge status-${r.statusClass}">${r.statusEmoji} ${r.statusText}</span>
-          </div>
-          <div class="road-item-info">
-            <span class="road-info-text">${r.detailText}</span>
-            <span class="road-surface-text">${r.surfaceText}</span>
-          </div>
-        </div>
-      `;
-    });
-    html += `</div>`;
-    vmsContainer.className = "road-guide-container";
-    vmsContainer.innerHTML = html;
-  }
+
 
   // Update Home Draft Indicator (Ver 2.16 - Patch 7)
   updateHomeDraftIndicator();

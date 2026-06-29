@@ -1346,14 +1346,14 @@ let pickerState = {
 // ----------------------------------------------------
 // INITIALIZATION & SUPABASE SYNC (Ver 2.19)
 // ----------------------------------------------------
-let supabase = null;
+let supabaseClient = null;
 
 async function initSupabase() {
   try {
     const res = await fetch('/api/config');
     const config = await res.json();
     if (config.supabaseUrl && config.supabaseKey && window.supabase) {
-      supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
+      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
       console.log("Supabase client initialized successfully!");
     } else {
       console.log("Supabase keys not found in config or SDK missing. Running in LocalStorage-only fallback mode.");
@@ -1364,7 +1364,7 @@ async function initSupabase() {
 }
 
 async function syncAllToSupabase() {
-  if (!supabase || !appState.currentUser || !appState.currentUser.uid) return;
+  if (!supabaseClient || !appState.currentUser || !appState.currentUser.uid) return;
   const uid = appState.currentUser.uid;
   
   try {
@@ -1393,7 +1393,7 @@ async function syncAllToSupabase() {
         expenses: t.expenses || {}
       }));
     if (tripsToSync.length > 0) {
-      await supabase.from('trips').upsert(tripsToSync);
+      await supabaseClient.from('trips').upsert(tripsToSync);
     }
     
     // 2. Sync Clients
@@ -1406,7 +1406,7 @@ async function syncAllToSupabase() {
         phone: c.phone
       }));
     if (clientsToSync.length > 0) {
-      await supabase.from('clients').upsert(clientsToSync);
+      await supabaseClient.from('clients').upsert(clientsToSync);
     }
     
     // 3. Sync Expenses
@@ -1423,18 +1423,18 @@ async function syncAllToSupabase() {
         notes: e.notes
       }));
     if (expensesToSync.length > 0) {
-      await supabase.from('expenses').upsert(expensesToSync);
+      await supabaseClient.from('expenses').upsert(expensesToSync);
     }
     
     // 4. Sync Settings
-    await supabase.from('settings').upsert({
+    await supabaseClient.from('settings').upsert({
       user_id: uid,
       owner_name: appState.settings.ownerName,
       theme: appState.theme
     });
     
     // 5. Sync Tracker
-    await supabase.from('trackers').upsert({
+    await supabaseClient.from('trackers').upsert({
       user_id: uid,
       step: String(appState.tracker.step),
       start_time: appState.tracker.startTime,
@@ -1482,11 +1482,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function loadData() {
-  if (supabase) {
+  if (supabaseClient) {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
-        const { data: profile } = await supabase
+        const { data: profile } = await supabaseClient
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
@@ -1504,7 +1504,7 @@ async function loadData() {
           
           if (profile.role === 'admin') {
             // Admin mode: load all profiles and all trips
-            const { data: allProfiles } = await supabase.from('profiles').select('*');
+            const { data: allProfiles } = await supabaseClient.from('profiles').select('*');
             if (allProfiles) {
               appState.users = allProfiles.map(p => ({
                 username: p.email.split('@')[0],
@@ -1513,7 +1513,7 @@ async function loadData() {
                 phone: ''
               }));
             }
-            const { data: allTrips } = await supabase.from('trips').select('*');
+            const { data: allTrips } = await supabaseClient.from('trips').select('*');
             if (allTrips) {
               appState.trips = allTrips.map(row => {
                 const owner = allProfiles ? allProfiles.find(p => p.id === row.user_id) : null;
@@ -1543,7 +1543,7 @@ async function loadData() {
             }
           } else {
             // Regular user mode: load user's own data
-            const { data: dbTrips, error: tripsErr } = await supabase
+            const { data: dbTrips, error: tripsErr } = await supabaseClient
               .from('trips')
               .select('*')
               .eq('user_id', profile.id);
@@ -1572,7 +1572,7 @@ async function loadData() {
               }));
             }
             
-            const { data: dbClients } = await supabase
+            const { data: dbClients } = await supabaseClient
               .from('clients')
               .select('*')
               .eq('user_id', profile.id);
@@ -1585,7 +1585,7 @@ async function loadData() {
               }));
             }
             
-            const { data: dbExpenses } = await supabase
+            const { data: dbExpenses } = await supabaseClient
               .from('expenses')
               .select('*')
               .eq('user_id', profile.id);
@@ -1602,7 +1602,7 @@ async function loadData() {
               }));
             }
             
-            const { data: dbSettings } = await supabase
+            const { data: dbSettings } = await supabaseClient
               .from('settings')
               .select('*')
               .eq('user_id', profile.id)
@@ -1615,7 +1615,7 @@ async function loadData() {
               appState.theme = dbSettings.theme;
             }
             
-            const { data: dbTracker } = await supabase
+            const { data: dbTracker } = await supabaseClient
               .from('trackers')
               .select('*')
               .eq('user_id', profile.id)
@@ -3856,9 +3856,9 @@ function editTrip(id) {
 
 async function deleteTrip(id) {
   if (confirm("정말 이 운행기록을 삭제하시겠습니까?")) {
-    if (supabase && appState.currentUser && appState.currentUser.uid) {
+    if (supabaseClient && appState.currentUser && appState.currentUser.uid) {
       try {
-        await supabase.from('trips').delete().eq('id', id);
+        await supabaseClient.from('trips').delete().eq('id', id);
       } catch (err) {
         console.error("Supabase trip delete failed:", err);
       }
@@ -5649,9 +5649,9 @@ async function deleteClient(clientId) {
   if (!client) return;
   
   if (confirm(`정말로 '${client.name}' 거래처를 삭제하시겠습니까?`)) {
-    if (supabase && appState.currentUser && appState.currentUser.uid) {
+    if (supabaseClient && appState.currentUser && appState.currentUser.uid) {
       try {
-        await supabase.from('clients').delete().eq('id', clientId);
+        await supabaseClient.from('clients').delete().eq('id', clientId);
       } catch (err) {
         console.error("Supabase client delete failed:", err);
       }
@@ -5836,10 +5836,10 @@ async function handleLogin(event) {
   const username = usernameInput.value.trim().toLowerCase();
   const password = passwordInput.value;
   
-  if (supabase) {
+  if (supabaseClient) {
     const email = username.includes('@') ? username : `${username}@logilog.com`;
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
       });
@@ -5850,7 +5850,7 @@ async function handleLogin(event) {
       }
       
       // Fetch user profile
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', data.user.id)
@@ -5858,7 +5858,7 @@ async function handleLogin(event) {
         
       if (profileError || !profile) {
         showToast("프로필을 로드할 수 없습니다.");
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         return;
       }
       
@@ -5939,10 +5939,10 @@ async function handleSignup(event) {
     return;
   }
   
-  if (supabase) {
+  if (supabaseClient) {
     const email = `${username}@logilog.com`;
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
         email: email,
         password: password,
         options: {
@@ -5960,7 +5960,7 @@ async function handleSignup(event) {
       // Wait for trigger to create profile
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const { data: profile } = await supabase
+      const { data: profile } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', data.user.id)
@@ -6029,9 +6029,9 @@ async function handleSignup(event) {
 
 async function handleLogout() {
   if (confirm("정말로 로그아웃 하시겠습니까?")) {
-    if (supabase) {
+    if (supabaseClient) {
       try {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
       } catch (err) {
         console.error("Supabase signout error:", err);
       }
@@ -6190,12 +6190,12 @@ async function toggleUserRole(username) {
   
   const newRole = user.role === 'admin' ? 'user' : 'admin';
   
-  if (supabase && appState.currentUser && appState.currentUser.role === 'admin') {
+  if (supabaseClient && appState.currentUser && appState.currentUser.role === 'admin') {
     try {
       const email = `${username}@logilog.com`;
-      const { data: userProfile } = await supabase.from('profiles').select('id').eq('email', email).single();
+      const { data: userProfile } = await supabaseClient.from('profiles').select('id').eq('email', email).single();
       if (userProfile) {
-        const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userProfile.id);
+        const { error } = await supabaseClient.from('profiles').update({ role: newRole }).eq('id', userProfile.id);
         if (error) {
           showToast(`등급 변경 실패: ${error.message}`);
           return;
@@ -6218,13 +6218,13 @@ async function deleteUserAccount(username) {
   if (!user) return;
   
   if (confirm(`정말로 기사 '${user.name}'(@${username}) 계정을 강제 삭제하시겠습니까?\n이 사용자의 모든 운행 기록과 거래처 정보도 함께 소멸됩니다.`)) {
-    if (supabase && appState.currentUser && appState.currentUser.role === 'admin') {
+    if (supabaseClient && appState.currentUser && appState.currentUser.role === 'admin') {
       try {
         const email = `${username}@logilog.com`;
-        const { data: userProfile } = await supabase.from('profiles').select('id').eq('email', email).single();
+        const { data: userProfile } = await supabaseClient.from('profiles').select('id').eq('email', email).single();
         if (userProfile) {
           // Deleting profile triggers cascading delete for trips, expenses, clients, etc. in PostgreSQL!
-          await supabase.from('profiles').delete().eq('id', userProfile.id);
+          await supabaseClient.from('profiles').delete().eq('id', userProfile.id);
         }
       } catch (err) {
         console.error("Supabase deleteUserAccount error:", err);
@@ -6819,9 +6819,9 @@ async function deleteExpense(expenseId) {
   if (!exp) return;
   
   if (confirm(`정말로 '${exp.title}' 경비 기록을 삭제하시겠습니까?`)) {
-    if (supabase && appState.currentUser && appState.currentUser.uid) {
+    if (supabaseClient && appState.currentUser && appState.currentUser.uid) {
       try {
-        await supabase.from('expenses').delete().eq('id', expenseId);
+        await supabaseClient.from('expenses').delete().eq('id', expenseId);
       } catch (err) {
         console.error("Supabase expense delete failed:", err);
       }

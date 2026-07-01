@@ -4165,6 +4165,29 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
   transform: none !important;
 }
 
+.btn-tracker-option.btn-tracker-dark {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.2) !important;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.6) !important;
+  box-shadow: none !important;
+  height: 80px !important; /* height increased by 100% (from 40px to 80px) */
+}
+
+.btn-tracker-option.btn-tracker-dark:hover {
+  background: #18181b !important;
+  box-shadow: none !important;
+}
+
+body.light-theme .btn-tracker-option.btn-tracker-dark {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: none !important;
+}
+
 /* Main button at the bottom of the right panel (3D Tactile Styling) */
 .btn-tracker-main {
   display: flex;

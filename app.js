@@ -4018,9 +4018,15 @@ function addWaypointField(val = "") {
           <i data-lucide="x" style="width: 14px; height: 14px;"></i>
         </button>
       </div>
-      <div class="input-icon-group">
-        <i data-lucide="map-pin"></i>
-        <input type="text" id="trip-via-${targetIndex}" placeholder="경유지 선택" readonly onclick="openLocationPicker('via-${targetIndex}')" value="${val}">
+      <div style="display: flex; gap: 6px; align-items: center; width: 100%;">
+        <div class="input-icon-group" style="flex: 1; margin-bottom: 0 !important;">
+          <i data-lucide="map-pin"></i>
+          <input type="text" id="trip-via-${targetIndex}" placeholder="경유지 선택" readonly onclick="openLocationPicker('via-${targetIndex}')" value="${val}">
+        </div>
+        <button type="button" class="btn btn-outline" style="flex-shrink: 0; padding: 0 10px; height: 38px; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; gap: 4px; background-color: var(--bg-panel); color: var(--text-main); border: 1px solid var(--bg-card-border);" onclick="setFieldToCurrentLocation('trip-via-${targetIndex}', 'waypoint')">
+          <i data-lucide="navigation" style="width: 12px; height: 12px;"></i>
+          <span>현위치</span>
+        </button>
       </div>
     </div>
   `;
@@ -5066,6 +5072,34 @@ function captureCurrentLocation(target, callback) {
     showToast("GPS를 지원하지 않는 브라우저입니다.");
     callback("서울특별시 강남구 역삼동");
   }
+}
+
+function setFieldToCurrentLocation(inputId, target) {
+  const inputEl = document.getElementById(inputId);
+  if (!inputEl) return;
+  
+  captureCurrentLocation(target, (address) => {
+    inputEl.value = address;
+    
+    // Automatically trigger distance calculation when address changes
+    triggerAutoDistanceCalculation();
+    
+    // For start and unload, toggle open the field wrapper if needed
+    if (target === 'departure') {
+      toggleLocationField('start', true);
+    } else if (target === 'arrival') {
+      toggleLocationField('arrival', true);
+    }
+    
+    // Fill time for load and unload
+    if (target === 'load') {
+      setDatetimeShortcut('start', 'now');
+    } else if (target === 'unload') {
+      setDatetimeShortcut('end', 'now');
+    }
+    
+    showToast("현위치가 입력되었습니다.");
+  });
 }
 
 function startTrackerWithDeparture(withDeparture) {

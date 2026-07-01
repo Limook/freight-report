@@ -2120,6 +2120,52 @@ function isTripOverdue(trip) {
   return trip.paymentDueDate < todayStr;
 }
 
+function getUnpaidRiskWarnings() {
+  if (!appState.currentUser || !appState.trips) return [];
+  
+  const otherOverdueTrips = appState.trips.filter(t => 
+    t.userId !== appState.currentUser.username && 
+    !t.isPaid && 
+    isTripOverdue(t)
+  );
+  
+  if (otherOverdueTrips.length === 0) return [];
+  
+  const overdueClients = {};
+  otherOverdueTrips.forEach(t => {
+    if (t.client) {
+      if (!overdueClients[t.client]) {
+        overdueClients[t.client] = [];
+      }
+      overdueClients[t.client].push(t);
+    }
+  });
+  
+  const myPendingTrips = appState.trips.filter(t => 
+    t.userId === appState.currentUser.username && 
+    !t.isPaid && 
+    !isTripOverdue(t)
+  );
+  
+  const warnings = [];
+  myPendingTrips.forEach(t => {
+    if (t.client && overdueClients[t.client]) {
+      let w = warnings.find(item => item.client === t.client);
+      if (!w) {
+        w = { 
+          client: t.client, 
+          myTripsCount: 0, 
+          otherOverdueCount: overdueClients[t.client].length 
+        };
+        warnings.push(w);
+      }
+      w.myTripsCount++;
+    }
+  });
+  
+  return warnings;
+}
+
 function isTripsPeriodDate(dateStr) {
   const cleanDateStr = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
   const period = appState.currentTripsPeriod;
@@ -2600,6 +2646,7 @@ function renderHomePanel() {
   const remindersContainer = document.getElementById("home-today-reminders");
     if (remindersContainer) {
       const todayDueTrips = appState.trips.filter(t => t.userId === appState.currentUser.username && !t.isPaid && t.paymentDueDate === todayStr);
+      const riskWarnings = getUnpaidRiskWarnings();
       
       let html = `
         <div class="card-header-flex" style="margin-bottom: 12px; border-bottom: 1px solid var(--bg-card-border); padding-bottom: 6px;">
@@ -2609,6 +2656,24 @@ function renderHomePanel() {
         </div>
         <div style="display: flex; flex-direction: column; gap: 14px;">
       `;
+
+      // 0. 미수금 위험 경고 알림 (다른 회원의 미수금 거래처와 겹치는 내 수금대기 운행)
+      if (riskWarnings.length > 0) {
+        html += `
+          <div class="home-alert-section" style="background-color: var(--color-danger-muted); border: 1px solid var(--color-danger); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 4px; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);">
+            <h4 style="font-size: 0.78rem; font-weight: 700; color: var(--color-danger); display: flex; align-items: center; gap: 6px; margin: 0 0 6px 0;">
+              <i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i> [미수금 주의] 거래처 위험 경고
+            </h4>
+            <div style="font-size: 0.72rem; color: var(--text-main); display: flex; flex-direction: column; gap: 4px;">
+              ${riskWarnings.map(w => `
+                <p style="margin: 0; line-height: 1.4;">
+                  다른 회원의 미수금(연체)이 발생한 거래처 <strong>'${w.client}'</strong>의 수금대기 화물이 내 운송 이력에 <strong>${w.myTripsCount}건</strong> 있습니다. (대금 회수 주의)
+                </p>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
 
       // B. 오늘 수금 예정 (placed above today's performance)
       if (todayDueTrips.length > 0) {
@@ -2637,7 +2702,7 @@ function renderHomePanel() {
       `;
 
       // If nothing to alert
-      if (todayDueTrips.length === 0 && todayCount === 0) {
+      if (todayDueTrips.length === 0 && todayCount === 0 && riskWarnings.length === 0) {
         html += `
           <div style="text-align: center; padding: 20px 0; color: var(--text-muted); font-size: 0.8rem;">
             <i data-lucide="check-circle-2" style="width: 28px; height: 28px; color: var(--color-success); margin-bottom: 6px;"></i>
@@ -2845,8 +2910,13 @@ function createTripElement(trip, disableHighlight = false) {
     `;
   }
 
+  const activeWarnings = typeof getUnpaidRiskWarnings === 'function' ? getUnpaidRiskWarnings() : [];
+  const hasRisk = !trip.isPaid && !isTripOverdue(trip) && trip.client && activeWarnings.some(w => w.client === trip.client);
   const clientBadge = trip.client 
-    ? `<span class="db-trip-client">${trip.client}</span>`
+    ? `<span class="db-trip-client" style="display: inline-flex; align-items: center; gap: 3px; ${hasRisk ? 'border-color: var(--color-danger) !important; color: var(--color-danger) !important; background-color: var(--color-danger-muted) !important; font-weight: 700;' : ''}">
+        ${hasRisk ? '<i data-lucide="alert-triangle" style="width: 10px; height: 10px; color: var(--color-danger); margin-bottom: 1px;"></i>' : ''}
+        ${trip.client}
+       </span>`
     : "";
 
   const isOverdue = isTripOverdue(trip);
@@ -3157,6 +3227,32 @@ function renderUnpaidTripsView() {
   const listContainer = document.getElementById("trips-unpaid-list");
   
   if (!summaryCard || !clientList || !listContainer) return;
+
+  // Render Unpaid Risk Warning Box
+  const riskWarningBox = document.getElementById("unpaid-risk-warning-box");
+  if (riskWarningBox) {
+    const riskWarnings = getUnpaidRiskWarnings();
+    if (riskWarnings.length > 0) {
+      riskWarningBox.style.display = "block";
+      riskWarningBox.innerHTML = `
+        <div style="background-color: var(--color-danger-muted); border: 1px solid var(--color-danger); border-radius: var(--radius-sm); padding: 12px; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);">
+          <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--color-danger); display: flex; align-items: center; gap: 6px; margin: 0 0 8px 0;">
+            <i data-lucide="alert-triangle" style="width: 15px; height: 15px;"></i> [미수금 주의] 거래처 연체 발생 알림
+          </h4>
+          <div style="font-size: 0.74rem; color: var(--text-main); display: flex; flex-direction: column; gap: 6px;">
+            ${riskWarnings.map(w => `
+              <p style="margin: 0; line-height: 1.45;">
+                다른 운송 회원의 미수금(연체)이 등록된 거래처 <strong>'${w.client}'</strong>에 대해, 현재 내가 운송한 <strong>${w.myTripsCount}건</strong>의 화물이 <strong>수금 대기</strong> 상태에 있습니다. 수금 지연 및 미수금 발생 위험이 있으므로 주의 바랍니다.
+              </p>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      riskWarningBox.style.display = "none";
+      riskWarningBox.innerHTML = "";
+    }
+  }
   
   listContainer.innerHTML = "";
   clientList.innerHTML = "";
@@ -3247,16 +3343,25 @@ function renderUnpaidTripsView() {
   
   // 2. Render Client Grouping Summary list
   const clients = Object.keys(clientGroups);
+  const riskWarnings = getUnpaidRiskWarnings();
   if (clients.length === 0) {
     clientList.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-muted); padding: 14px; text-align: center;">미수금이 잡힌 거래처가 없습니다.</div>`;
   } else {
     clients.forEach(client => {
       const group = clientGroups[client];
+      const hasWarning = riskWarnings.some(w => w.client === group.clientName);
+      const warningBadge = hasWarning 
+        ? `<span class="badge danger" style="font-size: 0.65rem; margin-left: 4px; display: inline-flex; align-items: center; gap: 2px; padding: 2px 5px;"><i data-lucide="alert-triangle" style="width: 10px; height: 10px;"></i> 미수주의</span>` 
+        : "";
+        
       const card = document.createElement("div");
       card.className = "client-summary-card";
       card.innerHTML = `
         <div class="client-info-col">
-          <span class="client-name">${group.clientName}</span>
+          <span class="client-name" style="display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+            ${group.clientName}
+            ${warningBadge}
+          </span>
           <span class="client-unpaid-count">미수금 ${group.count}건</span>
         </div>
         <div class="client-money-col">

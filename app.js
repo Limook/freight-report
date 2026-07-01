@@ -1991,6 +1991,10 @@ function initNavigation() {
     if (dialogTrip && dialogTrip.open) {
       const modalContent = dialogTrip.querySelector(".modal-content");
       if (modalContent && !modalContent.contains(e.target)) {
+        // If click is inside another open dialog (like location picker), ignore
+        const clickedDialog = e.target.closest("dialog");
+        if (clickedDialog && clickedDialog !== dialogTrip) return;
+
         const openBtn = e.target.closest(".btn-hero-register") || e.target.closest("[onclick*='openTripModal']") || e.target.closest(".nav-item");
         if (!openBtn) {
           saveTripDraft();
@@ -2003,6 +2007,9 @@ function initNavigation() {
     if (dialogExpense && dialogExpense.open) {
       const modalContent = dialogExpense.querySelector(".modal-content-expense");
       if (modalContent && !modalContent.contains(e.target)) {
+        const clickedDialog = e.target.closest("dialog");
+        if (clickedDialog && clickedDialog !== dialogExpense) return;
+
         const openBtn = e.target.closest(".btn-hero-expense") || e.target.closest("[onclick*='openExpenseModal']") || e.target.closest(".nav-item");
         if (!openBtn) {
           saveExpenseDraft();
@@ -2015,6 +2022,9 @@ function initNavigation() {
     if (dialogTracker && dialogTracker.open) {
       const modalContent = dialogTracker.querySelector(".tracker-dialog-content");
       if (modalContent && !modalContent.contains(e.target)) {
+        const clickedDialog = e.target.closest("dialog");
+        if (clickedDialog && clickedDialog !== dialogTracker) return;
+
         const openBtn = e.target.closest(".btn-tracker-hero") || e.target.closest("[onclick*='openTrackerDialog']") || e.target.closest(".nav-item");
         if (!openBtn) {
           closeTrackerDialog();

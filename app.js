@@ -1624,7 +1624,7 @@ async function loadSupabaseData() {
               { data: dbTracker }
             ] = await Promise.all([
               supabaseClient.from('trips').select('*').eq('user_id', profile.id),
-              supabaseClient.rpc('get_overdue_clients'),
+              supabaseClient.rpc('get_overdue_clients', { today_str: todayStr }),
               supabaseClient.from('clients').select('*').eq('user_id', profile.id),
               supabaseClient.from('expenses').select('*').eq('user_id', profile.id),
               supabaseClient.from('settings').select('*').eq('user_id', profile.id).maybeSingle(),
@@ -1655,6 +1655,9 @@ async function loadSupabaseData() {
               }));
             }
 
+            if (rpcErr) {
+              console.error("RPC get_overdue_clients failed:", rpcErr);
+            }
             if (!rpcErr && rpcClients) {
               appState.otherOverdueClients = rpcClients.map(row => row.client_name).filter(Boolean);
             } else {

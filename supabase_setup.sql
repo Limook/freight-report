@@ -186,7 +186,7 @@ CREATE POLICY "Settings 소유자 또는 어드민 액세스 허용" ON public.s
 -- ------------------------------------------
 
 -- 타 회원의 다른 중요 정보를 노출하지 않고, 오직 연체(미수금) 상태인 거래처 이름만 중복없이 반환하는 함수 (보안 조치)
-CREATE OR REPLACE FUNCTION public.get_overdue_clients()
+CREATE OR REPLACE FUNCTION public.get_overdue_clients(today_str TEXT)
 RETURNS TABLE (client_name TEXT) 
 SECURITY DEFINER
 AS $$
@@ -196,8 +196,8 @@ BEGIN
   FROM public.trips t
   WHERE t.is_paid = false 
     AND t.payment_due_date IS NOT NULL 
-    AND t.payment_due_date < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD');
+    AND t.payment_due_date < today_str;
 END;
 $$ LANGUAGE plpgsql;
 
-GRANT EXECUTE ON FUNCTION public.get_overdue_clients() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_overdue_clients(today_str TEXT) TO authenticated;

@@ -64,9 +64,9 @@
         <div id="home-idle-management-view" class="home-desktop-grid">
           <div class="home-left-col">
             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; width: 100%;">
-              <!-- 1. 스마트 운행기록기 -->
+              <!-- 1. 스마트 운행기록기 (첫 번째 줄 100%) -->
               <div class="tracker-hero-container" id="tracker-hero-container" style="width: 100%;">
-                <button class="btn-tracker-hero" onclick="openTrackerDialog()">
+                <button class="btn-tracker-hero" onclick="openTrackerDialog()" style="width: 100%;">
                   <div class="hero-icon-container">
                     <i data-lucide="navigation" class="hero-icon"></i>
                   </div>
@@ -77,17 +77,20 @@
                 </button>
               </div>
 
-              <!-- 2. 운행기록 등록 -->
-              <button class="btn-hero-register" onclick="openTripModal()" style="margin-bottom: 0;">
-                <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
-                <span>운행기록 등록</span>
-              </button>
+              <!-- 2. 등록 단축 버튼 그룹 (두 번째 줄 8:2 비율) -->
+              <div style="display: flex; gap: 10px; width: 100%;">
+                <!-- 운행기록 등록 (80%) -->
+                <button class="btn-hero-register" onclick="openTripModal()" style="flex: 8; margin-bottom: 0;">
+                  <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
+                  <span>운행기록 등록</span>
+                </button>
 
-              <!-- 3. 경비내역 등록 -->
-              <button class="btn-hero-register btn-hero-expense" onclick="openExpenseModal()" style="margin-bottom: 0;">
-                <i data-lucide="receipt" style="width: 18px; height: 18px;"></i>
-                <span>경비내역 등록</span>
-              </button>
+                <!-- 경비내역 등록 (20%) -->
+                <button class="btn-hero-register btn-hero-expense" onclick="openExpenseModal()" style="flex: 2; margin-bottom: 0; padding: 0 8px; justify-content: center; gap: 4px;">
+                  <i data-lucide="receipt" style="width: 18px; height: 18px; flex-shrink: 0;"></i>
+                  <span style="font-size: 0.76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">경비</span>
+                </button>
+              </div>
             </div>
 
             <!-- Home Draft Indicator (Visible if draft exists) -->

@@ -2741,8 +2741,8 @@ function createTripElement(trip, disableHighlight = false) {
     
     routeCollapsedHtml = `
       <div class="collapsed-route-line" style="display: flex; align-items: center; flex-wrap: wrap; gap: 2px;">${line1Html}</div>
-      <div class="collapsed-route-line" style="display: flex; align-items: center; flex-wrap: wrap; gap: 2px; margin-top: 4px; padding-left: 12px; border-left: 2px solid var(--bg-card-border);">
-        <i data-lucide="corner-down-right" style="width: 11px; height: 11px; color: var(--text-muted); margin-right: 4px; flex-shrink: 0;"></i>
+      <div class="collapsed-route-line" style="display: flex; align-items: center; flex-wrap: wrap; gap: 2px; margin-top: 4px;">
+        <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted); margin-right: 4px; flex-shrink: 0; vertical-align: middle;"></i>
         ${line2Html}
       </div>
     `;

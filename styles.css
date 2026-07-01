@@ -5064,6 +5064,24 @@ body.light-theme .tracker-hero-container.driving-active .btn-tracker-hero {
   border-left: 3.5px solid #8b5cf6 !important;
 }
 
+/* 3. Collapsed Route Container Layout to Support Two-Line Mode */
+.db-trip-route.route-collapsed {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  width: 100% !important;
+}
+
+/* 4. Force text colors on btn-tracker-hero black button to be white */
+.btn-tracker-hero .hero-title {
+  color: #ffffff !important;
+}
+
+.btn-tracker-hero .hero-subtitle {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
 
 
 

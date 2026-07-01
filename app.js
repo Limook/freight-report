@@ -2652,17 +2652,35 @@ function createTripElement(trip, disableHighlight = false) {
   // Helper to extract and format the last word (dong name) safely (Ver 2.16 Patch 8)
   const getDongName = (addr, fallback) => {
     if (!addr) return fallback;
-    const parts = addr.trim().split(' ');
-    const rawDong = parts.length > 0 ? parts[parts.length - 1] : fallback;
+    const parts = addr.trim().replace(/\s+/g, " ").split(" ");
     
-    // Remove trailing '동' or '읍' if the remaining part is at least 2 characters long
-    if (rawDong.endsWith('동') || rawDong.endsWith('읍')) {
-      const sliced = rawDong.slice(0, -1);
-      if (sliced.length >= 2) {
-        return sliced;
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      if (p.endsWith("동") || p.endsWith("읍") || p.endsWith("면") || p.endsWith("가") || p.endsWith("리") || p.includes("동)") || p.includes("읍)") || p.includes("면)")) {
+        let prefixParts = parts.slice(0, i + 1);
+        if (prefixParts[0] === "서울특별시") prefixParts[0] = "서울";
+        else if (prefixParts[0] === "경기도") prefixParts[0] = "경기";
+        else if (prefixParts[0] === "인천광역시") prefixParts[0] = "인천";
+        else if (prefixParts[0] === "부산광역시") prefixParts[0] = "부산";
+        else if (prefixParts[0] === "대구광역시") prefixParts[0] = "대구";
+        else if (prefixParts[0] === "대전광역시") prefixParts[0] = "대전";
+        else if (prefixParts[0] === "광주광역시") prefixParts[0] = "광주";
+        else if (prefixParts[0] === "울산광역시") prefixParts[0] = "울산";
+        else if (prefixParts[0] === "세종특별자치시") prefixParts[0] = "세종";
+        else if (prefixParts[0] === "강원특별자치도") prefixParts[0] = "강원";
+        else if (prefixParts[0] === "충청북도") prefixParts[0] = "충북";
+        else if (prefixParts[0] === "충청남도") prefixParts[0] = "충남";
+        else if (prefixParts[0] === "전라북도" || prefixParts[0] === "전북특별자치도") prefixParts[0] = "전북";
+        else if (prefixParts[0] === "전라남도") prefixParts[0] = "전남";
+        else if (prefixParts[0] === "경상북도") prefixParts[0] = "경북";
+        else if (prefixParts[0] === "경상남도") prefixParts[0] = "경남";
+        else if (prefixParts[0] === "제주특별자치도") prefixParts[0] = "제주";
+        
+        return prefixParts.join(" ");
       }
     }
-    return rawDong;
+    
+    return parts.slice(0, 3).join(" ") || fallback;
   };
 
   // 1. Collapsed Route representation (display all waypoints, split into 2 lines if > 4 locations)

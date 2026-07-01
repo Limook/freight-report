@@ -1297,6 +1297,7 @@ let appState = {
   currentUser: null, // Ver 2.17 Current Logged In User
   users: [],         // Ver 2.17 Users Database
   trips: [],
+  otherOverdueClients: [], // List of overdue client names for risk warnings (security measure)
   clients: [], // Ver 2.16 Client Database
   expenses: [], // Ver 2.18 Expenses Database
   expenseTypeFilter: 'all', // Ver 2.18 Filter by type ('all', 'fixed', 'variable')
@@ -1540,6 +1541,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function loadSupabaseData() {
+  const todayStr = getLocalDateString();
   if (supabaseClient) {
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();

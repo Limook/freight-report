@@ -3003,7 +3003,7 @@ function createTripElement(trip, disableHighlight = false) {
           ${trip.clientPhone ? `
           <div class="detail-row">
             <span>거래처 연락처</span>
-            <strong><a href="tel:${trip.clientPhone}" style="color: inherit; text-decoration: none; font-weight: 600;">${trip.clientPhone}</a></strong>
+            <strong><a href="tel:${(trip.clientPhone || '').replace(/[^0-9]/g, '')}" style="color: inherit; text-decoration: none; font-weight: 600;">${formatPhoneNumber(trip.clientPhone)}</a></strong>
           </div>` : ''}
           ${trip.notes ? `
           <div class="detail-row notes">
@@ -3603,6 +3603,17 @@ function getCumulativeMileage() {
 // TRIP LOG MANAGEMENT (TAB 2)
 // ----------------------------------------------------
 function initForms() {
+  // Set up phone input digit-only filters (Ver 2.26)
+  const phoneIds = ["trip-client-phone", "client-modal-phone", "signup-phone"];
+  phoneIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, "");
+      });
+    }
+  });
+
   document.getElementById("trip-search").addEventListener("input", renderTripsList);
 
   const formTrip = document.getElementById("form-trip");
@@ -3735,7 +3746,7 @@ function updateTripWizardSummary() {
   const perKmFee = (distance > 0 && fee > 0) ? Math.round(fee / distance) : 0;
   
   const clientName = document.getElementById("trip-client").value || "미지정";
-  const clientPhone = document.getElementById("trip-client-phone").value || "";
+  const clientPhone = formatPhoneNumber(document.getElementById("trip-client-phone").value) || "";
   const isPaid = document.getElementById("trip-is-paid").checked;
   const dueDate = document.getElementById("trip-payment-due").value;
   const paymentDate = document.getElementById("trip-payment-date").value;
@@ -3827,7 +3838,7 @@ function openTripModal(tripId = null) {
       document.getElementById("trip-start-date").value = trip.startDate || "";
       document.getElementById("trip-end-date").value = trip.endDate || "";
       document.getElementById("trip-client").value = trip.client || "";
-      document.getElementById("trip-client-phone").value = trip.clientPhone || "";
+      document.getElementById("trip-client-phone").value = (trip.clientPhone || "").replace(/[^0-9]/g, "");
       document.getElementById("trip-start").value = trip.routeStart || "";
       document.getElementById("trip-load").value = trip.routeLoad || "";
       document.getElementById("trip-unload").value = trip.routeUnload || "";
@@ -4047,7 +4058,7 @@ function saveTrip() {
   const startDate = document.getElementById("trip-start-date").value;
   const endDate = document.getElementById("trip-end-date").value;
   const client = document.getElementById("trip-client").value.trim();
-  const clientPhone = document.getElementById("trip-client-phone").value.trim();
+  const clientPhone = formatPhoneNumber(document.getElementById("trip-client-phone").value.trim());
   const routeStart = document.getElementById("trip-start").value.trim();
   const routeLoad = document.getElementById("trip-load").value.trim();
   const routeUnload = document.getElementById("trip-unload").value.trim();
@@ -5438,6 +5449,25 @@ function cleanAddressForDisplay(address) {
   return address.trim().replace(/^대한민국\s+/, "");
 }
 
+function formatPhoneNumber(phone) {
+  if (!phone) return "";
+  const digits = phone.replace(/[^0-9]/g, "");
+  if (digits.length === 11) {
+    return digits.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+  } else if (digits.length === 10) {
+    if (digits.startsWith("02")) {
+      return digits.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+    } else {
+      return digits.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+    }
+  } else if (digits.length === 9) {
+    if (digits.startsWith("02")) {
+      return digits.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
+    }
+  }
+  return digits;
+}
+
 function toggleDashboardTripDetail(element) {
   const isCurrentlyExpanded = element.classList.contains("expanded");
   
@@ -5674,7 +5704,7 @@ function saveTripDraft() {
   const startDate = document.getElementById("trip-start-date").value;
   const endDate = document.getElementById("trip-end-date").value;
   const client = document.getElementById("trip-client").value.trim();
-  const clientPhone = document.getElementById("trip-client-phone").value.trim();
+  const clientPhone = formatPhoneNumber(document.getElementById("trip-client-phone").value.trim());
   const routeStart = document.getElementById("trip-start").value.trim();
   const routeLoad = document.getElementById("trip-load").value.trim();
   const routeUnload = document.getElementById("trip-unload").value.trim();
@@ -5748,7 +5778,7 @@ function loadTripDraft() {
     document.getElementById("trip-start-date").value = draft.startDate || "";
     document.getElementById("trip-end-date").value = draft.endDate || "";
     document.getElementById("trip-client").value = draft.client || "";
-    document.getElementById("trip-client-phone").value = draft.clientPhone || "";
+    document.getElementById("trip-client-phone").value = (draft.clientPhone || "").replace(/[^0-9]/g, "");
     document.getElementById("trip-start").value = draft.routeStart || "";
     document.getElementById("trip-load").value = draft.routeLoad || "";
     document.getElementById("trip-unload").value = draft.routeUnload || "";
@@ -6012,8 +6042,8 @@ function renderClientsPanel() {
       <div class="client-card-body">
         <div class="client-meta-row">
           <strong>전화번호:</strong> 
-          <a href="tel:${client.phone}" class="client-phone-link">
-            <i data-lucide="phone" class="icon-xs" style="width: 12px; height: 12px;"></i> ${client.phone}
+          <a href="tel:${(client.phone || '').replace(/[^0-9]/g, '')}" class="client-phone-link">
+            <i data-lucide="phone" class="icon-xs" style="width: 12px; height: 12px;"></i> ${formatPhoneNumber(client.phone)}
           </a>
         </div>
         ${managerHtml}
@@ -6038,7 +6068,7 @@ function openClientModal(clientId = null) {
     if (client) {
       document.getElementById("client-id").value = client.id;
       document.getElementById("client-modal-name").value = client.name;
-      document.getElementById("client-modal-phone").value = client.phone || "";
+      document.getElementById("client-modal-phone").value = (client.phone || "").replace(/[^0-9]/g, "");
       document.getElementById("client-modal-manager").value = client.manager || "";
       document.getElementById("client-modal-notes").value = client.notes || "";
     }
@@ -6066,11 +6096,13 @@ function saveClient() {
     return;
   }
   
+  const formattedPhone = formatPhoneNumber(phone);
+  
   if (clientId) {
     const index = appState.clients.findIndex(c => c.id === clientId);
     if (index !== -1) {
       const existingUserId = appState.clients[index].userId || appState.currentUser.username;
-      appState.clients[index] = { id: clientId, userId: existingUserId, name, phone, manager, notes };
+      appState.clients[index] = { id: clientId, userId: existingUserId, name, phone: formattedPhone, manager, notes };
       showToast("거래처 정보가 수정되었습니다.");
     }
   } else {
@@ -6078,7 +6110,7 @@ function saveClient() {
       id: "client-" + Date.now(),
       userId: appState.currentUser.username,
       name,
-      phone,
+      phone: formattedPhone,
       manager,
       notes
     };
@@ -6119,16 +6151,18 @@ function saveClientQuickly() {
     return;
   }
   
+  const formattedPhone = formatPhoneNumber(phone);
+  
   const existingIndex = appState.clients.findIndex(c => c.name === name && c.userId === appState.currentUser.username);
   if (existingIndex !== -1) {
-    appState.clients[existingIndex].phone = phone;
+    appState.clients[existingIndex].phone = formattedPhone;
     showToast("거래처 전화번호가 업데이트되었습니다.");
   } else {
     const newClient = {
       id: "client-" + Date.now(),
       userId: appState.currentUser.username,
       name: name,
-      phone: phone,
+      phone: formattedPhone,
       manager: "",
       notes: ""
     };
@@ -6145,7 +6179,7 @@ function populateClientPhone() {
   const clientName = document.getElementById("trip-client").value.trim();
   const matchedClient = appState.clients.find(c => c.name === clientName && c.userId === appState.currentUser.username);
   if (matchedClient) {
-    document.getElementById("trip-client-phone").value = matchedClient.phone || "";
+    document.getElementById("trip-client-phone").value = (matchedClient.phone || "").replace(/[^0-9]/g, "");
   }
 }
 
@@ -6427,7 +6461,7 @@ async function handleSignup(event) {
   const username = usernameInput.value.trim().toLowerCase();
   const password = passwordInput.value;
   const name = nameInput.value.trim();
-  const phone = phoneInput.value.trim();
+  const phone = formatPhoneNumber(phoneInput.value.trim());
   
   const usernameRegex = /^[a-z0-9]{4,16}$/;
   if (!usernameRegex.test(username)) {
@@ -6622,7 +6656,7 @@ function renderAdminPanel() {
         <strong style="color:var(--text-main); display:block; font-size:0.8rem;">${user.name}</strong>
         <span style="font-size:0.65rem; color:var(--text-muted);">@${user.username}</span>
       </td>
-      <td style="padding: 10px 8px; color:var(--text-muted); font-size:0.75rem;">${user.phone || '-'}</td>
+      <td style="padding: 10px 8px; color:var(--text-muted); font-size:0.75rem;">${user.phone ? formatPhoneNumber(user.phone) : '-'}</td>
       <td style="padding: 10px 8px;">${roleBadge}</td>
       <td style="padding: 10px 8px; text-align: center;">${actionsHtml}</td>
     `;

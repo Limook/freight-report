@@ -2714,12 +2714,14 @@ function createTripElement(trip, disableHighlight = false) {
   let routeCollapsedHtml = "";
   if (locs.length <= 4) {
     // Single line
+    let singleHtml = "";
     locs.forEach((loc, idx) => {
       if (idx > 0) {
-        routeCollapsedHtml += ` <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted); margin: 0 2px; vertical-align: middle;"></i> `;
+        singleHtml += ` <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted); margin: 0 2px; vertical-align: middle;"></i> `;
       }
-      routeCollapsedHtml += loc.html;
+      singleHtml += loc.html;
     });
+    routeCollapsedHtml = `<div class="collapsed-route-line" style="display: flex; align-items: center; flex-wrap: wrap; gap: 2px;">${singleHtml}</div>`;
   } else {
     // Two lines (split after the 4th element - index 3)
     let line1Html = "";

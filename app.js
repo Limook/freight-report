@@ -5439,7 +5439,23 @@ function cleanAddressForDisplay(address) {
 }
 
 function toggleDashboardTripDetail(element) {
-  element.classList.toggle("expanded");
+  const isCurrentlyExpanded = element.classList.contains("expanded");
+  
+  const container = element.parentElement;
+  if (container) {
+    const expandedItems = container.querySelectorAll(".expanded");
+    expandedItems.forEach(item => {
+      if (item !== element) {
+        item.classList.remove("expanded");
+      }
+    });
+  }
+  
+  if (isCurrentlyExpanded) {
+    element.classList.remove("expanded");
+  } else {
+    element.classList.add("expanded");
+  }
 }
 
 // ----------------------------------------------------
@@ -6092,6 +6108,35 @@ async function deleteClient(clientId) {
     showToast("거래처가 삭제되었습니다.");
     renderClientsPanel();
   }
+function saveClientQuickly() {
+  const name = document.getElementById("trip-client").value.trim();
+  const phone = document.getElementById("trip-client-phone").value.trim();
+  
+  if (!name || !phone) {
+    showToast("거래처명과 전화번호를 모두 입력해주세요.");
+    return;
+  }
+  
+  const existingIndex = appState.clients.findIndex(c => c.name === name && c.userId === appState.currentUser.username);
+  if (existingIndex !== -1) {
+    appState.clients[existingIndex].phone = phone;
+    showToast("거래처 전화번호가 업데이트되었습니다.");
+  } else {
+    const newClient = {
+      id: "client-" + Date.now(),
+      userId: appState.currentUser.username,
+      name: name,
+      phone: phone,
+      manager: "",
+      notes: ""
+    };
+    appState.clients.push(newClient);
+    showToast("새로운 거래처 정보가 저장되었습니다.");
+  }
+  
+  saveData();
+  updateClientSuggestions();
+  renderClientsPanel();
 }
 
 function populateClientPhone() {

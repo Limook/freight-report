@@ -1657,9 +1657,12 @@ async function loadSupabaseData() {
 
             if (rpcErr) {
               console.error("RPC get_overdue_clients failed:", rpcErr);
+            } else {
+              console.log("RPC get_overdue_clients returned data:", rpcClients);
             }
             if (!rpcErr && rpcClients) {
               appState.otherOverdueClients = rpcClients.map(row => row.client_name).filter(Boolean);
+              console.log("Loaded otherOverdueClients in appState:", appState.otherOverdueClients);
             } else {
               appState.otherOverdueClients = [];
             }
@@ -7681,3 +7684,34 @@ function handleSwipeGesture() {
 }
 
 
+
+
+// Global debug helper for checking overdue warnings (Ver 2.3)
+window.debugUnpaidRisk = async () => {
+  console.log("=== Debugging Unpaid Risk Warning ===");
+  console.log("Current User:", appState.currentUser);
+  console.log("Trips in memory:", appState.trips);
+  console.log("Other Overdue Clients (RPC):", appState.otherOverdueClients);
+  
+  if (supabaseClient) {
+    console.log("Online mode: Querying Supabase RPC get_overdue_clients...");
+    try {
+      const todayStr = getLocalDateString();
+      const { data, error } = await supabaseClient.rpc('get_overdue_clients', { today_str: todayStr });
+      if (error) {
+        console.error("RPC Error:", error);
+      } else {
+        console.log("RPC Data returned:", data);
+      }
+    } catch (e) {
+      console.error("Fetch failed:", e);
+    }
+  } else {
+    console.log("Local mode (Offline/No Supabase config)");
+  }
+  
+  const warnings = getUnpaidRiskWarnings();
+  console.log("Calculated Warnings:", warnings);
+  console.log("=====================================");
+  return warnings;
+};

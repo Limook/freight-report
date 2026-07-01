@@ -6108,6 +6108,8 @@ async function deleteClient(clientId) {
     showToast("거래처가 삭제되었습니다.");
     renderClientsPanel();
   }
+}
+
 function saveClientQuickly() {
   const name = document.getElementById("trip-client").value.trim();
   const phone = document.getElementById("trip-client-phone").value.trim();

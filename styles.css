@@ -2303,6 +2303,7 @@ body.light-theme .btn-tracker-secondary:hover {
   display: flex;
   align-items: center;
   gap: 6px;
+  letter-spacing: -0.05em;
 }
 
 .db-trip-route i {

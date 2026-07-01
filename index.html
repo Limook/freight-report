@@ -1041,6 +1041,13 @@
               <div class="form-group" id="group-payment-due">
                 <label for="trip-payment-due">수금 예정일 <span class="required">*</span></label>
                 <input type="date" id="trip-payment-due">
+                <div class="datetime-shortcuts" style="margin-top: 6px;">
+                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(7)">7일</button>
+                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(15)">15일</button>
+                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(30)">30일</button>
+                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(45)">45일</button>
+                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-next-month')">익월말일</button>
+                </div>
               </div>
   
               <!-- Left: Actual Collection Date/Time -->

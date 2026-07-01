@@ -6311,6 +6311,35 @@ function setDatetimeShortcut(type, action) {
   }
 }
 
+// Payment due date shortcut calculator (7 days, 15 days, 30 days, 45 days, end of next month)
+function setPaymentDueShortcut(daysOrType) {
+  const startInput = document.getElementById("trip-start-date");
+  const endInput = document.getElementById("trip-end-date");
+  const dueInput = document.getElementById("trip-payment-due");
+  if (!dueInput) return;
+
+  let baseDate = new Date();
+  if (endInput && endInput.value) {
+    baseDate = new Date(endInput.value);
+  } else if (startInput && startInput.value) {
+    baseDate = new Date(startInput.value);
+  }
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const formatDateOnly = (date) => {
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+  };
+
+  let targetDate = new Date(baseDate.getTime());
+  if (typeof daysOrType === 'number') {
+    targetDate.setDate(targetDate.getDate() + daysOrType);
+  } else if (daysOrType === 'end-of-next-month') {
+    targetDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + 2, 0);
+  }
+
+  dueInput.value = formatDateOnly(targetDate);
+}
+
 // Global function to toggle dashboard card detail visibility (Ver 2.16)
 function toggleDashboardCardDetail(cardType) {
   const wrapper = document.getElementById(`detail-${cardType}-wrapper`);

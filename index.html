@@ -414,20 +414,20 @@
           </div>
         </div>
 
-        <!-- Monthly summaries stats (List style, 3 rows, expandable) -->
-        <div class="expenses-summary-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; width: 100%;">
+        <!-- Monthly summaries stats (Simple List style, 3 rows, expandable) -->
+        <div class="expenses-summary-list" style="display: flex; flex-direction: column; width: 100%; background-color: var(--bg-panel); border: 1px solid var(--bg-card-border); border-radius: var(--radius-sm); margin-bottom: 16px; overflow: hidden;">
           
-          <!-- Card 1: 이달의 총 경비 -->
-          <div class="stat-card" onclick="toggleExpenseSummaryDetail('total')" style="cursor: pointer; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.04) 100%); padding: 14px 16px; width: 100%;">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%;">
-              <div class="stat-icon-wrapper" style="background-color: var(--color-primary-muted); color: var(--color-primary); flex-shrink: 0; margin-bottom: 0;">
-                <i data-lucide="wallet"></i>
+          <!-- Row 1: 이달의 총 경비 -->
+          <div onclick="toggleExpenseSummaryDetail('total')" style="cursor: pointer; display: flex; flex-direction: column; padding: 14px 16px; border-bottom: 1px solid var(--bg-card-border); width: 100%; transition: background-color var(--transition-fast);" onmouseover="this.style.backgroundColor='var(--bg-card-hover)'" onmouseout="this.style.backgroundColor='transparent'">
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-primary); flex-shrink: 0;"></span>
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);" id="expense-stat-title-label">이달의 총 경비</span>
               </div>
-              <div class="stat-info" style="flex: 1;">
-                <span class="stat-label" id="expense-stat-title-label">이달의 총 경비</span>
-                <h3 id="expense-stat-total" class="stat-value" style="margin-top: 2px;">0원</h3>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <strong id="expense-stat-total" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">0원</strong>
+                <i data-lucide="chevron-down" id="expense-chevron-total" style="width: 14px; height: 14px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
               </div>
-              <i data-lucide="chevron-down" id="expense-chevron-total" style="width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
             </div>
             <!-- Collapsible details -->
             <div class="collapsible-wrapper" id="detail-expense-total-wrapper">
@@ -439,17 +439,17 @@
             </div>
           </div>
 
-          <!-- Card 2: 고정 경비 합계 -->
-          <div class="stat-card" onclick="toggleExpenseSummaryDetail('fixed')" style="cursor: pointer; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%); padding: 14px 16px; width: 100%;">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%;">
-              <div class="stat-icon-wrapper" style="background-color: var(--color-success-muted); color: var(--color-success); flex-shrink: 0; margin-bottom: 0;">
-                <i data-lucide="lock"></i>
+          <!-- Row 2: 고정 경비 합계 -->
+          <div onclick="toggleExpenseSummaryDetail('fixed')" style="cursor: pointer; display: flex; flex-direction: column; padding: 14px 16px; border-bottom: 1px solid var(--bg-card-border); width: 100%; transition: background-color var(--transition-fast);" onmouseover="this.style.backgroundColor='var(--bg-card-hover)'" onmouseout="this.style.backgroundColor='transparent'">
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-success); flex-shrink: 0;"></span>
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">고정 경비 합계</span>
               </div>
-              <div class="stat-info" style="flex: 1;">
-                <span class="stat-label">고정 경비 합계</span>
-                <h3 id="expense-stat-fixed" class="stat-value" style="margin-top: 2px;">0원</h3>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <strong id="expense-stat-fixed" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">0원</strong>
+                <i data-lucide="chevron-down" id="expense-chevron-fixed" style="width: 14px; height: 14px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
               </div>
-              <i data-lucide="chevron-down" id="expense-chevron-fixed" style="width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
             </div>
             <!-- Collapsible details -->
             <div class="collapsible-wrapper" id="detail-expense-fixed-wrapper">
@@ -461,17 +461,17 @@
             </div>
           </div>
 
-          <!-- Card 3: 유동 경비 합계 -->
-          <div class="stat-card" onclick="toggleExpenseSummaryDetail('variable')" style="cursor: pointer; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%); padding: 14px 16px; width: 100%;">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%;">
-              <div class="stat-icon-wrapper" style="background-color: var(--color-warning-muted); color: var(--color-warning); flex-shrink: 0; margin-bottom: 0;">
-                <i data-lucide="refresh-cw"></i>
+          <!-- Row 3: 유동 경비 합계 -->
+          <div onclick="toggleExpenseSummaryDetail('variable')" style="cursor: pointer; display: flex; flex-direction: column; padding: 14px 16px; width: 100%; transition: background-color var(--transition-fast);" onmouseover="this.style.backgroundColor='var(--bg-card-hover)'" onmouseout="this.style.backgroundColor='transparent'">
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-warning); flex-shrink: 0;"></span>
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">유동 경비 합계</span>
               </div>
-              <div class="stat-info" style="flex: 1;">
-                <span class="stat-label">유동 경비 합계</span>
-                <h3 id="expense-stat-variable" class="stat-value" style="margin-top: 2px;">0원</h3>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <strong id="expense-stat-variable" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">0원</strong>
+                <i data-lucide="chevron-down" id="expense-chevron-variable" style="width: 14px; height: 14px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
               </div>
-              <i data-lucide="chevron-down" id="expense-chevron-variable" style="width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;"></i>
             </div>
             <!-- Collapsible details -->
             <div class="collapsible-wrapper" id="detail-expense-variable-wrapper">

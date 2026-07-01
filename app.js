@@ -7693,7 +7693,7 @@ window.debugUnpaidRisk = async () => {
   console.log("=== Debugging Unpaid Risk Warning ===");
   console.log("Current User:", appState.currentUser);
   console.log("Trips in memory:", appState.trips);
-  console.log("Other Overdue Clients (RPC):", appState.otherOverdueClients);
+  console.log("Other Overdue Clients (RPC) before check:", appState.otherOverdueClients);
   
   if (supabaseClient) {
     console.log("Online mode: Querying Supabase RPC get_overdue_clients...");
@@ -7704,6 +7704,12 @@ window.debugUnpaidRisk = async () => {
         console.error("RPC Error:", error);
       } else {
         console.log("RPC Data returned:", data);
+        if (data) {
+          const names = data.map(row => row.client_name).filter(Boolean);
+          console.log("RPC client names extracted:", names);
+          appState.otherOverdueClients = names;
+          console.log("Dynamically synced appState.otherOverdueClients to:", appState.otherOverdueClients);
+        }
       }
     } catch (e) {
       console.error("Fetch failed:", e);

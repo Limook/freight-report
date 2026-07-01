@@ -6333,6 +6333,8 @@ function setPaymentDueShortcut(daysOrType) {
   let targetDate = new Date(baseDate.getTime());
   if (typeof daysOrType === 'number') {
     targetDate.setDate(targetDate.getDate() + daysOrType);
+  } else if (daysOrType === 'end-of-this-month') {
+    targetDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
   } else if (daysOrType === 'end-of-next-month') {
     targetDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + 2, 0);
   }

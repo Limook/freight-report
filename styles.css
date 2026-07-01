@@ -1,5 +1,5 @@
 :root {
-  /* Dark Theme Variables (default) - Monochrome Grayscale */
+  /* Dark Theme Variables (default) - Monochrome Base */
   --bg-app: #0f172a;
   --bg-panel: #1e293b;
   --bg-card: #334155;
@@ -15,18 +15,18 @@
   --color-primary-muted: rgba(255, 255, 255, 0.12);
   --color-primary-rgb: 255, 255, 255;
   
-  --color-success: #a1a1aa;
-  --color-success-hover: #cbd5e1;
-  --color-success-muted: rgba(161, 161, 170, 0.12);
+  --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-muted: rgba(16, 185, 129, 0.15);
   
-  --color-warning: #71717a;
-  --color-warning-muted: rgba(113, 113, 122, 0.12);
+  --color-warning: #f59e0b;
+  --color-warning-muted: rgba(245, 158, 11, 0.15);
   
-  --color-danger: #52525b;
-  --color-danger-muted: rgba(82, 82, 91, 0.12);
+  --color-danger: #ef4444;
+  --color-danger-muted: rgba(239, 68, 68, 0.15);
   
-  --color-accent-violet: #94a3b8;
-  --color-accent-violet-muted: rgba(148, 163, 184, 0.12);
+  --color-accent-violet: #8b5cf6;
+  --color-accent-violet-muted: rgba(139, 92, 246, 0.15);
   
   --font-sans: 'Inter', 'Noto Sans KR', sans-serif;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -44,7 +44,7 @@
 }
 
 body.light-theme {
-  /* Light Theme Variables - Monochrome Grayscale */
+  /* Light Theme Variables - Monochrome Base */
   --bg-app: #f1f5f9;
   --bg-panel: #ffffff;
   --bg-card: #f8fafc;
@@ -60,18 +60,18 @@ body.light-theme {
   --color-primary-muted: rgba(0, 0, 0, 0.06);
   --color-primary-rgb: 0, 0, 0;
   
-  --color-success: #3f3f46;
-  --color-success-hover: #27272a;
-  --color-success-muted: rgba(39, 39, 42, 0.06);
+  --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-muted: rgba(16, 185, 129, 0.08);
   
-  --color-warning: #71717a;
-  --color-warning-muted: rgba(113, 113, 122, 0.06);
+  --color-warning: #d97706;
+  --color-warning-muted: rgba(217, 119, 6, 0.08);
   
-  --color-danger: #18181b;
-  --color-danger-muted: rgba(24, 24, 27, 0.06);
+  --color-danger: #dc2626;
+  --color-danger-muted: rgba(220, 38, 38, 0.08);
   
-  --color-accent-violet: #52525b;
-  --color-accent-violet-muted: rgba(82, 82, 91, 0.06);
+  --color-accent-violet: #7c3aed;
+  --color-accent-violet-muted: rgba(124, 58, 237, 0.08);
 }
 
 /* Base Styles */
@@ -4058,61 +4058,67 @@ body.light-theme .auth-card {
   height: 14px;
 }
 
-/* Reset button override (Gray Option Style) */
+/* Reset button override (Amber/Danger Colored Style) */
 .btn-tracker-option.btn-danger {
   height: 38px;
   aspect-ratio: auto;
-  background: #27272a !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-bottom: 2.5px solid rgba(0, 0, 0, 0.35) !important;
-  color: #e4e4e7 !important;
+  background: linear-gradient(to bottom, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.05)) !important;
+  border-top: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border-left: 1px solid rgba(239, 68, 68, 0.2) !important;
+  border-right: 1px solid rgba(239, 68, 68, 0.2) !important;
+  border-bottom: 2.5px solid rgba(239, 68, 68, 0.45) !important;
+  color: var(--color-danger) !important;
   font-size: 0.88rem;
   font-weight: 700;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05);
 }
 
 .btn-tracker-option.btn-danger:hover {
-  background: #3f3f46 !important;
+  background: var(--color-danger) !important;
+  border-color: var(--color-danger) !important;
+  border-bottom: 3.5px solid rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff !important;
   transform: translateY(-1.5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
 }
 
 .btn-tracker-option.btn-danger:active {
   transform: translateY(2px);
   border-bottom-width: 1px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.15);
 }
 
-/* Undo button override (Gray Option Style) */
+/* Undo button override (Amber/Warning Colored Style) */
 .btn-tracker-option.btn-warning {
   height: 38px;
   aspect-ratio: auto;
-  background: #27272a !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-bottom: 2.5px solid rgba(0, 0, 0, 0.35) !important;
-  color: #e4e4e7 !important;
+  background: linear-gradient(to bottom, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.05)) !important;
+  border-top: 1px solid rgba(245, 158, 11, 0.3) !important;
+  border-left: 1px solid rgba(245, 158, 11, 0.2) !important;
+  border-right: 1px solid rgba(245, 158, 11, 0.2) !important;
+  border-bottom: 2.5px solid rgba(245, 158, 11, 0.45) !important;
+  color: var(--color-warning) !important;
   font-size: 0.88rem;
   font-weight: 700;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.05);
 }
 
 .btn-tracker-option.btn-warning:hover:not([disabled]) {
-  background: #3f3f46 !important;
+  background: var(--color-warning) !important;
+  border-color: var(--color-warning) !important;
+  border-bottom: 3.5px solid rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff !important;
   transform: translateY(-1.5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
 }
 
 .btn-tracker-option.btn-warning:active:not([disabled]) {
   transform: translateY(2px);
   border-bottom-width: 1px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.15);
 }
 
-body.light-theme .btn-tracker-option,
-body.light-theme .btn-tracker-option.btn-danger,
-body.light-theme .btn-tracker-option.btn-warning {
+body.light-theme .btn-tracker-option {
   background: #f4f4f5 !important;
   border-top: 1.5px solid rgba(0, 0, 0, 0.04);
   border-left: 1px solid rgba(0, 0, 0, 0.02);
@@ -4121,10 +4127,30 @@ body.light-theme .btn-tracker-option.btn-warning {
   color: #18181b !important;
 }
 
-body.light-theme .btn-tracker-option:hover,
-body.light-theme .btn-tracker-option.btn-danger:hover,
-body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
+body.light-theme .btn-tracker-option:hover {
   background: #e4e4e7 !important;
+}
+
+body.light-theme .btn-tracker-option.btn-danger {
+  background: linear-gradient(to bottom, rgba(220, 38, 38, 0.08), rgba(220, 38, 38, 0.03)) !important;
+  border: 1px solid rgba(220, 38, 38, 0.25) !important;
+  color: var(--color-danger) !important;
+}
+
+body.light-theme .btn-tracker-option.btn-danger:hover {
+  background: var(--color-danger) !important;
+  color: #ffffff !important;
+}
+
+body.light-theme .btn-tracker-option.btn-warning {
+  background: linear-gradient(to bottom, rgba(217, 119, 6, 0.08), rgba(217, 119, 6, 0.03)) !important;
+  border: 1px solid rgba(217, 119, 6, 0.25) !important;
+  color: var(--color-warning) !important;
+}
+
+body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
+  background: var(--color-warning) !important;
+  color: #ffffff !important;
 }
 
 .btn-tracker-option[disabled] {
@@ -4325,13 +4351,7 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
 
 /* State-based coloring and glow effects for the main button */
 .btn-tracker-main.state-start,
-.btn-tracker-main.state-load-arrive,
-.btn-tracker-main.state-load-complete,
-.btn-tracker-main.state-unload-arrive,
-.btn-tracker-main.state-via-complete,
-.btn-tracker-main.state-unload-complete,
-.btn-tracker-main.state-finish,
-.btn-tracker-main.state-finish-garage {
+.btn-tracker-main.state-finish {
   background: #000000 !important;
   color: #ffffff !important;
   border-top: 1.5px solid rgba(255, 255, 255, 0.2) !important;
@@ -4342,14 +4362,44 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
 }
 
 .btn-tracker-main.state-start:hover,
+.btn-tracker-main.state-finish:hover {
+  background: #18181b !important;
+}
+
+.btn-tracker-main.state-load-arrive,
+.btn-tracker-main.state-unload-arrive {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4) !important;
+  color: #ffffff !important;
+}
+
 .btn-tracker-main.state-load-arrive:hover,
+.btn-tracker-main.state-unload-arrive:hover {
+  filter: brightness(1.08) !important;
+}
+
+.btn-tracker-main.state-load-complete,
+.btn-tracker-main.state-via-complete,
+.btn-tracker-main.state-unload-complete,
+.btn-tracker-main.state-finish-garage {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+  color: #ffffff !important;
+}
+
 .btn-tracker-main.state-load-complete:hover,
-.btn-tracker-main.state-unload-arrive:hover,
 .btn-tracker-main.state-via-complete:hover,
 .btn-tracker-main.state-unload-complete:hover,
-.btn-tracker-main.state-finish:hover,
 .btn-tracker-main.state-finish-garage:hover {
-  background: #18181b !important;
+  filter: brightness(1.08) !important;
 }
 
 /* Stepper address label */
@@ -4530,37 +4580,37 @@ body.light-theme .btn-tracker-hero::before {
 
 .tracker-hero-container.driving-active .btn-tracker-hero {
   background: #000000;
-  border-color: #ffffff;
+  border-color: #3b82f6;
   color: #ffffff !important;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
   animation: borderGlowPulse 2s infinite alternate;
 }
 
 body.light-theme .tracker-hero-container.driving-active .btn-tracker-hero {
   background: #000000;
-  border-color: #000000;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
 }
 
 .tracker-hero-container.driving-active .btn-tracker-hero .hero-icon-container {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 }
 
 .tracker-hero-container.driving-active .btn-tracker-hero .hero-icon {
-  color: #ffffff;
+  color: #3b82f6;
   animation: pulseRotate 3s infinite ease-in-out;
 }
 
 @keyframes borderGlowPulse {
   0% {
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+    border-color: rgba(59, 130, 246, 0.4);
   }
   100% {
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.35);
-    border-color: #ffffff;
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.55);
+    border-color: #3b82f6;
   }
 }
 
@@ -4954,6 +5004,66 @@ body.light-theme .tracker-hero-container.driving-active .btn-tracker-hero {
 
 #dialog-trip .timeline-step .datetime-input-group label {
   margin-bottom: 2px !important;
+}
+
+/* ====================================================
+   Monochrome Accent Overrides for Functional Stepper Nodes
+   ==================================================== */
+/* 1. Active Step Highlight (Sleek Blue) */
+.milestone-status-icon.active {
+  color: #3b82f6 !important;
+}
+.tracker-dialog-content .step-node.active .node-label {
+  color: #3b82f6 !important;
+}
+.tracker-dialog-content .step-node.active .node-time {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+.step-node.active .node-address {
+  color: #3b82f6 !important;
+  background-color: rgba(59, 130, 246, 0.06) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+}
+.tracker-dialog-content .step-node.active .node-text-group {
+  background: rgba(59, 130, 246, 0.04) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+  border-left: 3.5px solid #3b82f6 !important;
+}
+
+/* 2. Waypoint Step Highlight (Premium Violet) */
+.step-node.via-node .node-label {
+  color: #8b5cf6 !important;
+}
+.step-node.via-node.completed .milestone-status-icon.completed {
+  color: #8b5cf6 !important;
+}
+.step-node.via-node.completed .node-address {
+  color: #8b5cf6 !important;
+  background-color: rgba(139, 92, 246, 0.06) !important;
+  border-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Active Waypoint Step Override */
+.step-node.via-node.active .milestone-status-icon.active {
+  color: #8b5cf6 !important;
+}
+.step-node.via-node.active .node-label {
+  color: #8b5cf6 !important;
+}
+.step-node.via-node.active .node-time {
+  background-color: #8b5cf6 !important;
+  color: #ffffff !important;
+}
+.step-node.via-node.active .node-address {
+  color: #8b5cf6 !important;
+  background-color: rgba(139, 92, 246, 0.06) !important;
+  border-color: rgba(139, 92, 246, 0.15) !important;
+}
+.step-node.via-node.active .node-text-group {
+  background: rgba(139, 92, 246, 0.04) !important;
+  border-color: rgba(139, 92, 246, 0.15) !important;
+  border-left: 3.5px solid #8b5cf6 !important;
 }
 
 

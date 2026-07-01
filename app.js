@@ -4659,8 +4659,10 @@ function updateTrackerUI() {
         statusIcon = `<i data-lucide="circle" class="milestone-status-icon pending" style="width: 14px; height: 14px; margin-top: 1px;"></i>`;
       }
 
+      const isVia = m.label.includes("경유지");
+      const viaClass = isVia ? "via-node" : "";
       html += `
-        <div class="step-node ${m.status}" style="padding-left: 28px; position: relative;">
+        <div class="step-node ${m.status} ${viaClass}" style="padding-left: 28px; position: relative;">
           <div class="node-text-group" style="width: 100%;">
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               ${statusIcon}

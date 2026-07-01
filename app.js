@@ -2665,36 +2665,86 @@ function createTripElement(trip, disableHighlight = false) {
     return rawDong;
   };
 
-  // 1. Collapsed Route representation (shows (경유N))
-  let routeCollapsedHtml = "";
+  // 1. Collapsed Route representation (display all waypoints, split into 2 lines if > 4 locations)
+  const locs = [];
+  
   if (trip.routeStart) {
     const startDong = getDongName(trip.routeStart, "출발지");
-    routeCollapsedHtml += `<span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">${startDong}</span>
-      <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted);"></i>`;
+    locs.push({
+      name: startDong,
+      type: 'start',
+      html: `<span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">${startDong}</span>`
+    });
   }
   
   const loadDong = getDongName(trip.routeLoad, "상차지");
-  routeCollapsedHtml += `<span>${loadDong}</span>`;
+  locs.push({
+    name: loadDong,
+    type: 'load',
+    html: `<span>${loadDong}</span>`
+  });
   
   if (trip.routeVias && trip.routeVias.length > 0) {
-    const viaCount = trip.routeVias.length;
-    routeCollapsedHtml += `
-      <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted);"></i>
-      <span style="color: var(--color-warning); font-size: 0.8rem; font-weight: 600;">(경유${viaCount})</span>
-    `;
+    trip.routeVias.forEach((via, index) => {
+      const viaDong = getDongName(via, `경유지${index + 1}`);
+      locs.push({
+        name: viaDong,
+        type: 'via',
+        html: `<span style="color: var(--color-warning); font-size: 0.8rem; font-weight: 600;">${viaDong}</span>`
+      });
+    });
   }
   
   const unloadDong = getDongName(trip.routeUnload, "하차지");
-  routeCollapsedHtml += `
-    <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted);"></i>
-    <span>${unloadDong}</span>
-  `;
-
+  locs.push({
+    name: unloadDong,
+    type: 'unload',
+    html: `<span>${unloadDong}</span>`
+  });
+  
   if (trip.routeArrival) {
     const arrivalDong = getDongName(trip.routeArrival, "도착지");
-    routeCollapsedHtml += `
-      <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted);"></i>
-      <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">${arrivalDong}</span>
+    locs.push({
+      name: arrivalDong,
+      type: 'arrival',
+      html: `<span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">${arrivalDong}</span>`
+    });
+  }
+
+  let routeCollapsedHtml = "";
+  if (locs.length <= 4) {
+    // Single line
+    locs.forEach((loc, idx) => {
+      if (idx > 0) {
+        routeCollapsedHtml += ` <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted); margin: 0 2px; vertical-align: middle;"></i> `;
+      }
+      routeCollapsedHtml += loc.html;
+    });
+  } else {
+    // Two lines (split after the 4th element - index 3)
+    let line1Html = "";
+    let line2Html = "";
+    
+    locs.forEach((loc, idx) => {
+      if (idx < 4) {
+        if (idx > 0) {
+          line1Html += ` <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted); margin: 0 2px; vertical-align: middle;"></i> `;
+        }
+        line1Html += loc.html;
+      } else {
+        if (idx > 4) {
+          line2Html += ` <i data-lucide="arrow-right" class="route-arrow" style="width: 12px; height: 12px; color: var(--text-muted); margin: 0 2px; vertical-align: middle;"></i> `;
+        }
+        line2Html += loc.html;
+      }
+    });
+    
+    routeCollapsedHtml = `
+      <div class="collapsed-route-line" style="display: flex; align-items: center; flex-wrap: wrap; gap: 2px;">${line1Html}</div>
+      <div class="collapsed-route-line" style="display: flex; align-items: center; flex-wrap: wrap; gap: 2px; margin-top: 4px; padding-left: 12px; border-left: 2px solid var(--bg-card-border);">
+        <i data-lucide="corner-down-right" style="width: 11px; height: 11px; color: var(--text-muted); margin-right: 4px; flex-shrink: 0;"></i>
+        ${line2Html}
+      </div>
     `;
   }
 

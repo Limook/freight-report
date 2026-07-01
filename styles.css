@@ -4447,11 +4447,12 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
 
 .btn-tracker-hero {
   width: 100%;
-  padding: 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--bg-card-border);
+  height: 68px;
+  padding: 0 20px;
+  background: #000000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: var(--radius-md);
-  color: var(--text-main);
+  color: #ffffff !important;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -4459,14 +4460,14 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
   text-align: left;
 }
 
-/* Light theme overrides for tracker hero */
 body.light-theme .btn-tracker-hero {
-  background: var(--bg-panel);
-  border: 1px solid var(--bg-card-border);
+  background: #000000 !important;
+  border: 1px solid #000000 !important;
+  color: #ffffff !important;
 }
 
 /* Animated metallic light sweep reflection */
@@ -4500,18 +4501,22 @@ body.light-theme .btn-tracker-hero::before {
 }
 
 .btn-tracker-hero:hover {
-  border-color: var(--text-muted);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+  background: #18181b !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+}
+body.light-theme .btn-tracker-hero:hover {
+  background: #18181b !important;
 }
 
 /* Circular icon badge wrapper */
 .btn-tracker-hero .hero-icon-container {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: var(--color-primary-muted);
-  border: 1px solid var(--color-primary-muted);
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4520,16 +4525,16 @@ body.light-theme .btn-tracker-hero::before {
 }
 
 .btn-tracker-hero .hero-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--color-primary);
+  width: 18px;
+  height: 18px;
+  color: #ffffff !important;
   transition: all var(--transition-normal);
 }
 
 .btn-tracker-hero:hover .hero-icon-container {
-  background: var(--color-primary-muted);
-  border-color: var(--text-muted);
-  box-shadow: 0 0 12px var(--color-primary-muted);
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2) !important;
 }
 
 .btn-tracker-hero:hover .hero-icon {
@@ -4857,14 +4862,7 @@ body.light-theme .tracker-hero-container.driving-active .btn-tracker-hero {
 /* ====================================================
    Expense Hero Button on Home View (Ver 2.16 Patch 5)
    ==================================================== */
-.btn-hero-register.btn-hero-expense {
-  background: linear-gradient(135deg, var(--color-success), var(--color-success-hover));
-}
 
-.btn-hero-register.btn-hero-expense:hover {
-  background: linear-gradient(135deg, var(--color-success-hover), var(--color-success));
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
-}
 
 /* ====================================================
    Expanded Trip Card layout overrides (Ver 2.16 Patch 7)

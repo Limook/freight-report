@@ -185,19 +185,21 @@ CREATE POLICY "Settings 소유자 또는 어드민 액세스 허용" ON public.s
 -- 4. 보안 함수 (Security Definer RPC) 정의
 -- ------------------------------------------
 
--- 타 회원의 다른 중요 정보를 노출하지 않고, 오직 연체(미수금) 상태인 거래처 이름만 중복없이 반환하는 함수 (보안 조치)
-CREATE OR REPLACE FUNCTION public.get_overdue_clients(today_str TEXT)
-RETURNS TABLE (client_name TEXT) 
+-- 타 회원의 다른 중요 정보를 노출하지 않고, 오직 연체(미수금) 상태인 거래처 이름과 해당 거래처에 연체가 있는 타 기사의 수만 중복없이 반환하는 함수 (보안 조치)
+CREATE OR REPLACE FUNCTION public.get_overdue_clients(today_str TEXT, current_user_id UUID)
+RETURNS TABLE (client_name TEXT, overdue_drivers_count INT) 
 SECURITY DEFINER
 AS $$
 BEGIN
   RETURN QUERY 
-  SELECT DISTINCT t.client_name 
+  SELECT t.client_name, COUNT(DISTINCT t.user_id)::INT
   FROM public.trips t
   WHERE t.is_paid = false 
     AND t.payment_due_date IS NOT NULL 
-    AND t.payment_due_date < today_str;
+    AND t.payment_due_date < today_str
+    AND t.user_id <> current_user_id
+  GROUP BY t.client_name;
 END;
 $$ LANGUAGE plpgsql;
 
-GRANT EXECUTE ON FUNCTION public.get_overdue_clients(today_str TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_overdue_clients(today_str TEXT, current_user_id UUID) TO authenticated;

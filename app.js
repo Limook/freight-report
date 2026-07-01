@@ -1613,7 +1613,19 @@ async function loadSupabaseData() {
                 t.payment_due_date && 
                 t.payment_due_date < todayStr
               );
-              appState.otherOverdueClients = [...new Set(otherOverdue.map(t => t.client_name).filter(Boolean))];
+              const clientCounts = {};
+              otherOverdue.forEach(t => {
+                if (t.client_name) {
+                  if (!clientCounts[t.client_name]) {
+                    clientCounts[t.client_name] = new Set();
+                  }
+                  clientCounts[t.client_name].add(t.user_id);
+                }
+              });
+              appState.otherOverdueClients = Object.keys(clientCounts).map(clientName => ({
+                client: clientName,
+                otherOverdueCount: clientCounts[clientName].size
+              }));
             }
           } else {
             // Parallelize Supabase requests
@@ -1626,7 +1638,7 @@ async function loadSupabaseData() {
               { data: dbTracker }
             ] = await Promise.all([
               supabaseClient.from('trips').select('*').eq('user_id', profile.id),
-              supabaseClient.rpc('get_overdue_clients', { today_str: todayStr }),
+              supabaseClient.rpc('get_overdue_clients', { today_str: todayStr, current_user_id: session.user.id }),
               supabaseClient.from('clients').select('*').eq('user_id', profile.id),
               supabaseClient.from('expenses').select('*').eq('user_id', profile.id),
               supabaseClient.from('settings').select('*').eq('user_id', profile.id).maybeSingle(),
@@ -1663,7 +1675,10 @@ async function loadSupabaseData() {
               console.log("RPC get_overdue_clients returned data:", rpcClients);
             }
             if (!rpcErr && rpcClients) {
-              appState.otherOverdueClients = rpcClients.map(row => row.client_name).filter(Boolean);
+              appState.otherOverdueClients = rpcClients.map(row => ({
+                client: row.client_name,
+                otherOverdueCount: Number(row.overdue_drivers_count || 0)
+              })).filter(item => item.client);
               console.log("Loaded otherOverdueClients in appState:", appState.otherOverdueClients);
             } else {
               appState.otherOverdueClients = [];
@@ -2148,18 +2163,24 @@ function isTripOverdue(trip) {
 function getUnpaidRiskWarnings() {
   if (!appState.currentUser || !appState.trips) return [];
   
-  const hasOtherOverdueClient = (clientName) => {
+  const getOtherOverdueCount = (clientName) => {
     // 1. If we are online and fetched otherOverdueClients via RPC
     if (appState.otherOverdueClients && appState.otherOverdueClients.length > 0) {
-      return appState.otherOverdueClients.includes(clientName);
+      const match = appState.otherOverdueClients.find(c => c.client === clientName);
+      return match ? match.otherOverdueCount : 0;
     }
     // 2. Local fallback mode: check localStorage trips of other users
-    return appState.trips.some(t => 
-      t.userId !== appState.currentUser.username && 
-      !t.isPaid && 
-      isTripOverdue(t) && 
-      t.client === clientName
+    const uniqueDrivers = new Set(
+      appState.trips
+        .filter(t => 
+          t.userId !== appState.currentUser.username && 
+          !t.isPaid && 
+          isTripOverdue(t) && 
+          t.client === clientName
+        )
+        .map(t => t.userId)
     );
+    return uniqueDrivers.size;
   };
   
   const myPendingTrips = appState.trips.filter(t => 
@@ -2170,16 +2191,20 @@ function getUnpaidRiskWarnings() {
   
   const warnings = [];
   myPendingTrips.forEach(t => {
-    if (t.client && hasOtherOverdueClient(t.client)) {
-      let w = warnings.find(item => item.client === t.client);
-      if (!w) {
-        w = { 
-          client: t.client, 
-          myTripsCount: 0 
-        };
-        warnings.push(w);
+    if (t.client) {
+      const count = getOtherOverdueCount(t.client);
+      if (count >= 3) {
+        let w = warnings.find(item => item.client === t.client);
+        if (!w) {
+          w = { 
+            client: t.client, 
+            myTripsCount: 0,
+            otherOverdueCount: count
+          };
+          warnings.push(w);
+        }
+        w.myTripsCount++;
       }
-      w.myTripsCount++;
     }
   });
   
@@ -2687,7 +2712,7 @@ function renderHomePanel() {
             <div style="font-size: 0.72rem; color: var(--text-main); display: flex; flex-direction: column; gap: 4px;">
               ${riskWarnings.map(w => `
                 <p style="margin: 0; line-height: 1.4;">
-                  다른 회원의 미수금(연체)이 발생한 거래처 <strong>'${w.client}'</strong>의 수금대기 화물이 내 운송 이력에 <strong>${w.myTripsCount}건</strong> 있습니다. (대금 회수 주의)
+                  다른회원 ${w.otherOverdueCount}명의 미수금(연체)이 발생한 거래처 '${w.client}'의 수금대기 화물이 내 운송이력에 ${w.myTripsCount}건 있습니다.(대금 회수 주의)
                 </p>
               `).join('')}
             </div>
@@ -3262,7 +3287,7 @@ function renderUnpaidTripsView() {
           <div style="font-size: 0.74rem; color: var(--text-main); display: flex; flex-direction: column; gap: 6px;">
             ${riskWarnings.map(w => `
               <p style="margin: 0; line-height: 1.45;">
-                다른 운송 회원의 미수금(연체)이 등록된 거래처 <strong>'${w.client}'</strong>에 대해, 현재 내가 운송한 <strong>${w.myTripsCount}건</strong>의 화물이 <strong>수금 대기</strong> 상태에 있습니다. 수금 지연 및 미수금 발생 위험이 있으므로 주의 바랍니다.
+                다른회원 ${w.otherOverdueCount}명의 미수금(연체)이 발생한 거래처 '${w.client}'의 수금대기 화물이 내 운송이력에 ${w.myTripsCount}건 있습니다.(대금 회수 주의)
               </p>
             `).join('')}
           </div>
@@ -7727,15 +7752,24 @@ window.debugUnpaidRisk = async () => {
     console.log("Online mode: Querying Supabase RPC get_overdue_clients...");
     try {
       const todayStr = getLocalDateString();
-      const { data, error } = await supabaseClient.rpc('get_overdue_clients', { today_str: todayStr });
+      const sessionRes = await supabaseClient.auth.getSession();
+      const current_user_id = sessionRes.data.session ? sessionRes.data.session.user.id : null;
+      
+      const { data, error } = await supabaseClient.rpc('get_overdue_clients', { 
+        today_str: todayStr, 
+        current_user_id: current_user_id 
+      });
       if (error) {
         console.error("RPC Error:", error);
       } else {
         console.log("RPC Data returned:", data);
         if (data) {
-          const names = data.map(row => row.client_name).filter(Boolean);
-          console.log("RPC client names extracted:", names);
-          appState.otherOverdueClients = names;
+          const formatted = data.map(row => ({
+            client: row.client_name,
+            otherOverdueCount: Number(row.overdue_drivers_count || 0)
+          })).filter(item => item.client);
+          console.log("RPC client objects extracted:", formatted);
+          appState.otherOverdueClients = formatted;
           console.log("Dynamically synced appState.otherOverdueClients to:", appState.otherOverdueClients);
         }
       }

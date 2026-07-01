@@ -6580,7 +6580,7 @@ async function handleLogin(event) {
         phone: ''
       };
       
-      await loadData();
+      await loadSupabaseData();
       
       usernameInput.value = "";
       passwordInput.value = "";
@@ -6690,7 +6690,7 @@ async function handleSignup(event) {
         phone: phone
       };
       
-      await loadData();
+      await loadSupabaseData();
       
       usernameInput.value = "";
       passwordInput.value = "";

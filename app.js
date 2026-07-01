@@ -3946,7 +3946,7 @@ function togglePaymentDueDate() {
     dateInput.setAttribute("required", "required");
     
     if (!dateInput.value) {
-      dateInput.value = getLocalDateTimeString();
+      dateInput.value = getLocalDateString();
     }
   } else {
     groupDue.style.display = "flex";
@@ -6315,7 +6315,8 @@ function setDatetimeShortcut(type, action) {
 function setPaymentDueShortcut(daysOrType) {
   const startInput = document.getElementById("trip-start-date");
   const endInput = document.getElementById("trip-end-date");
-  const dueInput = document.getElementById("trip-payment-due");
+  const isPaid = document.getElementById("trip-is-paid").checked;
+  const dueInput = isPaid ? document.getElementById("trip-payment-date") : document.getElementById("trip-payment-due");
   if (!dueInput) return;
 
   let baseDate = new Date();

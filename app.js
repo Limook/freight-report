@@ -4023,9 +4023,8 @@ function addWaypointField(val = "") {
           <i data-lucide="map-pin"></i>
           <input type="text" id="trip-via-${targetIndex}" placeholder="경유지 선택" readonly onclick="openLocationPicker('via-${targetIndex}')" value="${val}">
         </div>
-        <button type="button" class="btn btn-outline" style="flex-shrink: 0; padding: 0 10px; height: 38px; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; gap: 4px; background-color: var(--bg-panel); color: var(--text-main); border: 1px solid var(--bg-card-border);" onclick="setFieldToCurrentLocation('trip-via-${targetIndex}', 'waypoint')">
-          <i data-lucide="navigation" style="width: 12px; height: 12px;"></i>
-          <span>현위치</span>
+        <button type="button" class="btn btn-outline" style="width: 38px; height: 38px; padding: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-panel); color: var(--text-main); border: 1px solid var(--bg-card-border);" onclick="setFieldToCurrentLocation('trip-via-${targetIndex}', 'waypoint')" title="현위치 입력">
+          <i data-lucide="navigation" style="width: 14px; height: 14px;"></i>
         </button>
       </div>
     </div>

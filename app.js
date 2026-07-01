@@ -1986,6 +1986,9 @@ function initNavigation() {
   document.addEventListener("click", (e) => {
     if (window.innerWidth <= 600) return;
     
+    // Ignore clicks on elements that were detached from the DOM during click handling
+    if (!e.target.isConnected) return;
+    
     // A. Trip Modal
     const dialogTrip = document.getElementById("dialog-trip");
     if (dialogTrip && dialogTrip.open) {

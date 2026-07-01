@@ -2596,7 +2596,7 @@ body.light-theme .btn-tracker-secondary:hover {
 /* Hero register button style (Ver 2.14) */
 .btn-hero-register {
   width: 100%;
-  height: 102px; /* 150% height */
+  height: 80px; /* Adjust height to 80px */
   background: #000000 !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: var(--radius-md);
@@ -4447,7 +4447,7 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
 
 .btn-tracker-hero {
   width: 100%;
-  height: 102px; /* 150% height */
+  height: 80px; /* Adjust height to 80px */
   padding: 0 20px;
   background: #000000 !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;

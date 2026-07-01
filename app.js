@@ -1942,6 +1942,15 @@ function initNavigation() {
 
   navItems.forEach(item => {
     item.addEventListener("click", () => {
+      // Auto-save drafts and close modals when switching tabs
+      const dialogTrip = document.getElementById("dialog-trip");
+      if (dialogTrip && dialogTrip.open) {
+        saveTripDraft();
+      }
+      const dialogExpense = document.getElementById("dialog-expense");
+      if (dialogExpense && dialogExpense.open) {
+        saveExpenseDraft();
+      }
       closeTrackerDialog();
       const target = item.getAttribute("data-target");
 
@@ -1971,6 +1980,47 @@ function initNavigation() {
 
       lucide.createIcons();
     });
+  });
+  
+  // Outside Click Listener for Desktop Modal Dialogs (Ver 2.26)
+  document.addEventListener("click", (e) => {
+    if (window.innerWidth <= 600) return;
+    
+    // A. Trip Modal
+    const dialogTrip = document.getElementById("dialog-trip");
+    if (dialogTrip && dialogTrip.open) {
+      const modalContent = dialogTrip.querySelector(".modal-content");
+      if (modalContent && !modalContent.contains(e.target)) {
+        const openBtn = e.target.closest(".btn-hero-register") || e.target.closest("[onclick*='openTripModal']") || e.target.closest(".nav-item");
+        if (!openBtn) {
+          saveTripDraft();
+        }
+      }
+    }
+    
+    // B. Expense Modal
+    const dialogExpense = document.getElementById("dialog-expense");
+    if (dialogExpense && dialogExpense.open) {
+      const modalContent = dialogExpense.querySelector(".modal-content-expense");
+      if (modalContent && !modalContent.contains(e.target)) {
+        const openBtn = e.target.closest(".btn-hero-expense") || e.target.closest("[onclick*='openExpenseModal']") || e.target.closest(".nav-item");
+        if (!openBtn) {
+          saveExpenseDraft();
+        }
+      }
+    }
+    
+    // C. Smart Tracker Dialog
+    const dialogTracker = document.getElementById("dialog-tracker");
+    if (dialogTracker && dialogTracker.open) {
+      const modalContent = dialogTracker.querySelector(".tracker-dialog-content");
+      if (modalContent && !modalContent.contains(e.target)) {
+        const openBtn = e.target.closest(".btn-tracker-hero") || e.target.closest("[onclick*='openTrackerDialog']") || e.target.closest(".nav-item");
+        if (!openBtn) {
+          closeTrackerDialog();
+        }
+      }
+    }
   });
 }
 
@@ -5753,6 +5803,118 @@ function clearTripDraftHome() {
   }
 }
 
+// Expense Draft storage functions (Ver 2.26)
+function saveExpenseDraft() {
+  const expenseId = document.getElementById("expense-id").value;
+  const date = document.getElementById("expense-modal-date").value;
+  const type = document.getElementById("expense-modal-type").value;
+  const category = document.getElementById("expense-modal-category").value;
+  const customCategory = document.getElementById("expense-modal-custom-category") ? document.getElementById("expense-modal-custom-category").value.trim() : "";
+  const amount = document.getElementById("expense-modal-amount").value;
+  const title = document.getElementById("expense-modal-title-input") ? document.getElementById("expense-modal-title-input").value.trim() : "";
+  const notes = document.getElementById("expense-modal-notes").value.trim();
+  const repeatType = document.getElementById("expense-modal-repeat-type") ? document.getElementById("expense-modal-repeat-type").value : "none";
+  const repeatCount = document.getElementById("expense-modal-repeat-count") ? document.getElementById("expense-modal-repeat-count").value : "1";
+
+  const draftData = {
+    expenseId, date, type, category, customCategory, amount, title, notes, repeatType, repeatCount
+  };
+
+  localStorage.setItem("logilog_expense_draft", JSON.stringify(draftData));
+  showToast("작성 중이던 경비 내역이 임시저장되었습니다.");
+  closeExpenseModal();
+}
+
+function checkExpenseDraft(expenseId) {
+  const banner = document.getElementById("expense-draft-banner");
+  if (!banner) return;
+
+  const draftStr = localStorage.getItem("logilog_expense_draft");
+  if (draftStr) {
+    try {
+      const draft = JSON.parse(draftStr);
+      const targetId = expenseId || "";
+      const draftId = draft.expenseId || "";
+      if (targetId === draftId) {
+        banner.style.display = "flex";
+        lucide.createIcons();
+        return;
+      }
+      localStorage.removeItem("logilog_expense_draft");
+    } catch (e) {
+      localStorage.removeItem("logilog_expense_draft");
+    }
+  }
+  banner.style.display = "none";
+}
+
+function loadExpenseDraft() {
+  const draftStr = localStorage.getItem("logilog_expense_draft");
+  if (!draftStr) return;
+
+  try {
+    const draft = JSON.parse(draftStr);
+    
+    document.getElementById("expense-modal-date").value = draft.date || getLocalDateString();
+    
+    const typeVal = draft.type || "fixed";
+    document.getElementById("expense-modal-type").value = typeVal;
+    if (typeVal === "fixed") {
+      document.getElementById("expense-type-fixed").checked = true;
+    } else {
+      document.getElementById("expense-type-variable").checked = true;
+    }
+    
+    updateCategoryOptions(typeVal);
+    
+    const categorySelect = document.getElementById("expense-modal-category");
+    const selectWrapper = document.getElementById("wrapper-category-select");
+    const customWrapper = document.getElementById("wrapper-category-custom");
+    const customInput = document.getElementById("expense-modal-custom-category");
+    
+    if (draft.category === "직접입력") {
+      categorySelect.value = "직접입력";
+      if (selectWrapper) selectWrapper.style.display = "none";
+      if (customWrapper) {
+        customWrapper.style.display = "block";
+        customInput.value = draft.customCategory || "";
+        customInput.required = true;
+      }
+    } else {
+      categorySelect.value = draft.category;
+      if (selectWrapper) selectWrapper.style.display = "block";
+      if (customWrapper) customWrapper.style.display = "none";
+      if (customInput) customInput.required = false;
+    }
+    
+    document.getElementById("expense-modal-amount").value = draft.amount || "";
+    if (document.getElementById("expense-modal-title-input")) {
+      document.getElementById("expense-modal-title-input").value = draft.title || "";
+    }
+    document.getElementById("expense-modal-notes").value = draft.notes || "";
+    
+    if (document.getElementById("expense-modal-repeat-type")) {
+      document.getElementById("expense-modal-repeat-type").value = draft.repeatType || "none";
+    }
+    if (document.getElementById("expense-modal-repeat-count")) {
+      document.getElementById("expense-modal-repeat-count").value = draft.repeatCount || "1";
+    }
+  } catch (e) {
+    console.error("Error loading expense draft", e);
+  }
+  
+  const banner = document.getElementById("expense-draft-banner");
+  if (banner) banner.style.display = "none";
+}
+
+function clearExpenseDraft(showToastMessage = false) {
+  localStorage.removeItem("logilog_expense_draft");
+  const banner = document.getElementById("expense-draft-banner");
+  if (banner) banner.style.display = "none";
+  if (showToastMessage) {
+    showToast("임시 저장본이 삭제되었습니다.");
+  }
+}
 
 // ----------------------------------------------------
 // CLIENTS DATABASE CRUD OPERATIONS (TAB 4 - Ver 2.16)
@@ -6973,6 +7135,8 @@ function openExpenseModal(expenseId = null) {
     }
   }
   
+  checkExpenseDraft(expenseId);
+  
   if (dialogExpense) {
     dialogExpense.show();
     lucide.createIcons(); // To resolve the new segment control icons
@@ -7065,6 +7229,7 @@ function saveExpense() {
   }
   
   saveData();
+  clearExpenseDraft(false);
   closeExpenseModal();
   renderExpensesPanel();
   updateDashboardStats();

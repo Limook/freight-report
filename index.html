@@ -1234,6 +1234,21 @@
         <h3 id="expense-modal-title">경비 기록 등록</h3>
         <button class="close-btn" onclick="closeExpenseModal()">&times;</button>
       </header>
+
+      <!-- Draft Alert Banner (Ver 2.26) -->
+      <div id="expense-draft-banner" class="draft-banner" style="display: none; margin-bottom: 12px;">
+        <div class="draft-banner-content">
+          <i data-lucide="file-text" class="icon-sm" style="color: var(--color-warning); width: 14px; height: 14px;"></i>
+          <span>작성 중이던 임시 저장본이 있습니다.</span>
+        </div>
+        <div class="draft-banner-actions">
+          <button type="button" class="btn btn-warning btn-sm" onclick="loadExpenseDraft()">불러오기</button>
+          <button type="button" class="btn-icon" onclick="clearExpenseDraft(true)" title="임시저장 삭제">
+            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+          </button>
+        </div>
+      </div>
+
       <form id="form-expense" method="dialog">
         <input type="hidden" id="expense-id">
         <input type="hidden" id="expense-modal-type" value="fixed">

@@ -3121,11 +3121,11 @@ function renderTripsList() {
   if (statsContainer) {
     statsContainer.innerHTML = `
       <div style="flex: 35 1 0%; background-color: var(--bg-card); border: 1px solid var(--bg-card-border); padding: 10px 14px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">총 운행건수</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">운행건수</span>
         <strong style="font-size: 1rem; color: var(--color-primary); font-weight: 700;">${totalCount.toLocaleString()}건</strong>
       </div>
       <div style="flex: 65 1 0%; background-color: var(--bg-card); border: 1px solid var(--bg-card-border); padding: 10px 14px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">총 매출액</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">매출액</span>
         <strong style="font-size: 1rem; color: var(--color-success); font-weight: 700;">${totalRevenue.toLocaleString()}원</strong>
       </div>
     `;
@@ -3353,11 +3353,11 @@ function renderCalendarView() {
   if (calendarStatsContainer) {
     calendarStatsContainer.innerHTML = `
       <div style="flex: 35 1 0%; background-color: var(--bg-card); border: 1px solid var(--bg-card-border); padding: 10px 14px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">이번달 운행건수</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">운행건수</span>
         <strong style="font-size: 1rem; color: var(--color-primary); font-weight: 700;">${monthCount.toLocaleString()}건</strong>
       </div>
       <div style="flex: 65 1 0%; background-color: var(--bg-card); border: 1px solid var(--bg-card-border); padding: 10px 14px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">이번달 매출액</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">매출액</span>
         <strong style="font-size: 1rem; color: var(--color-success); font-weight: 700;">${monthRevenue.toLocaleString()}원</strong>
       </div>
     `;

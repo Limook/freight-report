@@ -66,29 +66,22 @@
             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; width: 100%;">
               <!-- 1. 스마트 운행기록기 (첫 번째 줄 100%) -->
               <div class="tracker-hero-container" id="tracker-hero-container" style="width: 100%;">
-                <button class="btn-tracker-hero" onclick="openTrackerDialog()" style="width: 100%;">
-                  <div class="hero-icon-container">
-                    <i data-lucide="navigation" class="hero-icon"></i>
-                  </div>
-                  <div class="hero-text-group">
-                    <span class="hero-subtitle" id="tracker-hero-status-subtitle">실시간 기록 시작하기</span>
-                    <h3 class="hero-title" id="tracker-hero-status-title">스마트 운행기록기</h3>
-                  </div>
+                <button class="btn-tracker-hero" onclick="openTrackerDialog()" style="width: 100%; display: flex; align-items: center; justify-content: center; text-align: center;">
+                  <span id="tracker-hero-status-subtitle" style="display: none;"></span>
+                  <span class="hero-title" id="tracker-hero-status-title" style="margin: 0; font-size: inherit; font-weight: inherit;">스마트 운행기록기</span>
                 </button>
               </div>
 
-              <!-- 2. 등록 단축 버튼 그룹 (두 번째 줄 8:2 비율) -->
+              <!-- 2. 등록 단축 버튼 그룹 (두 번째 줄 7:3 비율) -->
               <div style="display: flex; gap: 10px; width: 100%;">
-                <!-- 운행기록 등록 (80%) -->
-                <button class="btn-hero-register" onclick="openTripModal()" style="flex: 8; margin-bottom: 0;">
-                  <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
+                <!-- 운행기록 등록 (70%) -->
+                <button class="btn-hero-register" onclick="openTripModal()" style="flex: 7; margin-bottom: 0;">
                   <span>운행기록 등록</span>
                 </button>
 
-                <!-- 경비내역 등록 (20%) -->
-                <button class="btn-hero-register btn-hero-expense" onclick="openExpenseModal()" style="flex: 2; margin-bottom: 0; padding: 0 8px; justify-content: center; gap: 4px;">
-                  <i data-lucide="receipt" style="width: 18px; height: 18px; flex-shrink: 0;"></i>
-                  <span style="font-size: 0.76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">경비</span>
+                <!-- 경비내역 등록 (30%) -->
+                <button class="btn-hero-register btn-hero-expense" onclick="openExpenseModal()" style="flex: 3; margin-bottom: 0;">
+                  <span>경비 등록</span>
                 </button>
               </div>
             </div>

@@ -4906,7 +4906,7 @@ function updateTrackerUI() {
   if (heroStatusSubtitle && heroStatusTitle) {
     if (step === 0) {
       heroStatusSubtitle.textContent = "실시간 기록 시작하기";
-      heroStatusTitle.innerHTML = `<i data-lucide="play-circle" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-top: -3px; margin-right: 4px;"></i>스마트 운행기록기`;
+      heroStatusTitle.textContent = "스마트 운행기록기";
       if (heroContainer) heroContainer.classList.remove("driving-active");
     } else {
       let currentMilestoneLabel = "운행 시작";
@@ -4921,7 +4921,7 @@ function updateTrackerUI() {
       else if (step === 7) currentMilestoneLabel = "하차 완료";
       
       heroStatusSubtitle.textContent = `실시간 운행 중 (${currentMilestoneLabel})`;
-      heroStatusTitle.innerHTML = `<span class="live-dot-indicator"></span>운행기록기 열기`;
+      heroStatusTitle.innerHTML = `<span class="live-dot-indicator"></span>스마트 운행기록기`;
       if (heroContainer) heroContainer.classList.add("driving-active");
     }
     lucide.createIcons();

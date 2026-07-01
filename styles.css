@@ -2596,13 +2596,13 @@ body.light-theme .btn-tracker-secondary:hover {
 /* Hero register button style (Ver 2.14) */
 .btn-hero-register {
   width: 100%;
-  height: 68px;
+  height: 102px; /* 150% height */
   background: #000000 !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: var(--radius-md);
   color: #ffffff !important;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 1.15rem; /* Unified font size */
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4447,7 +4447,7 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
 
 .btn-tracker-hero {
   width: 100%;
-  height: 68px;
+  height: 102px; /* 150% height */
   padding: 0 20px;
   background: #000000 !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -4455,13 +4455,16 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
   color: #ffffff !important;
   display: flex;
   align-items: center;
+  justify-content: center; /* Center horizontally */
+  font-size: 1.15rem; /* Unified font size */
+  font-weight: 800;
   gap: 18px;
   cursor: pointer;
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
-  text-align: left;
+  text-align: center; /* Center text */
 }
 
 body.light-theme .btn-tracker-hero {

@@ -1608,12 +1608,14 @@ async function loadSupabaseData() {
             // Parallelize Supabase requests
             const [
               { data: dbTrips, error: tripsErr },
+              { data: otherTrips, error: otherTripsErr },
               { data: dbClients },
               { data: dbExpenses },
               { data: dbSettings },
               { data: dbTracker }
             ] = await Promise.all([
               supabaseClient.from('trips').select('*').eq('user_id', profile.id),
+              supabaseClient.from('trips').select('*').eq('is_paid', false).neq('user_id', profile.id),
               supabaseClient.from('clients').select('*').eq('user_id', profile.id),
               supabaseClient.from('expenses').select('*').eq('user_id', profile.id),
               supabaseClient.from('settings').select('*').eq('user_id', profile.id).maybeSingle(),
@@ -1642,6 +1644,31 @@ async function loadSupabaseData() {
                 notes: row.notes,
                 expenses: row.expenses || {}
               }));
+
+              if (!otherTripsErr && otherTrips) {
+                const mappedOther = otherTrips.map(row => ({
+                  id: row.id,
+                  userId: 'other_user_' + row.user_id,
+                  client: row.client_name,
+                  clientPhone: row.client_phone,
+                  fee: Number(row.fee),
+                  commission: Number(row.commission),
+                  distance: Number(row.distance),
+                  startDate: row.start_date,
+                  endDate: row.end_date,
+                  paymentDate: row.payment_date,
+                  paymentDueDate: row.payment_due_date,
+                  isPaid: row.is_paid,
+                  routeStart: row.route_start,
+                  routeLoad: row.route_load,
+                  routeVias: row.route_vias || [],
+                  routeUnload: row.route_unload,
+                  routeArrival: row.route_arrival,
+                  notes: row.notes,
+                  expenses: row.expenses || {}
+                }));
+                appState.trips = [...appState.trips, ...mappedOther];
+              }
             }
             
             if (dbClients) {

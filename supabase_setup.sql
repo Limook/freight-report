@@ -169,6 +169,9 @@ CREATE POLICY "Clients 소유자 또는 어드민 액세스 허용" ON public.cl
 CREATE POLICY "Trips 소유자 또는 어드민 액세스 허용" ON public.trips
   FOR ALL USING (auth.uid() = user_id OR public.is_admin(auth.uid()));
 
+CREATE POLICY "모든 인증된 사용자의 Trips 조회 허용" ON public.trips
+  FOR SELECT TO authenticated USING (true);
+
 -- 3.4 Expenses RLS 정책
 CREATE POLICY "Expenses 소유자 또는 어드민 액세스 허용" ON public.expenses
   FOR ALL USING (auth.uid() = user_id OR public.is_admin(auth.uid()));

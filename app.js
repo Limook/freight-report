@@ -4846,7 +4846,7 @@ function updateTrackerUI() {
 
     if (step === 0) {
       optionsHtml = `
-        <button class="btn-tracker-option btn-tracker-dark" onclick="startTrackerWithDeparture(true)">
+        <button class="btn-tracker-option btn-tracker-small" onclick="startTrackerWithDeparture(true)">
           <i data-lucide="play" class="icon-sm"></i>
           <span>상차지로 출발</span>
         </button>
@@ -4877,7 +4877,7 @@ function updateTrackerUI() {
       const isViaDisabled = appState.tracker.routeVias.length >= 3;
       optionsHtml = `
         ${resetBtnHtml}
-        <button class="btn-tracker-option btn-tracker-dark" onclick="${isViaDisabled ? '' : 'addTrackerWaypoint()'}" ${isViaDisabled ? 'disabled' : ''}>
+        <button class="btn-tracker-option btn-tracker-small" onclick="${isViaDisabled ? '' : 'addTrackerWaypoint()'}" ${isViaDisabled ? 'disabled' : ''}>
           <i data-lucide="plus-circle" class="icon-sm"></i>
           <span>경유지 추가</span>
         </button>
@@ -4907,7 +4907,7 @@ function updateTrackerUI() {
     } else if (step === 7) {
       optionsHtml = `
         ${resetBtnHtml}
-        <button class="btn-tracker-option btn-tracker-dark" onclick="completeTrackerAndRegister(true)">
+        <button class="btn-tracker-option btn-tracker-small" onclick="completeTrackerAndRegister(true)">
           <i data-lucide="home" class="icon-sm"></i>
           <span>차고지 도착</span>
         </button>

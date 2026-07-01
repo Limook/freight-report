@@ -169,9 +169,6 @@ CREATE POLICY "Clients 소유자 또는 어드민 액세스 허용" ON public.cl
 CREATE POLICY "Trips 소유자 또는 어드민 액세스 허용" ON public.trips
   FOR ALL USING (auth.uid() = user_id OR public.is_admin(auth.uid()));
 
-CREATE POLICY "모든 인증된 사용자의 Trips 조회 허용" ON public.trips
-  FOR SELECT TO authenticated USING (true);
-
 -- 3.4 Expenses RLS 정책
 CREATE POLICY "Expenses 소유자 또는 어드민 액세스 허용" ON public.expenses
   FOR ALL USING (auth.uid() = user_id OR public.is_admin(auth.uid()));
@@ -183,3 +180,24 @@ CREATE POLICY "Trackers 소유자 또는 어드민 액세스 허용" ON public.t
 -- 3.6 Settings RLS 정책
 CREATE POLICY "Settings 소유자 또는 어드민 액세스 허용" ON public.settings
   FOR ALL USING (auth.uid() = user_id OR public.is_admin(auth.uid()));
+
+-- ------------------------------------------
+-- 4. 보안 함수 (Security Definer RPC) 정의
+-- ------------------------------------------
+
+-- 타 회원의 다른 중요 정보를 노출하지 않고, 오직 연체(미수금) 상태인 거래처 이름만 중복없이 반환하는 함수 (보안 조치)
+CREATE OR REPLACE FUNCTION public.get_overdue_clients()
+RETURNS TABLE (client_name TEXT) 
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY 
+  SELECT DISTINCT t.client_name 
+  FROM public.trips t
+  WHERE t.is_paid = false 
+    AND t.payment_due_date IS NOT NULL 
+    AND t.payment_due_date < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD');
+END;
+$$ LANGUAGE plpgsql;
+
+GRANT EXECUTE ON FUNCTION public.get_overdue_clients() TO authenticated;

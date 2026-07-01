@@ -1603,19 +1603,28 @@ async function loadSupabaseData() {
                   expenses: row.expenses || {}
                 };
               });
+
+              // Securely extract other users' overdue client names for admin
+              const otherOverdue = allTrips.filter(t => 
+                t.user_id !== session.user.id && 
+                !t.is_paid && 
+                t.payment_due_date && 
+                t.payment_due_date < todayStr
+              );
+              appState.otherOverdueClients = [...new Set(otherOverdue.map(t => t.client_name).filter(Boolean))];
             }
           } else {
             // Parallelize Supabase requests
             const [
               { data: dbTrips, error: tripsErr },
-              { data: otherTrips, error: otherTripsErr },
+              { data: rpcClients, error: rpcErr },
               { data: dbClients },
               { data: dbExpenses },
               { data: dbSettings },
               { data: dbTracker }
             ] = await Promise.all([
               supabaseClient.from('trips').select('*').eq('user_id', profile.id),
-              supabaseClient.from('trips').select('*').eq('is_paid', false).neq('user_id', profile.id),
+              supabaseClient.rpc('get_overdue_clients'),
               supabaseClient.from('clients').select('*').eq('user_id', profile.id),
               supabaseClient.from('expenses').select('*').eq('user_id', profile.id),
               supabaseClient.from('settings').select('*').eq('user_id', profile.id).maybeSingle(),
@@ -1644,31 +1653,12 @@ async function loadSupabaseData() {
                 notes: row.notes,
                 expenses: row.expenses || {}
               }));
+            }
 
-              if (!otherTripsErr && otherTrips) {
-                const mappedOther = otherTrips.map(row => ({
-                  id: row.id,
-                  userId: 'other_user_' + row.user_id,
-                  client: row.client_name,
-                  clientPhone: row.client_phone,
-                  fee: Number(row.fee),
-                  commission: Number(row.commission),
-                  distance: Number(row.distance),
-                  startDate: row.start_date,
-                  endDate: row.end_date,
-                  paymentDate: row.payment_date,
-                  paymentDueDate: row.payment_due_date,
-                  isPaid: row.is_paid,
-                  routeStart: row.route_start,
-                  routeLoad: row.route_load,
-                  routeVias: row.route_vias || [],
-                  routeUnload: row.route_unload,
-                  routeArrival: row.route_arrival,
-                  notes: row.notes,
-                  expenses: row.expenses || {}
-                }));
-                appState.trips = [...appState.trips, ...mappedOther];
-              }
+            if (!rpcErr && rpcClients) {
+              appState.otherOverdueClients = rpcClients.map(row => row.client_name).filter(Boolean);
+            } else {
+              appState.otherOverdueClients = [];
             }
             
             if (dbClients) {
@@ -2150,23 +2140,19 @@ function isTripOverdue(trip) {
 function getUnpaidRiskWarnings() {
   if (!appState.currentUser || !appState.trips) return [];
   
-  const otherOverdueTrips = appState.trips.filter(t => 
-    t.userId !== appState.currentUser.username && 
-    !t.isPaid && 
-    isTripOverdue(t)
-  );
-  
-  if (otherOverdueTrips.length === 0) return [];
-  
-  const overdueClients = {};
-  otherOverdueTrips.forEach(t => {
-    if (t.client) {
-      if (!overdueClients[t.client]) {
-        overdueClients[t.client] = [];
-      }
-      overdueClients[t.client].push(t);
+  const hasOtherOverdueClient = (clientName) => {
+    // 1. If we are online and fetched otherOverdueClients via RPC
+    if (appState.otherOverdueClients && appState.otherOverdueClients.length > 0) {
+      return appState.otherOverdueClients.includes(clientName);
     }
-  });
+    // 2. Local fallback mode: check localStorage trips of other users
+    return appState.trips.some(t => 
+      t.userId !== appState.currentUser.username && 
+      !t.isPaid && 
+      isTripOverdue(t) && 
+      t.client === clientName
+    );
+  };
   
   const myPendingTrips = appState.trips.filter(t => 
     t.userId === appState.currentUser.username && 
@@ -2176,13 +2162,12 @@ function getUnpaidRiskWarnings() {
   
   const warnings = [];
   myPendingTrips.forEach(t => {
-    if (t.client && overdueClients[t.client]) {
+    if (t.client && hasOtherOverdueClient(t.client)) {
       let w = warnings.find(item => item.client === t.client);
       if (!w) {
         w = { 
           client: t.client, 
-          myTripsCount: 0, 
-          otherOverdueCount: overdueClients[t.client].length 
+          myTripsCount: 0 
         };
         warnings.push(w);
       }

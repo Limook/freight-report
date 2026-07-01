@@ -4218,23 +4218,51 @@ function saveTrip() {
     }
   }
 
-  if (!routeLoad || !startDate || isNaN(distance) || isNaN(fee)) {
-    showToast("필수 값을 모두 입력하세요.");
+  const helperFocusAlert = (elementId, message) => {
+    showToast(message);
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.focus();
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  if (!startDate) {
+    helperFocusAlert("trip-start-date", "상차일시를 입력해 주세요.");
     return;
   }
-
-  if (!routeUnload || !endDate) {
-    showToast("하차지와 하차 일시는 필수 항목입니다.");
+  if (!routeLoad) {
+    helperFocusAlert("trip-load", "상차지를 입력해 주세요.");
+    return;
+  }
+  if (!endDate) {
+    helperFocusAlert("trip-end-date", "하차일시를 입력해 주세요.");
+    return;
+  }
+  if (!routeUnload) {
+    helperFocusAlert("trip-unload", "하차지를 입력해 주세요.");
+    return;
+  }
+  
+  const distanceRaw = document.getElementById("trip-distance").value.trim();
+  if (!distanceRaw || isNaN(Number(distanceRaw))) {
+    helperFocusAlert("trip-distance", "운행 거리를 입력해 주세요.");
+    return;
+  }
+  
+  const feeRaw = document.getElementById("trip-fee").value.trim();
+  if (!feeRaw || isNaN(Number(feeRaw))) {
+    helperFocusAlert("trip-fee", "운임을 입력해 주세요.");
     return;
   }
   
   if (!isPaid && !paymentDueDate) {
-    showToast("미수금 상태인 경우 수금 예정일을 지정해 주세요.");
+    helperFocusAlert("trip-payment-due", "미수금 상태인 경우 수금 예정일을 지정해 주세요.");
     return;
   }
 
   if (isPaid && !paymentDate) {
-    showToast("수금 완료 상태인 경우 수금 완료일시를 입력해 주세요.");
+    helperFocusAlert("trip-payment-date", "수금 완료 상태인 경우 수금 완료일시를 입력해 주세요.");
     return;
   }
 

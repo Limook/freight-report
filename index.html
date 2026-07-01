@@ -800,10 +800,10 @@
             1. 상·하차지
           </button>
           <button type="button" class="wizard-tab" data-step="2" onclick="goToWizardStep(2)">
-            2. 운송료·경비
+            2. 운송료·경비·거래처
           </button>
           <button type="button" class="wizard-tab" data-step="3" onclick="goToWizardStep(3)">
-            3. 거래처·확인
+            3. 입력내역 최종확인
           </button>
         </div>
         
@@ -936,7 +936,7 @@
           <footer class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="closeTripModal()">취소</button>
             <button type="button" class="btn btn-outline text-warning" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
-            <button type="button" class="btn btn-primary" onclick="goToWizardStep(2)">다음 단계 (운송료·경비)</button>
+            <button type="button" class="btn btn-primary" onclick="goToWizardStep(2)">다음 단계 (운송료·경비·거래처)</button>
           </footer>
         </div>
 
@@ -996,17 +996,8 @@
             </div>
           </div>
 
-          <footer class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="goToWizardStep(1)">이전 단계</button>
-            <button type="button" class="btn btn-outline text-warning" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
-            <button type="button" class="btn btn-primary" onclick="goToWizardStep(3)">다음 단계 (거래처·확인)</button>
-          </footer>
-        </div>
-
-        <!-- STEP 3 PANE: Client Info & Summary Validation -->
-        <div class="wizard-step-pane" id="wizard-step-3-pane" style="display: none;">
-          <!-- 3. 거래처명 수금예정 Box -->
-          <div class="form-section-box" style="margin-bottom: 16px;">
+          <!-- 3. 거래처명 수금예정 Box (Merged here from step 3) -->
+          <div class="form-section-box" style="margin-top: 12px; margin-bottom: 0;">
             <h4 class="form-section-title"><i data-lucide="briefcase"></i> 거래처 및 수금 정보</h4>
             <!-- Client Name & Phone side-by-side -->
             <div class="form-row">
@@ -1058,6 +1049,15 @@
             </div>
           </div>
 
+          <footer class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="goToWizardStep(1)">이전 단계</button>
+            <button type="button" class="btn btn-outline text-warning" onclick="saveTripDraft()" style="border-color: var(--color-warning); color: var(--color-warning);">임시저장</button>
+            <button type="button" class="btn btn-primary" onclick="goToWizardStep(3)">다음 단계 (최종확인)</button>
+          </footer>
+        </div>
+
+        <!-- STEP 3 PANE: Final Input Verification only -->
+        <div class="wizard-step-pane" id="wizard-step-3-pane" style="display: none;">
           <!-- Final Input Verification Box -->
           <div class="form-section-box" style="margin-bottom: 0; background-color: var(--bg-card); border: 1px dashed var(--bg-card-border);">
             <h4 class="form-section-title" style="color: var(--color-primary);"><i data-lucide="check-square"></i> 입력 내역 최종 확인</h4>

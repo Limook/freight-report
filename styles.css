@@ -3104,7 +3104,7 @@ body.light-theme .btn-hero-register {
   color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 600;
-  padding: 10px 14px;
+  padding: 12px 14px; /* Increased height by 20% */
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
@@ -4976,8 +4976,8 @@ body.light-theme .tracker-hero-container.driving-active .btn-tracker-hero {
 }
 
 #dialog-trip .btn-timeline-toggle {
-  padding: 6px 12px !important;
-  font-size: 0.75rem !important;
+  padding: 10px 12px !important; /* Increased height by 20%+ */
+  font-size: 0.8rem !important;
 }
 
 #dialog-trip .datetime-shortcuts {
@@ -5083,6 +5083,30 @@ body.light-theme .tracker-hero-container.driving-active .btn-tracker-hero {
 
 .btn-tracker-hero .hero-subtitle {
   color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Sticky Modal Footer Styling (Ver 2.26) */
+#dialog-trip .modal-footer,
+#dialog-expense .modal-footer {
+  position: sticky !important;
+  bottom: -24px !important; /* Offset desktop padding */
+  background-color: var(--bg-panel) !important;
+  z-index: 100 !important;
+  border-top: 1px solid var(--bg-card-border) !important;
+  padding: 16px 24px !important;
+  margin: 16px -24px -24px -24px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+}
+
+@media (max-width: 600px) {
+  #dialog-trip .modal-footer,
+  #dialog-expense .modal-footer {
+    bottom: -16px !important; /* Offset mobile padding */
+    margin: 16px -16px -16px -16px !important;
+    padding: 16px 16px !important;
+  }
 }
 
 

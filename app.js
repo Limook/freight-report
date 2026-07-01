@@ -3699,14 +3699,17 @@ function updateTripWizardSummary() {
   const arrivalLoc = document.getElementById("trip-arrival").value || "";
   
   const waypoints = [];
-  const wpInputs = document.querySelectorAll(".waypoint-input");
-  wpInputs.forEach(input => {
-    if (input.value) waypoints.push(input.value);
-  });
+  for (let i = 1; i <= 3; i++) {
+    const input = document.getElementById(`trip-via-${i}`);
+    if (input && input.value) {
+      waypoints.push(input.value);
+    }
+  }
   
   const startDate = document.getElementById("trip-start-date").value;
   const endDate = document.getElementById("trip-end-date").value;
   
+  const distance = Number(document.getElementById("trip-distance").value || 0);
   const fee = Number(document.getElementById("trip-fee").value || 0);
   const fuel = Number(document.getElementById("trip-expense-fuel").value || 0);
   const toll = Number(document.getElementById("trip-expense-toll").value || 0);
@@ -3715,6 +3718,8 @@ function updateTripWizardSummary() {
   const commission = Number(document.getElementById("trip-commission").value || 0);
   const expSum = fuel + toll + meal + other + commission;
   const netIncome = fee - expSum;
+  
+  const perKmFee = (distance > 0 && fee > 0) ? Math.round(fee / distance) : 0;
   
   const clientName = document.getElementById("trip-client").value || "미지정";
   const clientPhone = document.getElementById("trip-client-phone").value || "";
@@ -3753,6 +3758,7 @@ function updateTripWizardSummary() {
       <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 12px; line-height: 1.4;">
         <div>운송료: <strong style="color: var(--text-main);">${fee.toLocaleString()}원</strong></div>
         <div>경비합계: <strong style="color: var(--color-danger);">${expSum.toLocaleString()}원</strong></div>
+        ${perKmFee > 0 ? `<div style="grid-column: span 2; font-size: 0.82rem; color: var(--text-main); margin-top: 2px;">km당 운송료: <strong style="color: var(--color-primary); font-weight: 700;">${perKmFee.toLocaleString()}원/km</strong></div>` : ''}
         <div style="grid-column: span 2; font-size: 0.82rem; padding: 4px 8px; background-color: var(--color-success-muted); border-radius: 4px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
           <span style="color: var(--color-success); font-weight: 700;">순수입 (매출-경비):</span>
           <strong style="color: var(--color-success); font-weight: 800;">${netIncome.toLocaleString()}원</strong>

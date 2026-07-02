@@ -2508,14 +2508,15 @@ function updateDashboardStats() {
   const expenseRatioLabel = document.getElementById("insight-expense-ratio");
   const expenseBar = document.getElementById("insight-expense-bar");
   
+  const kmRate = totalDistance > 0 ? Math.round(totalFee / totalDistance) : 0;
+  const totalExp = totalExpense + totalCommission;
+  const ratio = totalFee > 0 ? Math.round((totalExp / totalFee) * 100) : 0;
+  
   if (kmRateLabel) {
-    const kmRate = totalDistance > 0 ? Math.round(totalFee / totalDistance) : 0;
     kmRateLabel.innerText = kmRate.toLocaleString() + "원";
   }
   
   if (expenseRatioLabel && expenseBar) {
-    const totalExp = totalExpense + totalCommission;
-    const ratio = totalFee > 0 ? Math.round((totalExp / totalFee) * 100) : 0;
     expenseRatioLabel.innerText = ratio + "%";
     expenseBar.style.width = Math.min(ratio, 100) + "%";
   }

@@ -4800,12 +4800,12 @@ function openTripDetailModal(tripId) {
   };
 
   let html = `
-    <div style="display: flex; flex-direction: column; gap: 14px;">
-      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i> 운송 경로 (전체 주소)
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="map-pin" style="width: 15px; height: 15px;"></i> 운송 경로 (전체 주소)
         </h4>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
           ${trip.routeStart ? `
           <div>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">출발지</div>
@@ -4832,9 +4832,9 @@ function openTripDetailModal(tripId) {
         </div>
       </div>
 
-      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="briefcase" style="width: 16px; height: 16px;"></i> 거래처 및 수금 정보
+      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="briefcase" style="width: 15px; height: 15px;"></i> 거래처 및 수금 정보
         </h4>
         <div style="display: flex; flex-direction: column; gap: 6px;">
           <div style="display: flex; justify-content: space-between;">
@@ -4864,9 +4864,9 @@ function openTripDetailModal(tripId) {
         </div>
       </div>
 
-      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="banknote" style="width: 16px; height: 16px;"></i> 금액 및 경비 정산
+      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="banknote" style="width: 15px; height: 15px;"></i> 금액 및 경비 정산
         </h4>
         <div style="display: flex; flex-direction: column; gap: 6px;">
           <div style="display: flex; justify-content: space-between; font-weight: 600;">
@@ -4901,9 +4901,9 @@ function openTripDetailModal(tripId) {
       </div>
 
       ${trip.notes ? `
-      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 6px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="sticky-note" style="width: 16px; height: 16px;"></i> 비고 (특이사항)
+      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 6px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="sticky-note" style="width: 15px; height: 15px;"></i> 비고 (특이사항)
         </h4>
         <div style="white-space: pre-wrap; line-height: 1.4;">${trip.notes}</div>
       </div>` : ''}

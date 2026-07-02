@@ -1714,7 +1714,7 @@ async function loadSupabaseData() {
                 theme: dbSettings.theme
               };
               appState.theme = dbSettings.theme;
-              initTheme(); // Re-apply theme if updated from server
+              applyTheme(); // Re-apply theme if updated from server
             }
             
             if (dbTracker) {
@@ -1947,9 +1947,7 @@ async function saveData() {
 // ----------------------------------------------------
 // THEME CONTROL
 // ----------------------------------------------------
-function initTheme() {
-  const themeToggle = document.getElementById("theme-toggle");
-  
+function applyTheme() {
   if (appState.theme === "light") {
     document.body.classList.remove("dark-theme");
     document.body.classList.add("light-theme");
@@ -1957,20 +1955,29 @@ function initTheme() {
     document.body.classList.add("dark-theme");
     document.body.classList.remove("light-theme");
   }
+}
 
-  themeToggle.addEventListener("click", () => {
-    if (document.body.classList.contains("dark-theme")) {
-      document.body.classList.remove("dark-theme");
-      document.body.classList.add("light-theme");
-      appState.theme = "light";
-    } else {
-      document.body.classList.remove("light-theme");
-      document.body.classList.add("dark-theme");
-      appState.theme = "dark";
-    }
-    saveData();
-    showToast(`테마가 ${appState.theme === "dark" ? "다크" : "라이트"} 모드로 설정되었습니다.`);
-  });
+function initTheme() {
+  const themeToggle = document.getElementById("theme-toggle");
+  
+  applyTheme();
+
+  if (themeToggle) {
+    // Clone and replace to prevent duplicate listener accumulation
+    const newToggle = themeToggle.cloneNode(true);
+    themeToggle.parentNode.replaceChild(newToggle, themeToggle);
+
+    newToggle.addEventListener("click", () => {
+      if (document.body.classList.contains("dark-theme")) {
+        appState.theme = "light";
+      } else {
+        appState.theme = "dark";
+      }
+      applyTheme();
+      saveData();
+      showToast(`테마가 ${appState.theme === "dark" ? "다크" : "라이트"} 모드로 설정되었습니다.`);
+    });
+  }
 }
 
 // ----------------------------------------------------

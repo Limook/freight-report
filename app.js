@@ -3044,15 +3044,35 @@ function createTripElement(trip, disableHighlight = false) {
   // Helper to extract and format the last word (dong name) safely (Ver 2.16 Patch 8)
   const getDongName = (addr, fallback) => {
     if (!addr) return fallback;
-    const parts = addr.trim().replace(/\s+/g, " ").split(" ");
+    const cleanAddr = addr.trim().replace(/\s+/g, " ");
     
+    const parenMatch = cleanAddr.match(/\(([^)]+)\)$/);
+    if (parenMatch) {
+      const inside = parenMatch[1];
+      const subParts = inside.split(",");
+      for (let p of subParts) {
+        p = p.trim();
+        if (p.endsWith("동") || p.endsWith("읍") || p.endsWith("면") || p.endsWith("리") || p.endsWith("가")) {
+          return p;
+        }
+      }
+    }
+
+    const parts = cleanAddr.split(" ");
     for (let i = parts.length - 1; i >= 0; i--) {
-      const p = parts[i];
-      if (p.endsWith("동") || p.endsWith("읍") || p.endsWith("면") || p.endsWith("가") || p.endsWith("리") || p.includes("동)") || p.includes("읍)") || p.includes("면)")) {
+      let p = parts[i].replace(/[()]/g, "");
+      if (p.endsWith("동") || p.endsWith("읍") || p.endsWith("면") || p.endsWith("리") || p.endsWith("가")) {
         return p;
       }
     }
-    
+
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      if (isNaN(p) && (p.endsWith("로") || p.endsWith("길") || p.endsWith("구") || p.endsWith("시"))) {
+        return p;
+      }
+    }
+
     return parts[parts.length - 1] || fallback;
   };
 
@@ -3350,6 +3370,9 @@ function createTripElement(trip, disableHighlight = false) {
               수금 완료 처리
             </button>
             ` : ''}
+            <button class="btn-icon" onclick="event.stopPropagation(); openTripDetailModal('${trip.id}')" title="상세보기" style="${trip.isPaid ? 'margin-left: auto;' : ''}">
+              <i data-lucide="eye"></i>
+            </button>
             <button class="btn-icon" onclick="event.stopPropagation(); editTrip('${trip.id}')" title="수정">
               <i data-lucide="edit-2"></i>
             </button>
@@ -4743,6 +4766,163 @@ function openLocationPicker(targetField) {
 function closeLocationPicker() {
   if (dialogPicker) {
     dialogPicker.close();
+  }
+}
+
+function openTripDetailModal(tripId) {
+  const trip = appState.trips.find(t => t.id === tripId);
+  if (!trip) return;
+
+  const body = document.getElementById("trip-detail-modal-body");
+  if (!body) return;
+
+  const formatDt = (dtStr) => {
+    if (!dtStr) return "-";
+    const d = new Date(dtStr);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+
+  let fuel = 0, toll = 0, meal = 0, other = 0, commission = 0;
+  if (trip.expenses) {
+    fuel = trip.expenses.fuel || 0;
+    toll = trip.expenses.toll || 0;
+    meal = trip.expenses.meal || 0;
+    other = trip.expenses.other || 0;
+  } else if (trip.expense) {
+    fuel = trip.expense || 0;
+  }
+  commission = trip.commission || 0;
+  const expSum = fuel + toll + meal + other + commission;
+  const netIncome = (trip.fee || 0) - expSum;
+
+  const formatMoney = (val) => {
+    return Number(val).toLocaleString();
+  };
+
+  let html = `
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i> 운송 경로 (전체 주소)
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${trip.routeStart ? `
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">출발지</div>
+            <div style="font-weight: 500;">${trip.routeStart}</div>
+          </div>` : ''}
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">상차지 (${formatDt(trip.startDate)})</div>
+            <div style="font-weight: 600; color: var(--text-main);">${trip.routeLoad || "-"}</div>
+          </div>
+          ${trip.routeVias && trip.routeVias.length > 0 ? trip.routeVias.map((via, idx) => `
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">경유지 ${idx + 1}</div>
+            <div style="font-weight: 500;">${via}</div>
+          </div>`).join('') : ''}
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">하차지 (${formatDt(trip.endDate)})</div>
+            <div style="font-weight: 600; color: var(--text-main);">${trip.routeUnload || "-"}</div>
+          </div>
+          ${trip.routeArrival ? `
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">도착지</div>
+            <div style="font-weight: 500;">${trip.routeArrival}</div>
+          </div>` : ''}
+        </div>
+      </div>
+
+      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="briefcase" style="width: 16px; height: 16px;"></i> 거래처 및 수금 정보
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">거래처명</span>
+            <span style="font-weight: 600;">${trip.client || "미지정"}</span>
+          </div>
+          ${trip.clientPhone ? `
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">연락처</span>
+            <span>${formatPhoneNumber(trip.clientPhone)}</span>
+          </div>` : ''}
+          <div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--bg-card-border);">
+            <span style="color: var(--text-muted);">수금 상태</span>
+            <span style="font-weight: 700; color: ${trip.isPaid ? 'var(--color-success)' : 'var(--color-danger)'};">
+              ${trip.isPaid ? '수금 완료' : '미수금'}
+            </span>
+          </div>
+          ${trip.isPaid ? `
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">수금 완료일</span>
+            <span>${trip.paymentDate ? trip.paymentDate.replace('T', ' ') : '-'}</span>
+          </div>` : `
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">수금 예정일</span>
+            <span style="font-weight: 600; color: var(--color-warning);">${trip.paymentDueDate || "-"}</span>
+          </div>`}
+        </div>
+      </div>
+
+      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="banknote" style="width: 16px; height: 16px;"></i> 금액 및 경비 정산
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; font-weight: 600;">
+            <span>운임 (매출)</span>
+            <span style="color: var(--text-main); font-weight: 700;">${formatMoney(trip.fee || 0)}원</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
+            <span style="color: var(--text-muted);">- 주유비</span>
+            <span>${formatMoney(fuel)}원</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
+            <span style="color: var(--text-muted);">- 통행료</span>
+            <span>${formatMoney(toll)}원</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
+            <span style="color: var(--text-muted);">- 식비/숙박비</span>
+            <span>${formatMoney(meal)}원</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
+            <span style="color: var(--text-muted);">- 알선 수수료</span>
+            <span>${formatMoney(commission)}원</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
+            <span style="color: var(--text-muted);">- 기타 경비</span>
+            <span>${formatMoney(other)}원</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--bg-card-border); font-weight: 700; font-size: 0.95rem;">
+            <span>순수익 (매출 - 경비)</span>
+            <span style="color: var(--color-primary);">${formatMoney(netIncome)}원</span>
+          </div>
+        </div>
+      </div>
+
+      ${trip.notes ? `
+      <div style="background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+        <h4 style="margin-top: 0; margin-bottom: 6px; font-size: 0.88rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="sticky-note" style="width: 16px; height: 16px;"></i> 비고 (특이사항)
+        </h4>
+        <div style="white-space: pre-wrap; line-height: 1.4;">${trip.notes}</div>
+      </div>` : ''}
+    </div>
+  `;
+
+  body.innerHTML = html;
+  lucide.createIcons();
+  
+  const dialogDetail = document.getElementById("dialog-trip-detail");
+  if (dialogDetail) {
+    dialogDetail.showModal();
+  }
+}
+
+function closeTripDetailModal() {
+  const dialogDetail = document.getElementById("dialog-trip-detail");
+  if (dialogDetail) {
+    dialogDetail.close();
   }
 }
 

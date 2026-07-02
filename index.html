@@ -1157,6 +1157,22 @@
     </div>
   </dialog>
 
+  <!-- TRIP DETAIL DIALOG -->
+  <dialog id="dialog-trip-detail" class="modal-dialog">
+    <div class="modal-content" style="max-width: 480px; width: 100%; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--bg-card-border); display: flex; flex-direction: column;">
+      <header class="modal-header" style="flex: none;">
+        <h3>운송기록 상세 내역</h3>
+        <button class="close-btn" onclick="closeTripDetailModal()">&times;</button>
+      </header>
+      <div class="modal-body" id="trip-detail-modal-body" style="padding: 16px; overflow-y: auto; max-height: 480px; display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem; color: var(--text-main);">
+        <!-- Dynamically populated detail rows -->
+      </div>
+      <footer class="modal-footer" style="flex: none; padding-top: 12px; border-top: 1px solid var(--bg-card-border);">
+        <button type="button" class="btn btn-outline" style="width: 100%;" onclick="closeTripDetailModal()">닫기</button>
+      </footer>
+    </div>
+  </dialog>
+
 
 
   <!-- 3. CUSTOM PERIOD SELECTOR MODAL -->

@@ -1073,18 +1073,18 @@
             <h4 class="form-section-title"><i data-lucide="briefcase"></i> 거래처 및 수금 정보</h4>
             <!-- Client Name & Phone side-by-side with Quick Save Button -->
             <div style="display: flex; gap: 8px; align-items: flex-end; width: 100%;">
-              <div class="form-group" style="flex: 0 0 calc(40% - 4px); margin-bottom: 0;">
+              <div class="form-group" style="flex: 0 0 calc(43% - 4px); margin-bottom: 0;">
                 <label for="trip-client">거래처명</label>
                 <input type="text" id="trip-client" placeholder="예: (주)한라물류" list="trip-clients-suggestions" oninput="populateClientPhone()">
                 <datalist id="trip-clients-suggestions">
                   <!-- Dynamically populated from registered clients -->
                 </datalist>
               </div>
-              <div class="form-group" style="flex: 0 0 calc(40% - 4px); margin-bottom: 0;">
+              <div class="form-group" style="flex: 0 0 calc(43% - 4px); margin-bottom: 0;">
                 <label for="trip-client-phone">거래처 전화번호</label>
                 <input type="text" id="trip-client-phone" placeholder="예: 01012345678">
               </div>
-              <button type="button" class="btn btn-outline" onclick="saveClientQuickly()" style="flex: 0 0 20%; height: 42px; padding: 0; font-weight: 700; border-color: var(--color-primary); color: var(--color-primary); border-radius: var(--radius-sm); margin-bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 0.82rem;">저장</button>
+              <button type="button" class="btn btn-outline" onclick="saveClientQuickly()" style="flex: 0 0 14%; height: 42px; padding: 0; font-weight: 700; border-color: var(--color-primary); color: var(--color-primary); border-radius: var(--radius-sm); margin-bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 0.82rem;">저장</button>
             </div>
   
             <!-- Realigned Payment Row: Left Expected Due Date, Right Status Switch -->

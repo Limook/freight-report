@@ -4700,180 +4700,50 @@ const dialogPicker = document.getElementById("dialog-location-picker");
 
 function openLocationPicker(targetField) {
   pickerState.targetField = targetField;
-  pickerState.selectedSido = '';
-  pickerState.selectedSigungu = '';
-  pickerState.selectedDong = '';
   
-  document.getElementById("location-search-input").value = "";
-  document.getElementById("location-search-results").style.display = "none";
-  document.getElementById("picker-selection-text").innerText = "없음";
-  document.getElementById("btn-confirm-location").setAttribute("disabled", "disabled");
+  const container = document.getElementById("daum-postcode-container");
+  if (!container) return;
+  container.innerHTML = "";
   
-  switchPickerTab('sido');
-  dialogPicker.showModal();
+  const dialogLocationPicker = document.getElementById("dialog-location-picker");
+  if (dialogLocationPicker) {
+    dialogLocationPicker.showModal();
+  }
+  
+  new daum.Postcode({
+    oncomplete: function(data) {
+      let addr = '';
+      if (data.userSelectedType === 'R') {
+        addr = data.roadAddress;
+      } else {
+        addr = data.jibunAddress;
+      }
+      
+      let fieldId = '';
+      if (targetField === 'client-address') {
+        fieldId = 'client-modal-address';
+      } else {
+        fieldId = `trip-${targetField}`;
+      }
+      
+      const el = document.getElementById(fieldId);
+      if (el) {
+        el.value = addr;
+      }
+      
+      closeLocationPicker();
+      triggerAutoDistanceCalculation();
+    },
+    width : '100%',
+    height : '100%',
+    maxSuggestItems : 5
+  }).embed(container);
 }
 
 function closeLocationPicker() {
-  dialogPicker.close();
-}
-
-function switchPickerTab(tabName) {
-  const tabs = ['sido', 'sigungu', 'dong'];
-  
-  tabs.forEach(t => {
-    const btn = document.getElementById(`tab-btn-${t}`);
-    if (t === tabName) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
-
-  renderPickerButtons(tabName);
-}
-
-function renderPickerButtons(tabName) {
-  const grid = document.getElementById("picker-buttons-grid");
-  grid.innerHTML = "";
-
-  if (tabName === 'sido') {
-    document.getElementById("tab-btn-sido").disabled = false;
-    document.getElementById("tab-btn-sigungu").disabled = true;
-    document.getElementById("tab-btn-dong").disabled = true;
-
-    const sidos = Object.keys(REGION_DATA);
-    sidos.forEach(sido => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = `picker-btn ${pickerState.selectedSido === sido ? 'active' : ''}`;
-      btn.textContent = sido;
-      btn.onclick = () => selectSido(sido);
-      grid.appendChild(btn);
-    });
-  } 
-  
-  else if (tabName === 'sigungu') {
-    document.getElementById("tab-btn-sigungu").disabled = false;
-    document.getElementById("tab-btn-dong").disabled = true;
-
-    const sigungus = Object.keys(REGION_DATA[pickerState.selectedSido]);
-    sigungus.forEach(sigungu => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = `picker-btn ${pickerState.selectedSigungu === sigungu ? 'active' : ''}`;
-      btn.textContent = sigungu;
-      btn.onclick = () => selectSigungu(sigungu);
-      grid.appendChild(btn);
-    });
-  } 
-  
-  else if (tabName === 'dong') {
-    document.getElementById("tab-btn-dong").disabled = false;
-
-    const dongs = REGION_DATA[pickerState.selectedSido][pickerState.selectedSigungu];
-    dongs.forEach(dong => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = `picker-btn ${pickerState.selectedDong === dong ? 'active' : ''}`;
-      btn.textContent = dong;
-      btn.onclick = () => selectDong(dong);
-      grid.appendChild(btn);
-    });
+  if (dialogPicker) {
+    dialogPicker.close();
   }
-}
-
-function selectSido(sido) {
-  pickerState.selectedSido = sido;
-  pickerState.selectedSigungu = '';
-  pickerState.selectedDong = '';
-  document.getElementById("picker-selection-text").innerText = sido;
-  document.getElementById("btn-confirm-location").setAttribute("disabled", "disabled");
-  
-  switchPickerTab('sigungu');
-}
-
-function selectSigungu(sigungu) {
-  pickerState.selectedSigungu = sigungu;
-  pickerState.selectedDong = '';
-  document.getElementById("picker-selection-text").innerText = `${pickerState.selectedSido} ${sigungu}`;
-  document.getElementById("btn-confirm-location").setAttribute("disabled", "disabled");
-  
-  switchPickerTab('dong');
-}
-
-function selectDong(dong) {
-  pickerState.selectedDong = dong;
-  const fullAddress = `${pickerState.selectedSido} ${pickerState.selectedSigungu} ${dong}`;
-  document.getElementById("picker-selection-text").innerText = fullAddress;
-  
-  const btns = document.querySelectorAll("#picker-buttons-grid .picker-btn");
-  btns.forEach(btn => {
-    if (btn.textContent === dong) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
-
-  document.getElementById("btn-confirm-location").removeAttribute("disabled");
-}
-
-function confirmLocationSelection() {
-  const fullAddress = `${pickerState.selectedSido} ${pickerState.selectedSigungu} ${pickerState.selectedDong}`;
-  
-  let fieldId = `trip-${pickerState.targetField}`;
-  document.getElementById(fieldId).value = fullAddress;
-  
-  closeLocationPicker();
-  triggerAutoDistanceCalculation();
-}
-
-function handleLocationSearch(query) {
-  const resultsDiv = document.getElementById("location-search-results");
-  resultsDiv.innerHTML = "";
-  
-  const val = query.trim().toLowerCase();
-  if (val.length < 2) {
-    resultsDiv.style.display = "none";
-    return;
-  }
-
-  const matches = [];
-
-  for (const sido in REGION_DATA) {
-    for (const sigungu in REGION_DATA[sido]) {
-      const dongs = REGION_DATA[sido][sigungu];
-      dongs.forEach(dong => {
-        if (dong.toLowerCase().includes(val)) {
-          matches.push(`${sido} ${sigungu} ${dong}`);
-        }
-      });
-    }
-  }
-
-  const maxMatches = matches.slice(0, 8);
-
-  if (maxMatches.length > 0) {
-    resultsDiv.style.display = "block";
-    maxMatches.forEach(addr => {
-      const item = document.createElement("div");
-      item.className = "search-result-item";
-      item.textContent = addr;
-      item.onclick = () => selectSearchResult(addr);
-      resultsDiv.appendChild(item);
-    });
-  } else {
-    resultsDiv.style.display = "block";
-    resultsDiv.innerHTML = `<div class="search-result-item" style="color: var(--text-muted); cursor: default;">검색 결과가 없습니다.</div>`;
-  }
-}
-
-function selectSearchResult(address) {
-  let fieldId = `trip-${pickerState.targetField}`;
-  document.getElementById(fieldId).value = address;
-  
-  closeLocationPicker();
-  triggerAutoDistanceCalculation();
 }
 
 // Distance Calculation based on geolocations (Updated to support multiple waypoints)

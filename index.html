@@ -22,6 +22,7 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body class="light-theme"> <!-- Default to light theme as requested -->
   <script>
@@ -1141,40 +1142,17 @@
 
   <!-- 3. LOCATION PICKER DIALOG -->
   <dialog id="dialog-location-picker" class="modal-dialog">
-    <div class="modal-content location-picker-content">
-      <header class="modal-header">
-        <h3>행정구역 선택</h3>
+    <div class="modal-content location-picker-content" style="max-width: 480px; width: 100%; height: 580px; display: flex; flex-direction: column;">
+      <header class="modal-header" style="flex: none;">
+        <h3>주소 검색</h3>
         <button class="close-btn" onclick="closeLocationPicker()">&times;</button>
       </header>
-      <div class="location-search-row" style="margin-bottom: 10px;">
-        <div class="search-box">
-          <i data-lucide="search" class="search-icon"></i>
-          <input type="text" id="location-search-input" placeholder="동 이름 검색 (예: 역삼, 우면, 대연)..." oninput="handleLocationSearch(this.value)">
-        </div>
+      <!-- Daum Postcode Container -->
+      <div id="daum-postcode-container" style="flex: 1; width: 100%; min-height: 420px; background-color: var(--bg-panel); border: 1px solid var(--bg-card-border); border-radius: var(--radius-sm); overflow: hidden;">
+        <!-- Embedded Daum Postcode Iframe -->
       </div>
-      <!-- Search Results Autocomplete -->
-      <div id="location-search-results" class="search-results-list" style="display: none;"></div>
-      
-      <!-- Tab Selection -->
-      <div class="picker-tabs">
-        <button id="tab-btn-sido" class="picker-tab-btn active" onclick="switchPickerTab('sido')">시/도</button>
-        <button id="tab-btn-sigungu" class="picker-tab-btn" onclick="switchPickerTab('sigungu')" disabled>시/군/구</button>
-        <button id="tab-btn-dong" class="picker-tab-btn" onclick="switchPickerTab('dong')" disabled>읍/면/동</button>
-      </div>
-      
-      <!-- Buttons Grid -->
-      <div id="picker-buttons-grid" class="picker-buttons-grid">
-        <!-- Dynamically generated buttons -->
-      </div>
-      
-      <div class="picker-current-selection">
-        <span>선택 결과: </span>
-        <strong id="picker-selection-text">없음</strong>
-      </div>
-      
-      <footer class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="closeLocationPicker()">취소</button>
-        <button type="button" class="btn btn-primary" id="btn-confirm-location" disabled onclick="confirmLocationSelection()">선택 완료</button>
+      <footer class="modal-footer" style="flex: none; margin-top: 10px;">
+        <button type="button" class="btn btn-outline" style="width: 100%;" onclick="closeLocationPicker()">닫기</button>
       </footer>
     </div>
   </dialog>
@@ -1272,7 +1250,12 @@
 
         <div class="form-group">
           <label for="client-modal-address">주소</label>
-          <input type="text" id="client-modal-address" placeholder="예: 서울시 중구 태평로1가 31 (선택사항)">
+          <div style="display: flex; gap: 6px; align-items: center; width: 100%;">
+            <input type="text" id="client-modal-address" placeholder="예: 서울시 중구 태평로1가 31 (선택사항)" readonly style="flex: 1;">
+            <button type="button" class="btn btn-outline" style="width: 38px; height: 38px; padding: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-panel); color: var(--text-main); border: 1px solid var(--bg-card-border);" onclick="openLocationPicker('client-address')" title="주소 검색">
+              <i data-lucide="search" style="width: 14px; height: 14px;"></i>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">

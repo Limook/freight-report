@@ -4330,14 +4330,18 @@ function togglePaymentDueDate() {
   const dueInput = document.getElementById("trip-payment-due");
   const groupDate = document.getElementById("group-payment-date");
   const dateInput = document.getElementById("trip-payment-date");
+  const groupDueShortcuts = document.getElementById("group-payment-due-shortcuts");
+  const groupDateShortcuts = document.getElementById("group-payment-date-shortcuts");
   
   if (isPaid) {
     groupDue.style.display = "none";
     dueInput.removeAttribute("required");
     dueInput.value = "";
+    if (groupDueShortcuts) groupDueShortcuts.style.display = "none";
     
     groupDate.style.display = "flex";
     dateInput.setAttribute("required", "required");
+    if (groupDateShortcuts) groupDateShortcuts.style.display = "block";
     
     if (!dateInput.value) {
       dateInput.value = getLocalDateString();
@@ -4345,6 +4349,7 @@ function togglePaymentDueDate() {
   } else {
     groupDue.style.display = "flex";
     dueInput.setAttribute("required", "required");
+    if (groupDueShortcuts) groupDueShortcuts.style.display = "block";
     
     if (!dueInput.value) {
       const d = new Date();
@@ -4355,6 +4360,7 @@ function togglePaymentDueDate() {
     groupDate.style.display = "none";
     dateInput.removeAttribute("required");
     dateInput.value = "";
+    if (groupDateShortcuts) groupDateShortcuts.style.display = "none";
   }
 }
 

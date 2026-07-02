@@ -1072,49 +1072,33 @@
           <div class="form-section-box" style="margin-top: 12px; margin-bottom: 0;">
             <h4 class="form-section-title"><i data-lucide="briefcase"></i> 거래처 및 수금 정보</h4>
             <!-- Client Name & Phone side-by-side with Quick Save Button -->
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; width: 100%;">
-              <div class="form-group" style="flex: 1; min-width: 130px; margin-bottom: 0;">
+            <div style="display: flex; gap: 8px; align-items: flex-end; width: 100%;">
+              <div class="form-group" style="flex: 0 0 calc(45% - 4px); margin-bottom: 0;">
                 <label for="trip-client">거래처명</label>
                 <input type="text" id="trip-client" placeholder="예: (주)한라물류" list="trip-clients-suggestions" oninput="populateClientPhone()">
                 <datalist id="trip-clients-suggestions">
                   <!-- Dynamically populated from registered clients -->
                 </datalist>
               </div>
-              <div class="form-group" style="flex: 1; min-width: 130px; margin-bottom: 0;">
+              <div class="form-group" style="flex: 0 0 calc(45% - 4px); margin-bottom: 0;">
                 <label for="trip-client-phone">거래처 전화번호</label>
                 <input type="text" id="trip-client-phone" placeholder="예: 01012345678">
               </div>
-              <button type="button" class="btn btn-outline" onclick="saveClientQuickly()" style="flex: none; width: 60px; height: 42px; padding: 0; font-weight: 700; border-color: var(--color-primary); color: var(--color-primary); border-radius: var(--radius-sm); margin-bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">저장</button>
+              <button type="button" class="btn btn-outline" onclick="saveClientQuickly()" style="flex: 0 0 10%; height: 42px; padding: 0; font-weight: 700; border-color: var(--color-primary); color: var(--color-primary); border-radius: var(--radius-sm); margin-bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 0.82rem;">저장</button>
             </div>
   
             <!-- Realigned Payment Row: Left Expected Due Date, Right Status Switch -->
-            <div class="payment-status-row">
+            <div class="payment-status-row" style="margin-top: 12px; margin-bottom: 8px;">
               <!-- Left: Expected Payment Date -->
               <div class="form-group" id="group-payment-due">
                 <label for="trip-payment-due">수금 예정일 <span class="required">*</span></label>
                 <input type="date" id="trip-payment-due">
-                <div class="datetime-shortcuts" style="margin-top: 6px;">
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(7)">7일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(15)">15일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(30)">30일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(45)">45일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-this-month')">당월말일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-next-month')">익월말일</button>
-                </div>
               </div>
   
               <!-- Left: Actual Collection Date/Time -->
               <div class="form-group" id="group-payment-date" style="display: none;">
                 <label for="trip-payment-date">수금 완료일 <span class="required">*</span></label>
                 <input type="date" id="trip-payment-date">
-                <div class="datetime-shortcuts" style="margin-top: 6px;">
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(7)">7일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(15)">15일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(30)">30일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(45)">45일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-this-month')">당월말일</button>
-                  <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-next-month')">익월말일</button>
-                </div>
               </div>
               
               <!-- Right: Payment Status Toggle -->
@@ -1128,6 +1112,29 @@
                     <span class="toggle-text-unpaid">미수금</span>
                   </label>
                 </div>
+              </div>
+            </div>
+
+            <!-- Separated Shortcuts Row (occupies full width below, toggled by JS) -->
+            <div id="group-payment-due-shortcuts" class="datetime-shortcuts-row" style="margin-bottom: 12px;">
+              <div class="datetime-shortcuts" style="width: 100%;">
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(7)">7일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(15)">15일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(30)">30일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(45)">45일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-this-month')">당월말일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-next-month')">익월말일</button>
+              </div>
+            </div>
+
+            <div id="group-payment-date-shortcuts" class="datetime-shortcuts-row" style="margin-bottom: 12px; display: none;">
+              <div class="datetime-shortcuts" style="width: 100%;">
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(7)">7일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(15)">15일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(30)">30일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut(45)">45일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-this-month')">당월말일</button>
+                <button type="button" class="shortcut-badge" onclick="setPaymentDueShortcut('end-of-next-month')">익월말일</button>
               </div>
             </div>
   

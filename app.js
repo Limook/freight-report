@@ -4800,112 +4800,138 @@ function openTripDetailModal(tripId) {
   };
 
   let html = `
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="map-pin" style="width: 15px; height: 15px;"></i> 운송 경로 (전체 주소)
-        </h4>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <!-- 1. Route Timeline -->
+      <div style="display: flex; flex-direction: column;">
+        <div style="font-size: 0.72rem; font-weight: 700; color: var(--color-primary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i> 운송 경로 타임라인
+        </div>
+        
+        <div style="position: relative; padding-left: 20px; border-left: 2px dashed var(--bg-card-border); margin-left: 6px; display: flex; flex-direction: column; gap: 14px;">
           ${trip.routeStart ? `
-          <div>
+          <div style="position: relative;">
+            <span style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--text-muted); border: 2px solid var(--bg-card);"></span>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">출발지</div>
-            <div style="font-weight: 500;">${trip.routeStart}</div>
+            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-top: 1px;">${trip.routeStart}</div>
           </div>` : ''}
-          <div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">상차지 (${formatDt(trip.startDate)})</div>
-            <div style="font-weight: 600; color: var(--text-main);">${trip.routeLoad || "-"}</div>
+          
+          <div style="position: relative;">
+            <span style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--color-primary); border: 2px solid var(--bg-card);"></span>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">상차지 · ${formatDt(trip.startDate)}</div>
+            <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-top: 1px;">${trip.routeLoad || "-"}</div>
           </div>
+          
           ${trip.routeVias && trip.routeVias.length > 0 ? trip.routeVias.map((via, idx) => `
-          <div>
+          <div style="position: relative;" key="${idx}">
+            <span style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--color-warning); border: 2px solid var(--bg-card);"></span>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">경유지 ${idx + 1}</div>
-            <div style="font-weight: 500;">${via}</div>
+            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-top: 1px;">${via}</div>
           </div>`).join('') : ''}
-          <div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">하차지 (${formatDt(trip.endDate)})</div>
-            <div style="font-weight: 600; color: var(--text-main);">${trip.routeUnload || "-"}</div>
+          
+          <div style="position: relative;">
+            <span style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--color-success); border: 2px solid var(--bg-card);"></span>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">하차지 · ${formatDt(trip.endDate)}</div>
+            <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-top: 1px;">${trip.routeUnload || "-"}</div>
           </div>
+          
           ${trip.routeArrival ? `
-          <div>
+          <div style="position: relative;">
+            <span style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--text-muted); border: 2px solid var(--bg-card);"></span>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">도착지</div>
-            <div style="font-weight: 500;">${trip.routeArrival}</div>
+            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-top: 1px;">${trip.routeArrival}</div>
           </div>` : ''}
         </div>
       </div>
 
-      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="briefcase" style="width: 15px; height: 15px;"></i> 거래처 및 수금 정보
-        </h4>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--text-muted);">거래처명</span>
-            <span style="font-weight: 600;">${trip.client || "미지정"}</span>
-          </div>
-          ${trip.clientPhone ? `
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--text-muted);">연락처</span>
-            <span>${formatPhoneNumber(trip.clientPhone)}</span>
-          </div>` : ''}
-          <div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--bg-card-border);">
-            <span style="color: var(--text-muted);">수금 상태</span>
-            <span style="font-weight: 700; color: ${trip.isPaid ? 'var(--color-success)' : 'var(--color-danger)'};">
-              ${trip.isPaid ? '수금 완료' : '미수금'}
-            </span>
-          </div>
-          ${trip.isPaid ? `
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--text-muted);">수금 완료일</span>
-            <span>${trip.paymentDate ? trip.paymentDate.replace('T', ' ') : '-'}</span>
-          </div>` : `
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--text-muted);">수금 예정일</span>
-            <span style="font-weight: 600; color: var(--color-warning);">${trip.paymentDueDate || "-"}</span>
-          </div>`}
+      <!-- 2. Client & Payment -->
+      <div style="border-top: 1px solid var(--bg-card-border); padding-top: 14px; display: flex; flex-direction: column;">
+        <div style="font-size: 0.72rem; font-weight: 700; color: var(--color-primary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="briefcase" style="width: 13px; height: 13px;"></i> 거래처 및 수금 정보
         </div>
-      </div>
-
-      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="banknote" style="width: 15px; height: 15px;"></i> 금액 및 경비 정산
-        </h4>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <div style="display: flex; justify-content: space-between; font-weight: 600;">
-            <span>운임 (매출)</span>
-            <span style="color: var(--text-main); font-weight: 700;">${formatMoney(trip.fee || 0)}원</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">거래처명</div>
+            <div style="font-weight: 600; font-size: 0.88rem; margin-top: 2px;">${trip.client || "미지정"}</div>
           </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
-            <span style="color: var(--text-muted);">- 주유비</span>
-            <span>${formatMoney(fuel)}원</span>
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">연락처</div>
+            <div style="font-weight: 500; font-size: 0.88rem; margin-top: 2px;">${trip.clientPhone ? formatPhoneNumber(trip.clientPhone) : "-"}</div>
           </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
-            <span style="color: var(--text-muted);">- 통행료</span>
-            <span>${formatMoney(toll)}원</span>
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">수금 상태</div>
+            <div style="margin-top: 2px;">
+              <span style="font-weight: 700; font-size: 0.78rem; padding: 2px 6px; border-radius: 4px; background-color: ${trip.isPaid ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)'}; color: ${trip.isPaid ? 'var(--color-success)' : 'var(--color-danger)'}; display: inline-block;">
+                ${trip.isPaid ? '수금 완료' : '미수금'}
+              </span>
+            </div>
           </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
-            <span style="color: var(--text-muted);">- 식비/숙박비</span>
-            <span>${formatMoney(meal)}원</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
-            <span style="color: var(--text-muted);">- 알선 수수료</span>
-            <span>${formatMoney(commission)}원</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding-left: 8px;">
-            <span style="color: var(--text-muted);">- 기타 경비</span>
-            <span>${formatMoney(other)}원</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--bg-card-border); font-weight: 700; font-size: 0.95rem;">
-            <span>순수익 (매출 - 경비)</span>
-            <span style="color: var(--color-primary);">${formatMoney(netIncome)}원</span>
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">${trip.isPaid ? '수금 완료일' : '수금 예정일'}</div>
+            <div style="font-weight: 600; font-size: 0.88rem; margin-top: 2px; color: ${trip.isPaid ? 'var(--text-main)' : 'var(--color-warning)'};">
+              ${trip.isPaid ? (trip.paymentDate ? trip.paymentDate.split('T')[0] : '-') : (trip.paymentDueDate || '-')}
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- 3. Financial Breakdown -->
+      <div style="border-top: 1px solid var(--bg-card-border); padding-top: 14px; display: flex; flex-direction: column;">
+        <div style="font-size: 0.72rem; font-weight: 700; color: var(--color-primary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="banknote" style="width: 13px; height: 13px;"></i> 매출 및 정산 내역
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; background-color: var(--bg-panel); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 600;">
+            <span style="color: var(--text-main); font-size: 0.85rem;">운임 (매출)</span>
+            <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">+ ${formatMoney(trip.fee || 0)}원</span>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px 0 4px 8px; border-left: 2px solid var(--bg-card-border); margin: 2px 0;">
+            ${fuel > 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>주유비</span>
+              <span>- ${formatMoney(fuel)}원</span>
+            </div>` : ''}
+            ${toll > 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>통행료</span>
+              <span>- ${formatMoney(toll)}원</span>
+            </div>` : ''}
+            ${meal > 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>식비/숙박비</span>
+              <span>- ${formatMoney(meal)}원</span>
+            </div>` : ''}
+            ${commission > 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>알선 수수료</span>
+              <span>- ${formatMoney(commission)}원</span>
+            </div>` : ''}
+            ${other > 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>기타 경비</span>
+              <span>- ${formatMoney(other)}원</span>
+            </div>` : ''}
+            ${expSum === 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>등록된 경비 없음</span>
+              <span>0원</span>
+            </div>` : ''}
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--bg-card-border); font-weight: 700; font-size: 0.95rem;">
+            <span style="color: var(--text-main);">순수익</span>
+            <span style="color: var(--color-primary); font-size: 1.05rem;">${formatMoney(netIncome)}원</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Notes -->
       ${trip.notes ? `
-      <div style="background-color: var(--bg-panel); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-        <h4 style="margin-top: 0; margin-bottom: 6px; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="sticky-note" style="width: 15px; height: 15px;"></i> 비고 (특이사항)
-        </h4>
-        <div style="white-space: pre-wrap; line-height: 1.4;">${trip.notes}</div>
+      <div style="border-top: 1px solid var(--bg-card-border); padding-top: 14px; display: flex; flex-direction: column;">
+        <div style="font-size: 0.72rem; font-weight: 700; color: var(--color-primary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="sticky-note" style="width: 13px; height: 13px;"></i> 비고 / 특이사항
+        </div>
+        <div style="white-space: pre-wrap; line-height: 1.4; color: var(--text-main); font-size: 0.82rem; background-color: var(--bg-panel); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">${trip.notes}</div>
       </div>` : ''}
     </div>
   `;

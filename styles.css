@@ -4115,64 +4115,35 @@ body.light-theme .auth-card {
   height: 14px;
 }
 
-/* Reset button override (Amber/Danger Colored Style) */
-.btn-tracker-option.btn-danger {
+/* Reset button override (Amber/Danger Colored Style) - Redesign to Premium Red */
+.btn-tracker-option.btn-danger,
+body.light-theme .btn-tracker-option.btn-danger {
   height: 38px;
   aspect-ratio: auto;
-  background: linear-gradient(to bottom, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.05)) !important;
-  border-top: 1px solid rgba(239, 68, 68, 0.3) !important;
-  border-left: 1px solid rgba(239, 68, 68, 0.2) !important;
-  border-right: 1px solid rgba(239, 68, 68, 0.2) !important;
-  border-bottom: 2.5px solid rgba(239, 68, 68, 0.45) !important;
-  color: var(--color-danger) !important;
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 3.5px solid rgba(0, 0, 0, 0.45) !important;
+  color: #ffffff !important;
   font-size: 0.88rem;
   font-weight: 700;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25) !important;
 }
 
-.btn-tracker-option.btn-danger:hover {
-  background: var(--color-danger) !important;
-  border-color: var(--color-danger) !important;
-  border-bottom: 3.5px solid rgba(0, 0, 0, 0.35) !important;
-  color: #ffffff !important;
+.btn-tracker-option.btn-danger:hover,
+body.light-theme .btn-tracker-option.btn-danger:hover {
+  filter: brightness(1.1) !important;
   transform: translateY(-1.5px);
-  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
+  border-bottom-width: 4.5px;
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35) !important;
 }
 
-.btn-tracker-option.btn-danger:active {
+.btn-tracker-option.btn-danger:active,
+body.light-theme .btn-tracker-option.btn-danger:active {
   transform: translateY(2px);
   border-bottom-width: 1px;
-  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.15);
-}
-
-/* Undo button override (Amber/Warning Colored Style) */
-.btn-tracker-option.btn-warning {
-  height: 38px;
-  aspect-ratio: auto;
-  background: linear-gradient(to bottom, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.05)) !important;
-  border-top: 1px solid rgba(245, 158, 11, 0.3) !important;
-  border-left: 1px solid rgba(245, 158, 11, 0.2) !important;
-  border-right: 1px solid rgba(245, 158, 11, 0.2) !important;
-  border-bottom: 2.5px solid rgba(245, 158, 11, 0.45) !important;
-  color: var(--color-warning) !important;
-  font-size: 0.88rem;
-  font-weight: 700;
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.05);
-}
-
-.btn-tracker-option.btn-warning:hover:not([disabled]) {
-  background: var(--color-warning) !important;
-  border-color: var(--color-warning) !important;
-  border-bottom: 3.5px solid rgba(0, 0, 0, 0.35) !important;
-  color: #ffffff !important;
-  transform: translateY(-1.5px);
-  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
-}
-
-.btn-tracker-option.btn-warning:active:not([disabled]) {
-  transform: translateY(2px);
-  border-bottom-width: 1px;
-  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.15);
 }
 
 body.light-theme .btn-tracker-option {
@@ -4188,27 +4159,7 @@ body.light-theme .btn-tracker-option:hover {
   background: #e4e4e7 !important;
 }
 
-body.light-theme .btn-tracker-option.btn-danger {
-  background: linear-gradient(to bottom, rgba(220, 38, 38, 0.08), rgba(220, 38, 38, 0.03)) !important;
-  border: 1px solid rgba(220, 38, 38, 0.25) !important;
-  color: var(--color-danger) !important;
-}
 
-body.light-theme .btn-tracker-option.btn-danger:hover {
-  background: var(--color-danger) !important;
-  color: #ffffff !important;
-}
-
-body.light-theme .btn-tracker-option.btn-warning {
-  background: linear-gradient(to bottom, rgba(217, 119, 6, 0.08), rgba(217, 119, 6, 0.03)) !important;
-  border: 1px solid rgba(217, 119, 6, 0.25) !important;
-  color: var(--color-warning) !important;
-}
-
-body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
-  background: var(--color-warning) !important;
-  color: #ffffff !important;
-}
 
 .btn-tracker-option[disabled] {
   opacity: 0.35;
@@ -4419,57 +4370,25 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-/* State-based coloring and glow effects for the main button */
-.btn-tracker-main.state-start,
-.btn-tracker-main.state-finish {
+/* Unified Premium Black & White 3D Tactile Styling for Main Action Buttons */
+.btn-tracker-main {
   background: #000000 !important;
   color: #ffffff !important;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.25) !important;
   border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.2) !important;
-  border-bottom: 4px solid rgba(0, 0, 0, 0.6) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 4.5px solid rgba(0, 0, 0, 0.6) !important; /* Deeper 3D bottom border */
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
 }
 
-.btn-tracker-main.state-start:hover,
-.btn-tracker-main.state-finish:hover {
+.btn-tracker-main:hover {
   background: #18181b !important;
-}
-
-.btn-tracker-main.state-load-arrive,
-.btn-tracker-main.state-unload-arrive {
-  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.25) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
-  border-bottom: 4px solid rgba(0, 0, 0, 0.4) !important;
-  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4) !important;
   color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-.btn-tracker-main.state-load-arrive:hover,
-.btn-tracker-main.state-unload-arrive:hover {
-  filter: brightness(1.08) !important;
-}
-
-.btn-tracker-main.state-load-complete,
-.btn-tracker-main.state-via-complete,
-.btn-tracker-main.state-unload-complete,
-.btn-tracker-main.state-finish-garage {
-  background: linear-gradient(135deg, #10b981, #059669) !important;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.25) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
-  border-bottom: 4px solid rgba(0, 0, 0, 0.45) !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
-  color: #ffffff !important;
-}
-
-.btn-tracker-main.state-load-complete:hover,
-.btn-tracker-main.state-via-complete:hover,
-.btn-tracker-main.state-unload-complete:hover,
-.btn-tracker-main.state-finish-garage:hover {
-  filter: brightness(1.08) !important;
+.btn-tracker-main:active {
+  background: #09090b !important;
 }
 
 /* Stepper address label */

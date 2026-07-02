@@ -1023,49 +1023,16 @@
               <input type="text" id="trip-fee" inputmode="numeric" placeholder="예: 450,000" required>
             </div>
   
-            <!-- Separated Expenses Accordion (Now includes Commission) -->
-            <div class="expenses-accordion" style="border: 1px solid var(--bg-card-border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden;">
-              <div class="accordion-header" onclick="toggleExpensesAccordion()" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background-color: var(--bg-card); cursor: pointer; user-select: none;">
-                <span style="font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-                  <i data-lucide="receipt" style="width: 16px; height: 16px; color: var(--color-primary);"></i>
-                  경비 상세 내역 입력 (주유, 수수료 등)
-                </span>
-                <i data-lucide="chevron-down" id="accordion-icon" style="width: 16px; height: 16px; transition: transform var(--transition-fast);"></i>
-              </div>
-              <div class="accordion-content" id="expenses-accordion-content" style="display: none; padding: 12px; background-color: var(--bg-panel); border-top: 1px solid var(--bg-card-border);">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="trip-expense-fuel">주유비 (원)</label>
-                    <input type="text" id="trip-expense-fuel" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
-                  </div>
-                  <div class="form-group">
-                    <label for="trip-expense-toll">통행료 (원)</label>
-                    <input type="text" id="trip-expense-toll" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="trip-expense-meal">식대/숙박비 (원)</label>
-                    <input type="text" id="trip-expense-meal" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
-                  </div>
-                  <div class="form-group">
-                    <label for="trip-expense-other">기타 경비 (원)</label>
-                    <input type="text" id="trip-expense-other" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
-                  </div>
-                </div>
-                <!-- Commission moved here inside accordion -->
-                <div class="form-group" style="margin-bottom: 0;">
-                  <label for="trip-commission">수수료 (원)</label>
-                  <input type="text" id="trip-commission" inputmode="numeric" value="0" placeholder="예: 30,000" oninput="calculateTotalExpenses()">
-                </div>
-              </div>
+            <!-- Dynamic Expenses Container -->
+            <div id="expenses-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+              <!-- Dynamic expense rows will be rendered here -->
             </div>
-  
-            <!-- Summary fields: Total Expenses (Always visible) -->
-            <div class="form-group" style="margin-bottom: 0;">
-              <label>경비 합계 (자동 계산)</label>
-              <input type="text" id="trip-expense-total" readonly value="0원" style="background-color: var(--bg-app); opacity: 0.8; font-weight: 700;">
-            </div>
+
+            <!-- Add Expense Button -->
+            <button type="button" id="btn-add-expense" class="btn-timeline-toggle" onclick="addExpenseField()" style="margin-bottom: 12px; padding: 10px 12px !important; font-size: 0.8rem !important;">
+              <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+              <span>경비 추가 (최대 5개)</span>
+            </button>
           </div>
 
           <!-- 3. 거래처명 수금예정 Box (Merged here from step 3) -->

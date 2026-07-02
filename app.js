@@ -4239,7 +4239,6 @@ function openTripModal(tripId = null) {
       document.getElementById("trip-arrival").value = trip.routeArrival || "";
       document.getElementById("trip-distance").value = trip.distance;
       document.getElementById("trip-fee").value = formatMoneyString(trip.fee);
-      document.getElementById("trip-commission").value = formatMoneyString(trip.commission || 0);
       
       toggleLocationField('start', !!trip.routeStart);
       toggleLocationField('arrival', !!trip.routeArrival);
@@ -4251,16 +4250,20 @@ function openTripModal(tripId = null) {
         });
       }
 
+      const expContainer = document.getElementById("expenses-container");
+      if (expContainer) expContainer.innerHTML = "";
+
       if (trip.expenses) {
-        document.getElementById("trip-expense-fuel").value = formatMoneyString(trip.expenses.fuel || 0);
-        document.getElementById("trip-expense-toll").value = formatMoneyString(trip.expenses.toll || 0);
-        document.getElementById("trip-expense-meal").value = formatMoneyString(trip.expenses.meal || 0);
-        document.getElementById("trip-expense-other").value = formatMoneyString(trip.expenses.other || 0);
-      } else {
-        document.getElementById("trip-expense-fuel").value = formatMoneyString(trip.expense || 0);
-        document.getElementById("trip-expense-toll").value = 0;
-        document.getElementById("trip-expense-meal").value = 0;
-        document.getElementById("trip-expense-other").value = 0;
+        if (trip.expenses.fuel > 0) addExpenseField("fuel", trip.expenses.fuel);
+        if (trip.expenses.toll > 0) addExpenseField("toll", trip.expenses.toll);
+        if (trip.expenses.meal > 0) addExpenseField("meal", trip.expenses.meal);
+        if (trip.expenses.other > 0) addExpenseField("other", trip.expenses.other);
+      } else if (trip.expense > 0) {
+        addExpenseField("fuel", trip.expense);
+      }
+
+      if (trip.commission > 0) {
+        addExpenseField("commission", trip.commission);
       }
 
       document.getElementById("trip-is-paid").checked = trip.isPaid;
@@ -4286,11 +4289,8 @@ function openTripModal(tripId = null) {
     document.getElementById("trip-load").value = "";
     document.getElementById("trip-unload").value = "";
     document.getElementById("trip-arrival").value = "";
-    document.getElementById("trip-commission").value = 0;
-    document.getElementById("trip-expense-fuel").value = 0;
-    document.getElementById("trip-expense-toll").value = 0;
-    document.getElementById("trip-expense-meal").value = 0;
-    document.getElementById("trip-expense-other").value = 0;
+    const expContainer = document.getElementById("expenses-container");
+    if (expContainer) expContainer.innerHTML = "";
     
     document.getElementById("trip-is-paid").checked = false;
     document.getElementById("trip-payment-due").value = "";
@@ -4314,14 +4314,106 @@ function closeTripModal() {
 }
 
 function calculateTotalExpenses() {
-  const fuel = getNumericValue("trip-expense-fuel");
-  const toll = getNumericValue("trip-expense-toll");
-  const meal = getNumericValue("trip-expense-meal");
-  const other = getNumericValue("trip-expense-other");
-  const commission = getNumericValue("trip-commission");
-  
+  let fuel = 0, toll = 0, meal = 0, other = 0, commission = 0;
+  for (let i = 1; i <= 5; i++) {
+    const row = document.getElementById(`expense-row-${i}`);
+    if (row) {
+      const type = document.getElementById(`trip-expense-type-${i}`).value;
+      const amt = getNumericValue(`trip-expense-amount-${i}`);
+      if (type === "fuel") fuel += amt;
+      else if (type === "toll") toll += amt;
+      else if (type === "meal") meal += amt;
+      else if (type === "other") other += amt;
+      else if (type === "commission") commission += amt;
+    }
+  }
   const sum = fuel + toll + meal + other + commission;
-  document.getElementById("trip-expense-total").value = sum.toLocaleString() + "원";
+  return sum;
+}
+
+function addExpenseField(type = "toll", amount = "") {
+  const container = document.getElementById("expenses-container");
+  if (!container) return;
+  
+  const activeIndices = [];
+  for (let i = 1; i <= 5; i++) {
+    if (document.getElementById(`expense-row-${i}`)) {
+      activeIndices.push(i);
+    }
+  }
+  
+  if (activeIndices.length >= 5) {
+    showToast("경비는 최대 5개까지 추가할 수 있습니다.");
+    return;
+  }
+
+  let targetIndex = 1;
+  for (let i = 1; i <= 5; i++) {
+    if (!activeIndices.includes(i)) {
+      targetIndex = i;
+      break;
+    }
+  }
+
+  const row = document.createElement("div");
+  row.className = "expense-row";
+  row.id = `expense-row-${targetIndex}`;
+  row.style.display = "flex";
+  row.style.gap = "6px";
+  row.style.alignItems = "center";
+  row.style.width = "100%";
+  row.style.marginBottom = "8px";
+  
+  const formattedAmount = amount ? formatMoneyString(amount) : "";
+  
+  row.innerHTML = `
+    <div style="flex: 0 0 calc(40% - 22px);">
+      <select id="trip-expense-type-${targetIndex}" onchange="calculateTotalExpenses()" class="form-input" style="width: 100%; height: 42px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-card); color: var(--text-main); font-weight: 500; font-size: 0.85rem; padding: 0 10px;">
+        <option value="toll" ${type === 'toll' ? 'selected' : ''}>톨비</option>
+        <option value="meal" ${type === 'meal' ? 'selected' : ''}>식비</option>
+        <option value="commission" ${type === 'commission' ? 'selected' : ''}>수수료</option>
+        <option value="fuel" ${type === 'fuel' ? 'selected' : ''}>주유비</option>
+        <option value="other" ${type === 'other' ? 'selected' : ''}>기타</option>
+      </select>
+    </div>
+    <div style="flex: 1; position: relative;">
+      <input type="text" id="trip-expense-amount-${targetIndex}" inputmode="numeric" oninput="formatAndCalculateExpense(this)" placeholder="금액 입력" class="form-input" style="width: 100%; height: 42px; padding: 0 12px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background-color: var(--bg-card); color: var(--text-main); font-weight: 500; font-size: 0.85rem;" value="${formattedAmount}">
+    </div>
+    <button type="button" onclick="removeExpenseField(${targetIndex})" style="flex: none; width: 38px; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition-fast);">
+      <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+    </button>
+  `;
+  
+  container.appendChild(row);
+  lucide.createIcons();
+  calculateTotalExpenses();
+  updateAddExpenseButtonState();
+}
+
+function removeExpenseField(index) {
+  const row = document.getElementById(`expense-row-${index}`);
+  if (row) {
+    row.remove();
+  }
+  calculateTotalExpenses();
+  updateAddExpenseButtonState();
+}
+
+function formatAndCalculateExpense(input) {
+  input.value = formatMoneyInput(input.value);
+  calculateTotalExpenses();
+}
+
+function updateAddExpenseButtonState() {
+  const count = document.querySelectorAll(".expense-row").length;
+  const btn = document.getElementById("btn-add-expense");
+  if (btn) {
+    if (count >= 5) {
+      btn.style.display = "none";
+    } else {
+      btn.style.display = "flex";
+    }
+  }
 }
 
 function togglePaymentDueDate() {
@@ -4471,13 +4563,20 @@ function saveTrip() {
   const distance = Number(document.getElementById("trip-distance").value);
   const fee = getNumericValue("trip-fee");
   
-  const commission = getNumericValue("trip-commission");
-  const expenses = {
-    fuel: getNumericValue("trip-expense-fuel"),
-    toll: getNumericValue("trip-expense-toll"),
-    meal: getNumericValue("trip-expense-meal"),
-    other: getNumericValue("trip-expense-other")
-  };
+  let fuel = 0, toll = 0, meal = 0, other = 0, commission = 0;
+  for (let i = 1; i <= 5; i++) {
+    const row = document.getElementById(`expense-row-${i}`);
+    if (row) {
+      const type = document.getElementById(`trip-expense-type-${i}`).value;
+      const amt = getNumericValue(`trip-expense-amount-${i}`);
+      if (type === "fuel") fuel += amt;
+      else if (type === "toll") toll += amt;
+      else if (type === "meal") meal += amt;
+      else if (type === "other") other += amt;
+      else if (type === "commission") commission += amt;
+    }
+  }
+  const expenses = { fuel, toll, meal, other };
   
   const isPaid = document.getElementById("trip-is-paid").checked;
   const paymentDueDate = document.getElementById("trip-payment-due").value;
@@ -6222,14 +6321,25 @@ function saveTripDraft() {
   const routeArrival = document.getElementById("trip-arrival").value.trim();
   const distance = document.getElementById("trip-distance").value;
   const fee = document.getElementById("trip-fee").value;
-  const commission = document.getElementById("trip-commission").value;
+  const dynamicExpenses = [];
+  for (let i = 1; i <= 5; i++) {
+    const row = document.getElementById(`expense-row-${i}`);
+    if (row) {
+      const type = document.getElementById(`trip-expense-type-${i}`).value;
+      const amt = document.getElementById(`trip-expense-amount-${i}`).value.replace(/,/g, "");
+      dynamicExpenses.push({ type, amount: Number(amt) || 0 });
+    }
+  }
   
-  const expenses = {
-    fuel: document.getElementById("trip-expense-fuel").value,
-    toll: document.getElementById("trip-expense-toll").value,
-    meal: document.getElementById("trip-expense-meal").value,
-    other: document.getElementById("trip-expense-other").value
-  };
+  let fuel = 0, toll = 0, meal = 0, other = 0, commission = 0;
+  dynamicExpenses.forEach(item => {
+    if (item.type === "fuel") fuel += item.amount;
+    else if (item.type === "toll") toll += item.amount;
+    else if (item.type === "meal") meal += item.amount;
+    else if (item.type === "other") other += item.amount;
+    else if (item.type === "commission") commission += item.amount;
+  });
+  const expenses = { fuel, toll, meal, other };
   
   const isPaid = document.getElementById("trip-is-paid").checked;
   const paymentDueDate = document.getElementById("trip-payment-due").value;
@@ -6247,7 +6357,7 @@ function saveTripDraft() {
 
   const draftData = {
     tripId, startDate, endDate, client, clientPhone, routeStart, routeLoad, routeVias, routeUnload, routeArrival,
-    distance, fee, commission, expenses, isPaid, paymentDueDate, paymentDate, notes
+    distance, fee, commission, expenses, isPaid, paymentDueDate, paymentDate, notes, dynamicExpenses
   };
 
   localStorage.setItem("logilog_trip_draft", JSON.stringify(draftData));
@@ -6310,11 +6420,23 @@ function loadTripDraft() {
       });
     }
 
-    if (draft.expenses) {
-      document.getElementById("trip-expense-fuel").value = formatMoneyString(draft.expenses.fuel || 0);
-      document.getElementById("trip-expense-toll").value = formatMoneyString(draft.expenses.toll || 0);
-      document.getElementById("trip-expense-meal").value = formatMoneyString(draft.expenses.meal || 0);
-      document.getElementById("trip-expense-other").value = formatMoneyString(draft.expenses.other || 0);
+    const expContainer = document.getElementById("expenses-container");
+    if (expContainer) expContainer.innerHTML = "";
+
+    if (draft.dynamicExpenses && draft.dynamicExpenses.length > 0) {
+      draft.dynamicExpenses.forEach(item => {
+        addExpenseField(item.type, item.amount);
+      });
+    } else {
+      if (draft.expenses) {
+        if (draft.expenses.fuel > 0) addExpenseField("fuel", draft.expenses.fuel);
+        if (draft.expenses.toll > 0) addExpenseField("toll", draft.expenses.toll);
+        if (draft.expenses.meal > 0) addExpenseField("meal", draft.expenses.meal);
+        if (draft.expenses.other > 0) addExpenseField("other", draft.expenses.other);
+      }
+      if (draft.commission > 0) {
+        addExpenseField("commission", draft.commission);
+      }
     }
 
     document.getElementById("trip-is-paid").checked = !!draft.isPaid;

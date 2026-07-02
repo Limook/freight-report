@@ -23,6 +23,10 @@ CREATE TABLE IF NOT EXISTS public.clients (
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   phone TEXT,
+  bizno TEXT,
+  address TEXT,
+  manager TEXT,
+  notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

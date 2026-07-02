@@ -1431,7 +1431,11 @@ async function syncAllToSupabase() {
         id: c.id,
         user_id: uid,
         name: c.name,
-        phone: c.phone
+        phone: c.phone,
+        bizno: c.bizno || null,
+        address: c.address || null,
+        manager: c.manager || null,
+        notes: c.notes || null
       }));
     if (clientsToSync.length > 0) {
       const { error } = await supabaseClient.from('clients').upsert(clientsToSync);
@@ -1689,7 +1693,11 @@ async function loadSupabaseData() {
                 id: row.id,
                 userId: appState.currentUser.username,
                 name: row.name,
-                phone: row.phone
+                phone: row.phone,
+                bizno: row.bizno || "",
+                address: row.address || "",
+                manager: row.manager || "",
+                notes: row.notes || ""
               }));
             }
             
@@ -6442,6 +6450,12 @@ function renderClientsPanel() {
     const card = document.createElement("div");
     card.className = "client-card detail-card";
     
+    const biznoHtml = client.bizno 
+      ? `<div class="client-meta-row"><strong>사업자번호:</strong> <span>${client.bizno}</span></div>` 
+      : "";
+    const addressHtml = client.address 
+      ? `<div class="client-meta-row"><strong>주소:</strong> <span>${client.address}</span></div>` 
+      : "";
     const managerHtml = client.manager 
       ? `<div class="client-meta-row"><strong>담당자:</strong> <span>${client.manager}</span></div>` 
       : "";
@@ -6468,6 +6482,8 @@ function renderClientsPanel() {
             <i data-lucide="phone" class="icon-xs" style="width: 12px; height: 12px;"></i> ${formatPhoneNumber(client.phone)}
           </a>
         </div>
+        ${biznoHtml}
+        ${addressHtml}
         ${managerHtml}
         ${notesHtml}
       </div>
@@ -6491,12 +6507,16 @@ function openClientModal(clientId = null) {
       document.getElementById("client-id").value = client.id;
       document.getElementById("client-modal-name").value = client.name;
       document.getElementById("client-modal-phone").value = (client.phone || "").replace(/[^0-9]/g, "");
+      document.getElementById("client-modal-bizno").value = client.bizno || "";
+      document.getElementById("client-modal-address").value = client.address || "";
       document.getElementById("client-modal-manager").value = client.manager || "";
       document.getElementById("client-modal-notes").value = client.notes || "";
     }
   } else {
     modalTitle.innerText = "거래처 등록";
     document.getElementById("client-id").value = "";
+    document.getElementById("client-modal-bizno").value = "";
+    document.getElementById("client-modal-address").value = "";
   }
   
   dialogClient.showModal();
@@ -6510,6 +6530,8 @@ function saveClient() {
   const clientId = document.getElementById("client-id").value;
   const name = document.getElementById("client-modal-name").value.trim();
   const phone = document.getElementById("client-modal-phone").value.trim();
+  const bizno = document.getElementById("client-modal-bizno").value.trim();
+  const address = document.getElementById("client-modal-address").value.trim();
   const manager = document.getElementById("client-modal-manager").value.trim();
   const notes = document.getElementById("client-modal-notes").value.trim();
   
@@ -6524,7 +6546,16 @@ function saveClient() {
     const index = appState.clients.findIndex(c => c.id === clientId);
     if (index !== -1) {
       const existingUserId = appState.clients[index].userId || appState.currentUser.username;
-      appState.clients[index] = { id: clientId, userId: existingUserId, name, phone: formattedPhone, manager, notes };
+      appState.clients[index] = { 
+        id: clientId, 
+        userId: existingUserId, 
+        name, 
+        phone: formattedPhone, 
+        bizno, 
+        address, 
+        manager, 
+        notes 
+      };
       showToast("거래처 정보가 수정되었습니다.");
     }
   } else {
@@ -6533,6 +6564,8 @@ function saveClient() {
       userId: appState.currentUser.username,
       name,
       phone: formattedPhone,
+      bizno,
+      address,
       manager,
       notes
     };
@@ -6585,6 +6618,8 @@ function saveClientQuickly() {
       userId: appState.currentUser.username,
       name: name,
       phone: formattedPhone,
+      bizno: "",
+      address: "",
       manager: "",
       notes: ""
     };

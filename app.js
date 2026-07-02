@@ -3972,13 +3972,38 @@ function getCumulativeMileage() {
 // TRIP LOG MANAGEMENT (TAB 2)
 // ----------------------------------------------------
 function initForms() {
-  // Set up phone input digit-only filters (Ver 2.26)
+  // Set up phone input with auto-hyphen (Ver 2.29)
   const phoneIds = ["trip-client-phone", "client-modal-phone", "signup-phone"];
   phoneIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("input", (e) => {
-        e.target.value = e.target.value.replace(/[^0-9]/g, "");
+        e.target.value = autoHyphenPhone(e.target.value);
+      });
+    }
+  });
+
+  const biznoEl = document.getElementById("client-modal-bizno");
+  if (biznoEl) {
+    biznoEl.addEventListener("input", (e) => {
+      e.target.value = autoHyphenBizno(e.target.value);
+    });
+  }
+
+  const moneyIds = [
+    "trip-fee",
+    "trip-commission",
+    "trip-expense-fuel",
+    "trip-expense-toll",
+    "trip-expense-meal",
+    "trip-expense-other",
+    "expense-modal-amount"
+  ];
+  moneyIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", (e) => {
+        e.target.value = formatMoneyInput(e.target.value);
       });
     }
   });
@@ -4103,12 +4128,12 @@ function updateTripWizardSummary() {
   const endDate = document.getElementById("trip-end-date").value;
   
   const distance = Number(document.getElementById("trip-distance").value || 0);
-  const fee = Number(document.getElementById("trip-fee").value || 0);
-  const fuel = Number(document.getElementById("trip-expense-fuel").value || 0);
-  const toll = Number(document.getElementById("trip-expense-toll").value || 0);
-  const meal = Number(document.getElementById("trip-expense-meal").value || 0);
-  const other = Number(document.getElementById("trip-expense-other").value || 0);
-  const commission = Number(document.getElementById("trip-commission").value || 0);
+  const fee = getNumericValue("trip-fee");
+  const fuel = getNumericValue("trip-expense-fuel");
+  const toll = getNumericValue("trip-expense-toll");
+  const meal = getNumericValue("trip-expense-meal");
+  const other = getNumericValue("trip-expense-other");
+  const commission = getNumericValue("trip-commission");
   const expSum = fuel + toll + meal + other + commission;
   const netIncome = fee - expSum;
   
@@ -4213,8 +4238,8 @@ function openTripModal(tripId = null) {
       document.getElementById("trip-unload").value = trip.routeUnload || "";
       document.getElementById("trip-arrival").value = trip.routeArrival || "";
       document.getElementById("trip-distance").value = trip.distance;
-      document.getElementById("trip-fee").value = trip.fee;
-      document.getElementById("trip-commission").value = trip.commission || 0;
+      document.getElementById("trip-fee").value = formatMoneyString(trip.fee);
+      document.getElementById("trip-commission").value = formatMoneyString(trip.commission || 0);
       
       toggleLocationField('start', !!trip.routeStart);
       toggleLocationField('arrival', !!trip.routeArrival);
@@ -4227,12 +4252,12 @@ function openTripModal(tripId = null) {
       }
 
       if (trip.expenses) {
-        document.getElementById("trip-expense-fuel").value = trip.expenses.fuel || 0;
-        document.getElementById("trip-expense-toll").value = trip.expenses.toll || 0;
-        document.getElementById("trip-expense-meal").value = trip.expenses.meal || 0;
-        document.getElementById("trip-expense-other").value = trip.expenses.other || 0;
+        document.getElementById("trip-expense-fuel").value = formatMoneyString(trip.expenses.fuel || 0);
+        document.getElementById("trip-expense-toll").value = formatMoneyString(trip.expenses.toll || 0);
+        document.getElementById("trip-expense-meal").value = formatMoneyString(trip.expenses.meal || 0);
+        document.getElementById("trip-expense-other").value = formatMoneyString(trip.expenses.other || 0);
       } else {
-        document.getElementById("trip-expense-fuel").value = trip.expense || 0;
+        document.getElementById("trip-expense-fuel").value = formatMoneyString(trip.expense || 0);
         document.getElementById("trip-expense-toll").value = 0;
         document.getElementById("trip-expense-meal").value = 0;
         document.getElementById("trip-expense-other").value = 0;
@@ -4289,11 +4314,11 @@ function closeTripModal() {
 }
 
 function calculateTotalExpenses() {
-  const fuel = Number(document.getElementById("trip-expense-fuel").value || 0);
-  const toll = Number(document.getElementById("trip-expense-toll").value || 0);
-  const meal = Number(document.getElementById("trip-expense-meal").value || 0);
-  const other = Number(document.getElementById("trip-expense-other").value || 0);
-  const commission = Number(document.getElementById("trip-commission").value || 0);
+  const fuel = getNumericValue("trip-expense-fuel");
+  const toll = getNumericValue("trip-expense-toll");
+  const meal = getNumericValue("trip-expense-meal");
+  const other = getNumericValue("trip-expense-other");
+  const commission = getNumericValue("trip-commission");
   
   const sum = fuel + toll + meal + other + commission;
   document.getElementById("trip-expense-total").value = sum.toLocaleString() + "원";
@@ -4438,14 +4463,14 @@ function saveTrip() {
   const routeUnload = document.getElementById("trip-unload").value.trim();
   const routeArrival = document.getElementById("trip-arrival").value.trim();
   const distance = Number(document.getElementById("trip-distance").value);
-  const fee = Number(document.getElementById("trip-fee").value);
+  const fee = getNumericValue("trip-fee");
   
-  const commission = Number(document.getElementById("trip-commission").value || 0);
+  const commission = getNumericValue("trip-commission");
   const expenses = {
-    fuel: Number(document.getElementById("trip-expense-fuel").value || 0),
-    toll: Number(document.getElementById("trip-expense-toll").value || 0),
-    meal: Number(document.getElementById("trip-expense-meal").value || 0),
-    other: Number(document.getElementById("trip-expense-other").value || 0)
+    fuel: getNumericValue("trip-expense-fuel"),
+    toll: getNumericValue("trip-expense-toll"),
+    meal: getNumericValue("trip-expense-meal"),
+    other: getNumericValue("trip-expense-other")
   };
   
   const isPaid = document.getElementById("trip-is-paid").checked;
@@ -4494,7 +4519,7 @@ function saveTrip() {
     return;
   }
   
-  const feeRaw = document.getElementById("trip-fee").value.trim();
+  const feeRaw = document.getElementById("trip-fee").value.trim().replace(/,/g, "");
   if (!feeRaw || isNaN(Number(feeRaw))) {
     helperFocusAlert("trip-fee", "운임을 입력해 주세요.");
     return;
@@ -5879,6 +5904,56 @@ function cleanAddressForDisplay(address) {
   return address.trim().replace(/^대한민국\s+/, "");
 }
 
+function autoHyphenPhone(value) {
+  if (!value) return "";
+  const digits = value.replace(/[^0-9]/g, "");
+  
+  if (digits.startsWith("02")) {
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 2)}-\t${digits.slice(2, 5)}-${digits.slice(5)}`.replace('\t', '');
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+  } else {
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+  }
+}
+
+// Fixed function definition
+function autoHyphenBizno(value) {
+  if (!value) return "";
+  const digits = value.replace(/[^0-9]/g, "");
+  if (digits.length <= 3) {
+    return digits;
+  } else if (digits.length <= 5) {
+    return digits.slice(0, 3) + "-" + digits.slice(3);
+  } else {
+    return digits.slice(0, 3) + "-" + digits.slice(3, 5) + "-" + digits.slice(5, 10);
+  }
+}
+
+function formatMoneyString(val) {
+  if (val === undefined || val === null || val === "") return "";
+  const clean = String(val).replace(/[^0-9]/g, "");
+  if (!clean) return "";
+  return Number(clean).toLocaleString();
+}
+
+function formatMoneyInput(value) {
+  if (!value) return "";
+  const clean = value.replace(/[^0-9]/g, "");
+  if (!clean) return "";
+  return Number(clean).toLocaleString();
+}
+
+function getNumericValue(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  return Number(el.value.replace(/,/g, "")) || 0;
+}
+
 function formatPhoneNumber(phone) {
   if (!phone) return "";
   const digits = phone.replace(/[^0-9]/g, "");
@@ -6214,8 +6289,8 @@ function loadTripDraft() {
     document.getElementById("trip-unload").value = draft.routeUnload || "";
     document.getElementById("trip-arrival").value = draft.routeArrival || "";
     document.getElementById("trip-distance").value = draft.distance || "";
-    document.getElementById("trip-fee").value = draft.fee || "";
-    document.getElementById("trip-commission").value = draft.commission || 0;
+    document.getElementById("trip-fee").value = formatMoneyString(draft.fee || "");
+    document.getElementById("trip-commission").value = formatMoneyString(draft.commission || 0);
 
     toggleLocationField('start', !!draft.routeStart);
     toggleLocationField('arrival', !!draft.routeArrival);
@@ -6230,10 +6305,10 @@ function loadTripDraft() {
     }
 
     if (draft.expenses) {
-      document.getElementById("trip-expense-fuel").value = draft.expenses.fuel || 0;
-      document.getElementById("trip-expense-toll").value = draft.expenses.toll || 0;
-      document.getElementById("trip-expense-meal").value = draft.expenses.meal || 0;
-      document.getElementById("trip-expense-other").value = draft.expenses.other || 0;
+      document.getElementById("trip-expense-fuel").value = formatMoneyString(draft.expenses.fuel || 0);
+      document.getElementById("trip-expense-toll").value = formatMoneyString(draft.expenses.toll || 0);
+      document.getElementById("trip-expense-meal").value = formatMoneyString(draft.expenses.meal || 0);
+      document.getElementById("trip-expense-other").value = formatMoneyString(draft.expenses.other || 0);
     }
 
     document.getElementById("trip-is-paid").checked = !!draft.isPaid;
@@ -6305,7 +6380,7 @@ function saveExpenseDraft() {
   const type = document.getElementById("expense-modal-type").value;
   const category = document.getElementById("expense-modal-category").value;
   const customCategory = document.getElementById("expense-modal-custom-category") ? document.getElementById("expense-modal-custom-category").value.trim() : "";
-  const amount = document.getElementById("expense-modal-amount").value;
+  const amount = document.getElementById("expense-modal-amount").value.replace(/,/g, "");
   const title = document.getElementById("expense-modal-title-input") ? document.getElementById("expense-modal-title-input").value.trim() : "";
   const notes = document.getElementById("expense-modal-notes").value.trim();
   const repeatType = document.getElementById("expense-modal-repeat-type") ? document.getElementById("expense-modal-repeat-type").value : "none";
@@ -6382,7 +6457,7 @@ function loadExpenseDraft() {
       if (customInput) customInput.required = false;
     }
     
-    document.getElementById("expense-modal-amount").value = draft.amount || "";
+    document.getElementById("expense-modal-amount").value = formatMoneyString(draft.amount || "");
     if (document.getElementById("expense-modal-title-input")) {
       document.getElementById("expense-modal-title-input").value = draft.title || "";
     }
@@ -7678,7 +7753,7 @@ function openExpenseModal(expenseId = null) {
         }
       }
       
-      document.getElementById("expense-modal-amount").value = exp.amount;
+      document.getElementById("expense-modal-amount").value = formatMoneyString(exp.amount);
       document.getElementById("expense-modal-title-input").value = exp.title || "";
       document.getElementById("expense-modal-notes").value = exp.notes || "";
       
@@ -7742,7 +7817,7 @@ function saveExpense() {
   const date = document.getElementById("expense-modal-date").value;
   const type = document.getElementById("expense-modal-type").value;
   const categorySelect = document.getElementById("expense-modal-category").value;
-  const amount = Number(document.getElementById("expense-modal-amount").value);
+  const amount = getNumericValue("expense-modal-amount");
   let title = document.getElementById("expense-modal-title-input").value.trim();
   const notes = document.getElementById("expense-modal-notes").value.trim();
   

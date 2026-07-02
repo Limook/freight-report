@@ -1020,7 +1020,7 @@
             <!-- Freight Fee takes full width -->
             <div class="form-group">
               <label for="trip-fee">운송료 (운임, 원) <span class="required">*</span></label>
-              <input type="number" id="trip-fee" min="0" placeholder="예: 450000" required>
+              <input type="text" id="trip-fee" inputmode="numeric" placeholder="예: 450,000" required>
             </div>
   
             <!-- Separated Expenses Accordion (Now includes Commission) -->
@@ -1036,27 +1036,27 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label for="trip-expense-fuel">주유비 (원)</label>
-                    <input type="number" id="trip-expense-fuel" min="0" value="0" oninput="calculateTotalExpenses()">
+                    <input type="text" id="trip-expense-fuel" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
                   </div>
                   <div class="form-group">
                     <label for="trip-expense-toll">통행료 (원)</label>
-                    <input type="number" id="trip-expense-toll" min="0" value="0" oninput="calculateTotalExpenses()">
+                    <input type="text" id="trip-expense-toll" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
                     <label for="trip-expense-meal">식대/숙박비 (원)</label>
-                    <input type="number" id="trip-expense-meal" min="0" value="0" oninput="calculateTotalExpenses()">
+                    <input type="text" id="trip-expense-meal" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
                   </div>
                   <div class="form-group">
                     <label for="trip-expense-other">기타 경비 (원)</label>
-                    <input type="number" id="trip-expense-other" min="0" value="0" oninput="calculateTotalExpenses()">
+                    <input type="text" id="trip-expense-other" inputmode="numeric" value="0" oninput="calculateTotalExpenses()">
                   </div>
                 </div>
                 <!-- Commission moved here inside accordion -->
                 <div class="form-group" style="margin-bottom: 0;">
                   <label for="trip-commission">수수료 (원)</label>
-                  <input type="number" id="trip-commission" min="0" value="0" placeholder="예: 30000" oninput="calculateTotalExpenses()">
+                  <input type="text" id="trip-commission" inputmode="numeric" value="0" placeholder="예: 30,000" oninput="calculateTotalExpenses()">
                 </div>
               </div>
             </div>
@@ -1386,7 +1386,7 @@
             <label for="expense-modal-amount">금액 (원) <span class="required">*</span></label>
             <div class="form-input-icon-group">
               <i data-lucide="credit-card"></i>
-              <input type="number" id="expense-modal-amount" min="0" placeholder="예: 1200000" required>
+              <input type="text" id="expense-modal-amount" inputmode="numeric" placeholder="예: 1,200,000" required>
             </div>
           </div>
 

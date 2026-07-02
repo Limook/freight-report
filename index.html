@@ -126,8 +126,6 @@
           </div>
         </div>
 
-
-
         <!-- Summary Cards Grid -->
         <div class="stats-grid">
           <div class="stat-card revenue" onclick="toggleDashboardCardDetail('revenue')" style="cursor: pointer;">
@@ -169,7 +167,7 @@
               <i data-lucide="trending-up"></i>
             </div>
             <div class="stat-info">
-              <span class="stat-label">순수입 (매출-경비)</span>
+              <span class="stat-label">순수입</span>
               <h3 id="stat-net-income" class="stat-value">0원</h3>
             </div>
             <div class="collapsible-wrapper" id="detail-net-income-wrapper">
@@ -199,9 +197,64 @@
           </div>
         </div>
 
-        <!-- 화물차 맞춤 영업 효율 & 차량 관리 위젯 (Ver 2.13 추가) -->
-        <div class="dashboard-details-grid" id="dashboard-custom-insights" style="margin-top: 16px; margin-bottom: 16px;">
-          <!-- 1. 영업 효율성 분석 -->
+        <!-- 1. Financial Overview Section (수금 및 상세 지출) -->
+        <div class="dashboard-details-grid" style="margin-top: 16px;">
+          <div class="detail-card">
+            <div class="card-header-flex">
+              <h4>수금 및 미수금 현황</h4>
+              <i data-lucide="pie-chart" class="icon-sm" style="color: var(--color-success);"></i>
+            </div>
+            <div id="dashboard-collection-widget" style="margin-top: 10px;">
+              <!-- JS로 렌더링 -->
+            </div>
+          </div>
+          
+          <div class="detail-card">
+            <div class="card-header-flex">
+              <h4>경비 상세 분석</h4>
+              <i data-lucide="bar-chart-3" class="icon-sm" style="color: var(--color-danger);"></i>
+            </div>
+            <div id="dashboard-expense-widget" style="margin-top: 10px;">
+              <!-- JS로 렌더링 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Transportation & Regional Statistics (상/하차지 및 최다 노선) -->
+        <div class="dashboard-details-grid" style="margin-top: 16px;">
+          <div class="detail-card">
+            <div class="card-header-flex">
+              <h4>주요 상/하차지 통계</h4>
+              <i data-lucide="map-pin" class="icon-sm" style="color: #3b82f6;"></i>
+            </div>
+            <div id="dashboard-regional-widget" style="margin-top: 10px;">
+              <!-- JS로 렌더링 -->
+            </div>
+          </div>
+          
+          <div class="detail-card">
+            <div class="card-header-flex">
+              <h4>최다 매칭 노선 TOP 3</h4>
+              <i data-lucide="navigation" class="icon-sm" style="color: #8b5cf6;"></i>
+            </div>
+            <div id="dashboard-route-widget" style="margin-top: 10px;">
+              <!-- JS로 렌더링 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Driving Patterns & Efficiency Guidelines -->
+        <div class="dashboard-details-grid" style="margin-top: 16px;">
+          <div class="detail-card">
+            <div class="card-header-flex">
+              <h4>요일별 운행 분석</h4>
+              <i data-lucide="calendar" class="icon-sm" style="color: var(--color-warning);"></i>
+            </div>
+            <div id="dashboard-weekday-widget" style="margin-top: 10px;">
+              <!-- JS로 렌더링 -->
+            </div>
+          </div>
+
           <div class="detail-card insight-card" onclick="toggleDashboardCardDetail('efficiency')" style="cursor: pointer;">
             <div class="card-header-flex">
               <h4>운행 효율성 분석</h4>
@@ -233,20 +286,16 @@
               </div>
             </div>
           </div>
-          
-
         </div>
 
         <!-- Dashboard Charts -->
-        <div class="dashboard-details-grid">
-          <!-- Monthly/Weekly Earning bar chart (SVG dynamic) -->
+        <div class="dashboard-details-grid" style="margin-top: 16px;">
           <div class="detail-card chart-card">
             <div class="card-header-flex">
               <h4>최근 운행 통계</h4>
               <span class="card-subtitle">일별 매출액 추이 (최근 7일)</span>
             </div>
             <div id="chart-container" class="svg-chart-container">
-              <!-- Render SVG charts programmatically in JS -->
               <svg id="earnings-chart" width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="none">
                 <!-- Dynamically generated elements -->
               </svg>

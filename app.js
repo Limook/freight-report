@@ -2446,7 +2446,7 @@ function updateDashboardStats() {
     }
   });
 
-  // Filter non-trip expenses for the dashboard period (Ver 2.18)
+  // Filter non-trip expenses for the dashboard period
   let filteredExpenses = appState.expenses.filter(e => e.userId === appState.currentUser.username);
   if (period === "today") {
     filteredExpenses = filteredExpenses.filter(e => isToday(e.date));
@@ -2481,6 +2481,7 @@ function updateDashboardStats() {
   document.getElementById("stat-net-income").innerText = netIncome.toLocaleString() + "원";
   document.getElementById("stat-total-distance").innerText = totalDistance.toLocaleString() + " km";
 
+  // Re-calculate values for standard KPI rings (if exist)
   const pctText = document.getElementById("collection-percentage-text");
   const summaryPaid = document.getElementById("summary-paid-amount");
   const summaryUnpaid = document.getElementById("summary-unpaid-amount");
@@ -2502,7 +2503,7 @@ function updateDashboardStats() {
 
   renderSVGChart();
 
-  // 1. 영업 효율성 업데이트
+  // 1. 영업 효율성 업데이트 (Insight Section)
   const kmRateLabel = document.getElementById("insight-km-rate");
   const expenseRatioLabel = document.getElementById("insight-expense-ratio");
   const expenseBar = document.getElementById("insight-expense-bar");
@@ -2519,9 +2520,230 @@ function updateDashboardStats() {
     expenseBar.style.width = Math.min(ratio, 100) + "%";
   }
 
-  // Calculate and render collapsible card details (Ver 2.16)
+  // 2. 수금 및 미수금 현황 렌더링
+  const collectionPercentage = (totalPaid + totalUnpaid) > 0 
+    ? (totalPaid / (totalPaid + totalUnpaid)) * 100 
+    : 100;
   
-  // 1. Revenue Details (Top 3 clients by revenue)
+  let collectionTip = "수금이 100% 완료된 깨끗한 상태입니다!";
+  if (totalUnpaid > 0) {
+    collectionTip = `미수금 ${totalUnpaid.toLocaleString()}원이 존재합니다. 대금 회수를 주의하세요.`;
+  }
+  
+  const collectionHtml = `
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.76rem; color: var(--text-muted);">수금 진행율</span>
+        <strong style="font-size: 0.95rem; color: var(--color-success); font-weight: 700;">${Math.round(collectionPercentage)}%</strong>
+      </div>
+      <div style="width: 100%; height: 8px; background-color: var(--bg-panel); border-radius: 4px; overflow: hidden; border: 1px solid var(--bg-card-border);">
+        <div style="width: ${collectionPercentage}%; height: 100%; background-color: var(--color-success); transition: width 0.4s ease;"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 6px;">
+        <div style="background-color: var(--bg-panel); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); text-align: center;">
+          <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 2px;">수금 완료액</div>
+          <strong style="font-size: 0.82rem; color: var(--color-success);">${totalPaid.toLocaleString()}원</strong>
+        </div>
+        <div style="background-color: var(--bg-panel); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border); text-align: center;">
+          <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 2px;">미수금 (대기)</div>
+          <strong style="font-size: 0.82rem; color: ${totalUnpaid > 0 ? 'var(--color-danger)' : 'var(--text-muted)'};">${totalUnpaid.toLocaleString()}원</strong>
+        </div>
+      </div>
+      <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3; border-top: 1px dashed var(--bg-card-border); padding-top: 6px; margin-top: 4px;">
+        💡 ${collectionTip}
+      </div>
+    </div>
+  `;
+  const widgetCollection = document.getElementById("dashboard-collection-widget");
+  if (widgetCollection) widgetCollection.innerHTML = collectionHtml;
+
+  // 3. 경비 상세 분석 렌더링
+  let totalFuel = 0, totalToll = 0, totalMeal = 0, totalOther = 0;
+  filteredTrips.forEach(trip => {
+    if (trip.expenses) {
+      totalFuel += Number(trip.expenses.fuel || 0);
+      totalToll += Number(trip.expenses.toll || 0);
+      totalMeal += Number(trip.expenses.meal || 0);
+      totalOther += Number(trip.expenses.other || 0);
+    } else {
+      totalFuel += Number(trip.expense || 0);
+    }
+  });
+
+  const totalAllExpenses = totalExpense + totalCommission + totalNonTripExpense;
+  let expenseHtml = "";
+  if (totalAllExpenses === 0) {
+    expenseHtml = `<div style="font-size: 0.76rem; color: var(--text-muted); text-align: center; padding: 12px;">이번 기간 중 발생한 지출 경비가 없습니다.</div>`;
+  } else {
+    const expenseItems = [
+      { name: "주유비 (운행)", amount: totalFuel, color: "#ef4444" },
+      { name: "통행료 (톨비)", amount: totalToll, color: "#f59e0b" },
+      { name: "알선수수료", amount: totalCommission, color: "#8b5cf6" },
+      { name: "식대", amount: totalMeal, color: "#10b981" },
+      { name: "고정비 (할부/보험)", amount: totalFixedNonTrip, color: "#64748b" },
+      { name: "기타 경비", amount: totalOther + totalVariableNonTrip, color: "#06b6d4" }
+    ].filter(item => item.amount > 0)
+     .sort((a, b) => b.amount - a.amount);
+     
+    expenseHtml = `<div style="display: flex; flex-direction: column; gap: 8px;">`;
+    expenseItems.forEach(item => {
+      const pct = (item.amount / totalAllExpenses) * 100;
+      expenseHtml += `
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem;">
+            <span style="color: var(--text-muted);">${item.name}</span>
+            <strong style="color: var(--text-main);">${item.amount.toLocaleString()}원 (${Math.round(pct)}%)</strong>
+          </div>
+          <div style="width: 100%; height: 6px; background-color: var(--bg-panel); border-radius: 3px; overflow: hidden; border: 1px solid var(--bg-card-border);">
+            <div style="width: ${pct}%; height: 100%; background-color: ${item.color};"></div>
+          </div>
+        </div>
+      `;
+    });
+    expenseHtml += `</div>`;
+  }
+  const widgetExpense = document.getElementById("dashboard-expense-widget");
+  if (widgetExpense) widgetExpense.innerHTML = expenseHtml;
+
+  // 4. 주요 상/하차지 통계 렌더링
+  const loadCounts = {};
+  const unloadCounts = {};
+  filteredTrips.forEach(t => {
+    if (t.load) {
+      loadCounts[t.load] = (loadCounts[t.load] || 0) + 1;
+    }
+    if (t.unload) {
+      unloadCounts[t.unload] = (unloadCounts[t.unload] || 0) + 1;
+    }
+  });
+  
+  const topLoads = Object.entries(loadCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const topUnloads = Object.entries(unloadCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  
+  let regionalHtml = "";
+  if (topLoads.length === 0 && topUnloads.length === 0) {
+    regionalHtml = `<div style="font-size: 0.76rem; color: var(--text-muted); text-align: center; padding: 12px;">상/하차지 정보가 기록되지 않았습니다.</div>`;
+  } else {
+    regionalHtml = `
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--bg-card-border); padding-right: 8px;">
+          <div style="font-size: 0.74rem; font-weight: 600; color: #3b82f6; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            <span style="display: inline-block; width: 6px; height: 6px; background-color: #3b82f6; border-radius: 50%;"></span>
+            상차지 TOP 3
+          </div>
+    `;
+    if (topLoads.length === 0) {
+      regionalHtml += `<div style="font-size: 0.65rem; color: var(--text-muted);">기록 없음</div>`;
+    } else {
+      topLoads.forEach(([place, count], idx) => {
+        regionalHtml += `
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem;">
+            <span style="color: var(--text-main); font-weight: 600;">${idx+1}. ${place}</span>
+            <span style="color: var(--text-muted);">${count}회</span>
+          </div>
+        `;
+      });
+    }
+    regionalHtml += `
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
+          <div style="font-size: 0.74rem; font-weight: 600; color: #ef4444; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            <span style="display: inline-block; width: 6px; height: 6px; background-color: #ef4444; border-radius: 50%;"></span>
+            하차지 TOP 3
+          </div>
+    `;
+    if (topUnloads.length === 0) {
+      regionalHtml += `<div style="font-size: 0.65rem; color: var(--text-muted);">기록 없음</div>`;
+    } else {
+      topUnloads.forEach(([place, count], idx) => {
+        regionalHtml += `
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem;">
+            <span style="color: var(--text-main); font-weight: 600;">${idx+1}. ${place}</span>
+            <span style="color: var(--text-muted);">${count}회</span>
+          </div>
+        `;
+      });
+    }
+    regionalHtml += `
+        </div>
+      </div>
+    `;
+  }
+  const widgetRegional = document.getElementById("dashboard-regional-widget");
+  if (widgetRegional) widgetRegional.innerHTML = regionalHtml;
+
+  // 5. 최다 매칭 노선 TOP 3 렌더링
+  const routeCounts = {};
+  filteredTrips.forEach(t => {
+    if (t.load && t.unload) {
+      const key = `${t.load} ➔ ${t.unload}`;
+      routeCounts[key] = (routeCounts[key] || 0) + 1;
+    }
+  });
+  
+  const topRoutes = Object.entries(routeCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  let routeHtml = "";
+  if (topRoutes.length === 0) {
+    routeHtml = `<div style="font-size: 0.76rem; color: var(--text-muted); text-align: center; padding: 12px;">매칭된 노선 정보가 없습니다.</div>`;
+  } else {
+    routeHtml = `<div style="display: flex; flex-direction: column; gap: 6px;">`;
+    topRoutes.forEach(([route, count], idx) => {
+      routeHtml += `
+        <div style="display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-panel); border: 1px solid var(--bg-card-border); padding: 8px; border-radius: var(--radius-sm); font-size: 0.72rem;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="background-color: var(--color-primary-muted); color: var(--text-main); font-weight: 700; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.65rem;">${idx+1}</span>
+            <span style="color: var(--text-main); font-weight: 600;">${route}</span>
+          </div>
+          <span style="font-weight: 700; color: #8b5cf6;">${count}회 운송</span>
+        </div>
+      `;
+    });
+    routeHtml += `</div>`;
+  }
+  const widgetRoute = document.getElementById("dashboard-route-widget");
+  if (widgetRoute) widgetRoute.innerHTML = routeHtml;
+
+  // 6. 요일별 운행 분석 렌더링
+  const weekdayTrips = [0, 0, 0, 0, 0, 0, 0]; 
+  const weekdayRevenue = [0, 0, 0, 0, 0, 0, 0];
+  filteredTrips.forEach(t => {
+    if (t.startDate) {
+      const datePart = t.startDate.split('T')[0];
+      const dayIndex = new Date(datePart).getDay();
+      weekdayTrips[dayIndex] += 1;
+      weekdayRevenue[dayIndex] += Number(t.fee || 0);
+    }
+  });
+  
+  const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+  const renderIndices = [1, 2, 3, 4, 5, 6, 0];
+  const maxDayTrips = Math.max(...weekdayTrips, 1);
+  
+  let weekdayHtml = `<div style="display: flex; justify-content: space-between; align-items: flex-end; height: 90px; padding: 10px 4px 4px 4px; gap: 8px;">`;
+  renderIndices.forEach(idx => {
+    const trips = weekdayTrips[idx];
+    const revenue = weekdayRevenue[idx];
+    const barHeightPct = (trips / maxDayTrips) * 80; 
+    const isTodayIdx = new Date().getDay() === idx;
+    
+    weekdayHtml += `
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;">
+        <div style="font-size: 0.58rem; color: var(--text-muted); text-align: center; min-height: 12px;">
+          ${trips > 0 ? `${trips}회` : ""}
+        </div>
+        <div style="width: 100%; height: ${Math.max(barHeightPct, 4)}%; background: ${trips > 0 ? 'linear-gradient(to top, var(--color-warning), #fbbf24)' : 'var(--bg-card-border)'}; border-radius: 3px; position: relative; cursor: pointer; transition: all 0.2s;" title="${dayNames[idx]}요일: ${trips}회 운송, 매출 ${revenue.toLocaleString()}원">
+        </div>
+        <span style="font-size: 0.72rem; font-weight: 700; color: ${isTodayIdx ? 'var(--color-warning)' : 'var(--text-muted)'}; margin-top: 2px;">
+          ${dayNames[idx]}
+        </span>
+      </div>
+    `;
+  });
+  weekdayHtml += `</div>`;
+  const widgetWeekday = document.getElementById("dashboard-weekday-widget");
+  if (widgetWeekday) widgetWeekday.innerHTML = weekdayHtml;
+
+  // Render collapsible card details (Revenue / Expense Top 3 etc.)
   const clientRevenue = {};
   filteredTrips.forEach(t => {
     const c = t.client || "거래처 미지정";
@@ -2544,19 +2766,7 @@ function updateDashboardStats() {
   const detailRev = document.getElementById("detail-revenue-content");
   if (detailRev) detailRev.innerHTML = revenueHtml;
 
-  // 2. Expense Details (Detailed item breakdown)
-  let totalFuel = 0, totalToll = 0, totalMeal = 0, totalOther = 0;
-  filteredTrips.forEach(trip => {
-    if (trip.expenses) {
-      totalFuel += Number(trip.expenses.fuel || 0);
-      totalToll += Number(trip.expenses.toll || 0);
-      totalMeal += Number(trip.expenses.meal || 0);
-      totalOther += Number(trip.expenses.other || 0);
-    } else {
-      totalFuel += Number(trip.expense || 0);
-    }
-  });
-  const expenseHtml = `
+  const expenseHtml2 = `
     <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-main);">운행 지출 상세</div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
       <span>주유비 (운행)</span>
@@ -2589,9 +2799,8 @@ function updateDashboardStats() {
     </div>
   `;
   const detailExp = document.getElementById("detail-expense-content");
-  if (detailExp) detailExp.innerHTML = expenseHtml;
+  if (detailExp) detailExp.innerHTML = expenseHtml2;
 
-  // 3. Net Income Details (Tax estimation)
   const estIncomeTax = Math.round(totalFee * 0.033);
   const estLocalTax = Math.round(totalFee * 0.0033);
   const realNetIncome = netIncome - estIncomeTax - estLocalTax;
@@ -2605,7 +2814,7 @@ function updateDashboardStats() {
       <span>지방소득세 (0.33%)</span>
       <strong>${estLocalTax.toLocaleString()}원</strong>
     </div>
-    <div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--bg-card-border); color: var(--text-main); font-weight: 700;">
+    <div style="display: flex; justify-content: space-top: 4px; padding-top: 4px; border-top: 1px dashed var(--bg-card-border); color: var(--text-main); font-weight: 700;">
       <span>세후 예상 순수입</span>
       <strong style="color: var(--color-success);">${realNetIncome.toLocaleString()}원</strong>
     </div>
@@ -2613,10 +2822,9 @@ function updateDashboardStats() {
   const detailNet = document.getElementById("detail-net-income-content");
   if (detailNet) detailNet.innerHTML = netIncomeHtml;
 
-  // 4. Distance Details (Average distance, estimated fuel consumption, carbon emissions)
   const avgDistance = filteredTrips.length > 0 ? (totalDistance / filteredTrips.length) : 0;
-  const estFuelLiters = totalDistance / 5.5; // Assuming average 5.5 km/L for truck
-  const estCarbonKg = estFuelLiters * 2.68; // 2.68 kg CO2 per Liter diesel
+  const estFuelLiters = totalDistance / 5.5; 
+  const estCarbonKg = estFuelLiters * 2.68; 
   const distanceHtml = `
     <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-main);">운행 상세 통계</div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
@@ -2635,11 +2843,6 @@ function updateDashboardStats() {
   const detailDist = document.getElementById("detail-distance-content");
   if (detailDist) detailDist.innerHTML = distanceHtml;
 
-  // 5. Efficiency Details (Guidelines/Tips)
-  const kmRate = totalDistance > 0 ? Math.round(totalFee / totalDistance) : 0;
-  const totalExp = totalExpense + totalCommission;
-  const ratio = totalFee > 0 ? Math.round((totalExp / totalFee) * 100) : 0;
-  
   let efficiencyTip = "현재 안정적인 수익 효율을 보이고 있습니다.";
   if (filteredTrips.length > 0) {
     if (kmRate < 1200) {

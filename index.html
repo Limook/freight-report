@@ -1158,17 +1158,17 @@
   </dialog>
 
   <!-- TRIP DETAIL DIALOG -->
-  <dialog id="dialog-trip-detail" class="modal-dialog">
-    <div class="modal-content" style="max-width: 500px; width: 92vw; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--bg-card-border); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg);">
-      <header class="modal-header" style="flex: none; padding: 14px 20px; border-bottom: none; display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase;">운송기록 상세 내역</span>
-        <button class="close-btn" onclick="closeTripDetailModal()" style="font-size: 1.25rem; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 4px; line-height: 1;">&times;</button>
+  <dialog id="dialog-trip-detail" class="modal-dialog" style="overflow: hidden; border: none; padding: 0; margin: auto;">
+    <div class="modal-content" style="max-width: 500px; width: 92vw; max-height: 80vh; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--bg-card-border); display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: var(--shadow-lg);">
+      <header class="modal-header" style="flex: none; padding: 10px 20px; border-bottom: none; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase;">운송기록 상세 내역</span>
+        <button class="close-btn" onclick="closeTripDetailModal()" style="font-size: 1.1rem; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 2px; line-height: 1;">&times;</button>
       </header>
-      <div class="modal-body" id="trip-detail-modal-body" style="padding: 0 20px 20px 20px; overflow-y: auto; max-height: 70vh; display: flex; flex-direction: column; gap: 16px; font-size: 0.85rem; color: var(--text-main);">
+      <div class="modal-body" id="trip-detail-modal-body" style="padding: 0 20px 70px 20px; overflow-y: auto; overflow-x: hidden; max-height: calc(80vh - 40px); display: flex; flex-direction: column; gap: 14px; font-size: 0.85rem; color: var(--text-main);">
         <!-- Dynamically populated detail rows -->
       </div>
-      <footer class="modal-footer" style="flex: none; padding-top: 12px; border-top: 1px solid var(--bg-card-border);">
-        <button type="button" class="btn btn-outline" style="width: 100%;" onclick="closeTripDetailModal()">닫기</button>
+      <footer class="modal-footer" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 20px 16px 20px; border-top: none; background: linear-gradient(to top, var(--bg-card) 70%, transparent); z-index: 10; pointer-events: none; display: flex; justify-content: center; align-items: center; width: 100%;">
+        <button type="button" class="btn btn-outline" style="width: 100%; height: 38px; font-weight: 600; font-size: 0.85rem; border-radius: var(--radius-sm); pointer-events: auto; background-color: var(--bg-card); box-shadow: var(--shadow-sm);" onclick="closeTripDetailModal()">닫기</button>
       </footer>
     </div>
   </dialog>

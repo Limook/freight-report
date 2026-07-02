@@ -4818,7 +4818,7 @@ function openTripDetailModal(tripId) {
           <div style="position: relative;">
             <span style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--color-primary); border: 2px solid var(--bg-card);"></span>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">상차지 · ${formatDt(trip.startDate)}</div>
-            <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-top: 1px;">${trip.routeLoad || "-"}</div>
+            <div style="font-weight: 800; font-size: 0.96rem; color: var(--text-main); margin-top: 1px; letter-spacing: -0.01em;">${trip.routeLoad || "-"}</div>
           </div>
           
           ${trip.routeVias && trip.routeVias.length > 0 ? trip.routeVias.map((via, idx) => `
@@ -4831,7 +4831,7 @@ function openTripDetailModal(tripId) {
           <div style="position: relative;">
             <span style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--color-success); border: 2px solid var(--bg-card);"></span>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">하차지 · ${formatDt(trip.endDate)}</div>
-            <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-top: 1px;">${trip.routeUnload || "-"}</div>
+            <div style="font-weight: 800; font-size: 0.96rem; color: var(--text-main); margin-top: 1px; letter-spacing: -0.01em;">${trip.routeUnload || "-"}</div>
           </div>
           
           ${trip.routeArrival ? `

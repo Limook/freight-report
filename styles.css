@@ -1305,6 +1305,7 @@ body.light-theme .btn-danger:hover {
 .form-group input[type="text"],
 .form-group input[type="number"],
 .form-group input[type="date"],
+.form-group input[type="datetime-local"],
 .form-group textarea,
 .form-group select {
   width: 100%;
@@ -1315,7 +1316,7 @@ body.light-theme .btn-danger:hover {
   padding: 10px 12px;
   font-size: 0.85rem;
   outline: none;
-  font-family: inherit;
+  font-family: var(--font-sans) !important;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
@@ -1323,6 +1324,18 @@ body.light-theme .btn-danger:hover {
 .form-group textarea:focus,
 .form-group select:focus {
   border-color: var(--color-primary);
+}
+
+/* Force standard font family on inner datetime-local input fields (WebKit/Chrome) */
+input[type="datetime-local"]::-webkit-datetime-edit,
+input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper,
+input[type="datetime-local"]::-webkit-datetime-edit-text,
+input[type="datetime-local"]::-webkit-datetime-edit-minute,
+input[type="datetime-local"]::-webkit-datetime-edit-hour,
+input[type="datetime-local"]::-webkit-datetime-edit-day,
+input[type="datetime-local"]::-webkit-datetime-edit-month,
+input[type="datetime-local"]::-webkit-datetime-edit-year {
+  font-family: var(--font-sans) !important;
 }
 
 /* Toggle Switch Styling */

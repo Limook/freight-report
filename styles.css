@@ -4222,7 +4222,8 @@ body.light-theme .btn-tracker-option.btn-warning:hover:not([disabled]) {
 }
 
 .btn-tracker-option.btn-tracker-small {
-  height: 24px !important; /* 60% of 40px */
+  height: auto !important;
+  aspect-ratio: 10 / 3 !important;
   padding: 0 10px !important;
   font-size: 0.72rem !important;
   border-bottom-width: 2.5px !important;

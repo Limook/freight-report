@@ -4080,17 +4080,17 @@ body.light-theme .auth-card {
   justify-content: center;
   gap: 6px;
   width: 100%;
-  height: 40px;
+  height: 38px;
   padding: 0 12px;
-  background: #27272a !important; /* Zinc Gray background */
-  border-top: 1.5px solid rgba(255, 255, 255, 0.08);
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
-  border-bottom: 3.5px solid rgba(0, 0, 0, 0.35); /* 3D bottom shadow */
+  background: #000000 !important; /* Unified to Black */
+  border-top: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 3.5px solid rgba(0, 0, 0, 0.5) !important; /* 3D bottom shadow */
   border-radius: var(--radius-sm);
-  color: #e4e4e7 !important;
-  font-size: 0.88rem;
-  font-weight: 700;
+  color: #ffffff !important; /* Unified to White */
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
   cursor: pointer;
   position: relative;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -4118,7 +4118,7 @@ body.light-theme .auth-card {
 /* Reset button override (Amber/Danger Colored Style) - Redesign to Premium Red */
 .btn-tracker-option.btn-danger,
 body.light-theme .btn-tracker-option.btn-danger {
-  height: 38px;
+  height: 34px !important;
   aspect-ratio: auto;
   background: linear-gradient(135deg, #ef4444, #dc2626) !important;
   border-top: 1.5px solid rgba(255, 255, 255, 0.25) !important;
@@ -4126,9 +4126,17 @@ body.light-theme .btn-tracker-option.btn-danger {
   border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
   border-bottom: 3.5px solid rgba(0, 0, 0, 0.45) !important;
   color: #ffffff !important;
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25) !important;
+}
+
+/* Set Reset and Undo options to be smaller (34px) */
+.btn-tracker-option.btn-danger,
+.btn-tracker-option.btn-warning,
+body.light-theme .btn-tracker-option.btn-danger,
+body.light-theme .btn-tracker-option.btn-warning {
+  height: 34px !important;
 }
 
 .btn-tracker-option.btn-danger:hover,
@@ -4147,16 +4155,17 @@ body.light-theme .btn-tracker-option.btn-danger:active {
 }
 
 body.light-theme .btn-tracker-option {
-  background: #f4f4f5 !important;
-  border-top: 1.5px solid rgba(0, 0, 0, 0.04);
-  border-left: 1px solid rgba(0, 0, 0, 0.02);
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 3.5px solid rgba(0, 0, 0, 0.15);
-  color: #18181b !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 3.5px solid rgba(0, 0, 0, 0.5) !important;
 }
 
 body.light-theme .btn-tracker-option:hover {
-  background: #e4e4e7 !important;
+  background: #18181b !important;
+  color: #ffffff !important;
 }
 
 
@@ -4172,12 +4181,27 @@ body.light-theme .btn-tracker-option:hover {
   transform: none !important;
 }
 
-.btn-tracker-option.btn-tracker-small {
-  height: auto !important;
-  aspect-ratio: 10 / 3 !important;
-  padding: 0 10px !important;
-  font-size: 0.72rem !important;
-  border-bottom-width: 2.5px !important;
+.btn-tracker-option.btn-tracker-small,
+body.light-theme .btn-tracker-option.btn-tracker-small {
+  height: 48px !important;
+  aspect-ratio: auto !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 3.5px solid rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+}
+
+.btn-tracker-option.btn-tracker-small:hover,
+body.light-theme .btn-tracker-option.btn-tracker-small:hover {
+  background: #18181b !important;
+  color: #ffffff !important;
+  transform: translateY(-1.5px);
+  border-bottom-width: 4.5px;
 }
 
 .btn-tracker-option.btn-tracker-small .icon-sm {
@@ -4201,8 +4225,8 @@ body.light-theme .btn-tracker-option:hover {
   border-bottom: 4.5px solid rgba(0, 0, 0, 0.4); /* Deeper 3D bottom border */
   border-radius: var(--radius-md);
   color: #ffffff;
-  font-size: 0.88rem; /* Unified font size */
-  font-weight: 800;
+  font-size: 0.88rem !important; /* Unified font size */
+  font-weight: 700 !important;
   cursor: pointer;
   position: relative;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -4389,6 +4413,30 @@ body.light-theme .btn-tracker-option:hover {
 
 .btn-tracker-main:active {
   background: #09090b !important;
+}
+
+/* Green Color Overrides for Completion States (상차완료, 경유완료, 하차완료, 운행완료) */
+.btn-tracker-main.state-load-complete,
+.btn-tracker-main.state-via-complete,
+.btn-tracker-main.state-unload-complete,
+.btn-tracker-main.state-finish-garage,
+.btn-tracker-main.state-finish {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 4.5px solid rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.btn-tracker-main.state-load-complete:hover,
+.btn-tracker-main.state-via-complete:hover,
+.btn-tracker-main.state-unload-complete:hover,
+.btn-tracker-main.state-finish-garage:hover,
+.btn-tracker-main.state-finish:hover {
+  filter: brightness(1.08) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
 }
 
 /* Stepper address label */
